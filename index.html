@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Визуализатор материалов</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #f8f9fc;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      padding: 2rem 1rem;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 32px;
+      box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .content {
+      display: flex;
+      gap: 24px;
+      padding: 24px;
+    }
+    .sidebar {
+      width: 360px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    }
+    .preview-area {
+      flex-grow: 1;
+      background: #f1f5f9;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      min-height: 500px;
+    }
+    .category-tabs, .subcategory-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .tab-btn, .subcategory-btn {
+      flex: 1;
+      background: #f1f5f9;
+      border: none;
+      font-size: 0.9rem;
+      font-weight: 700;
+      padding: 12px;
+      cursor: pointer;
+      color: #64748b;
+      border-radius: 8px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .tab-btn.active, .subcategory-btn.active {
+      background: #cc0000;
+      color: white;
+    }
+    .step-header {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .step-num { color: #cc0000; }
+    .upload-area {
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      background: #f8fafc;
+      padding: 32px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .upload-area.drag-over { border-color: #cc0000; background: #fff0f0; }
+    .upload-icon { font-size: 2rem; margin-bottom: 12px; color: #94a3b8; }
+    .upload-text { color: #475569; font-size: 0.9rem; font-weight: 500; margin-bottom: 4px; }
+    .upload-hint { font-size: 0.75rem; color: #94a3b8; }
+    .supplier-buttons, .material-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 10px 0;
+    }
+    .supplier-btn, .material-btn {
+      background: #f1f5f9;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    .supplier-btn.active, .material-btn.active {
+      background: #cc0000;
+      color: white;
+    }
+    .textures-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      max-height: 240px;
+      overflow-y: auto;
+      margin: 15px 0;
+    }
+    .texture-card {
+      aspect-ratio: 3/2;
+      background-size: cover;
+      background-position: center;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+    .texture-card.selected {
+      border-color: #cc0000;
+      box-shadow: 0 0 0 2px rgba(204,0,0,0.2);
+    }
+    .selected-texture-info {
+      background: #fff0f0;
+      color: #cc0000;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-align: center;
+      margin-top: 8px;
+    }
+    .grout-colors-grid {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .grout-color {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 1px solid #ccc;
+      transition: 0.2s;
+    }
+    .grout-color.selected {
+      border: 2px solid #cc0000;
+    }
+    .generate-btn {
+      width: 100%;
+      padding: 16px;
+      background: #cbd5e1;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: not-allowed;
+      transition: all 0.2s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+    .generate-btn.ready {
+      background: #cc0000;
+      cursor: pointer;
+    }
+    .generate-btn.ready:hover { background: #a30000; }
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.6s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .preview-area {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .empty-state { text-align: center; color: #94a3b8; }
+    .main-image {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 20px;
+    }
+    .image-controls {
+      position: absolute;
+      bottom: 24px;
+      display: flex;
+      gap: 12px;
+      background: rgba(255,255,255,0.9);
+      padding: 10px 20px;
+      border-radius: 30px;
+      backdrop-filter: blur(4px);
+    }
+    .control-btn {
+      background: none;
+      border: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      color: #475569;
+    }
+    .control-btn:hover { color: #cc0000; }
+    .status-overlay, .error-overlay {
+      position: absolute;
+      top: 24px; right: 24px;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: none;
+    }
+    .status-overlay { background: #10b981; }
+    .error-overlay { background: #cc0000; }
+    @media (max-width: 900px) {
+      .content { flex-direction: column; }
+      .sidebar { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="content">
+    <div class="sidebar">
+      <div class="card">
+        <div class="category-tabs">
+          <button class="tab-btn active" data-category="facade">🏠 ФАСАД</button>
+          <button class="tab-btn" data-category="interior">🛋️ ИНТЕРЬЕР</button>
+        </div>
+        <div style="text-align:center; font-size:0.75rem; color:#94a3b8; margin-top:12px;">
+          ИИ заменит поверхность на выбранный материал
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="step-header"><span class="step-num">📸 1.</span> Загрузите фото</div>
+        <div id="dropzone" class="upload-area">
+          <div class="upload-icon">↑</div>
+          <div class="upload-text">Перетащите фото или нажмите для выбора</div>
+          <div class="upload-hint">JPG, PNG до 10 МБ</div>
+          <input type="file" id="fileInput" accept="image/jpeg,image/jpg,image/png" style="display:none">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="step-header"><span class="step-num">🏗 2.</span> Тип материала</div>
+        <div id="materialTypeButtons" class="material-buttons"></div>
+      </div>
+
+      <div class="card" id="supplierCard">
+        <div class="step-header"><span class="step-num">🏭 3.</span> Поставщик</div>
+        <div id="supplierButtons" class="supplier-buttons"></div>
+      </div>
+
+      <div class="card">
+        <div class="step-header"><span class="step-num">🧱 4.</span> Выберите текстуру</div>
+        <div id="texturesGrid" class="textures-grid"></div>
+        <div id="selectedTextureName" class="selected-texture-info">— не выбрано —</div>
+      </div>
+
+      <div class="card" id="groutCard">
+        <div class="step-header"><span class="step-num">🎨 5.</span> Цвет затирки (опционально)</div>
+        <div id="groutColorsContainer" class="grout-colors-grid"></div>
+      </div>
+
+      <button id="generateBtn" class="generate-btn" disabled>✨ ВИЗУАЛИЗИРОВАТЬ</button>
+    </div>
+
+    <div class="preview-area" id="previewArea">
+      <div class="empty-state" id="emptyState">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        <p>Загрузите фото</p>
+      </div>
+      <img src="" id="mainImage" class="main-image" style="display:none;" alt="Preview">
+      <div class="image-controls" id="imageControls" style="display:none;">
+        <button class="control-btn" id="removePhotoBtn">✕ Очистить фото</button>
+      </div>
+      <div id="statusOverlay" class="status-overlay">✅ Готово!</div>
+      <div id="errorOverlay" class="error-overlay">❌ Ошибка</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API_BASE = 'https://denotable-nonhieratic-samiyah.ngrok-free.dev';
+  const POLL_INTERVAL = 2000;
+  const MAX_POLL_ATTEMPTS = 90;
+
+  let currentCategory = 'facade';
+  let currentMaterialType = null;
+  let currentSupplier = null;
+  let selectedTexture = null;
+  let selectedGroutColorName = null;
+  let currentPhotoFile = null;
+  let pollingInterval = null;
+
+  // Маппинг для читаемых названий
+  const materialNames = {
+    standard: 'Стандартный кирпич',
+    rigel: 'Ригель (тонкий)',
+    decorative_stone: 'Декоративный камень'
+  };
+  const supplierNames = {
+    redstone: 'Redstone',
+    redstone_premium: 'Redstone Premium',
+    krasny_kamen: 'Красный Камень'
+  };
+
+  // DOM элементы
+  const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('fileInput');
+  const materialTypeDiv = document.getElementById('materialTypeButtons');
+  const supplierDiv = document.getElementById('supplierButtons');
+  const texturesGrid = document.getElementById('texturesGrid');
+  const selectedTextureSpan = document.getElementById('selectedTextureName');
+  const generateBtn = document.getElementById('generateBtn');
+  const groutColorsContainer = document.getElementById('groutColorsContainer');
+  const emptyState = document.getElementById('emptyState');
+  const mainImage = document.getElementById('mainImage');
+  const imageControls = document.getElementById('imageControls');
+  const removePhotoBtn = document.getElementById('removePhotoBtn');
+  const statusOverlay = document.getElementById('statusOverlay');
+  const errorOverlay = document.getElementById('errorOverlay');
+  const supplierCard = document.getElementById('supplierCard');
+  const groutCard = document.getElementById('groutCard');
+
+  function getHeaders() {
+    return { 'ngrok-skip-browser-warning': 'true' };
+  }
+
+  function showError(msg, duration = 5000) {
+    errorOverlay.textContent = msg;
+    errorOverlay.style.display = 'block';
+    setTimeout(() => errorOverlay.style.display = 'none', duration);
+  }
+
+  function showSuccess(msg) {
+    statusOverlay.textContent = msg;
+    statusOverlay.style.display = 'block';
+    setTimeout(() => statusOverlay.style.display = 'none', 3000);
+  }
+
+  function setPreviewImage(src) {
+    emptyState.style.display = 'none';
+    mainImage.style.display = 'block';
+    imageControls.style.display = 'flex';
+    mainImage.src = src;
+  }
+
+  function resetPreview() {
+    currentPhotoFile = null;
+    fileInput.value = '';
+    emptyState.style.display = 'block';
+    mainImage.style.display = 'none';
+    imageControls.style.display = 'none';
+    mainImage.src = '';
+    statusOverlay.style.display = 'none';
+    errorOverlay.style.display = 'none';
+    if (pollingInterval) clearInterval(pollingInterval);
+    checkReadyState();
+  }
+
+  function checkReadyState() {
+    if (currentPhotoFile && selectedTexture) {
+      generateBtn.classList.add('ready');
+      generateBtn.disabled = false;
+    } else {
+      generateBtn.classList.remove('ready');
+      generateBtn.disabled = true;
+    }
+  }
+
+  // Загрузка поставщиков для выбранного типа материала
+  async function loadSuppliers() {
+    if (!currentMaterialType) return;
+    try {
+      const resp = await fetch(`${API_BASE}/api/client/suppliers?material_type=${currentMaterialType}`, { headers: getHeaders() });
+      if (!resp.ok) throw new Error();
+      const suppliers = await resp.json();
+      supplierDiv.innerHTML = suppliers.map(s => `
+        <button class="supplier-btn" data-code="${s.code}">${s.name}</button>
+      `).join('');
+      document.querySelectorAll('.supplier-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.supplier-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentSupplier = btn.dataset.code;
+          loadTextures();
+        });
+      });
+      // Если есть поставщики, выбираем первого
+      if (suppliers.length) {
+        document.querySelector('.supplier-btn')?.click();
+      } else {
+        currentSupplier = null;
+        texturesGrid.innerHTML = '<div style="grid-column:span 3; text-align:center;">Нет поставщиков</div>';
+        selectedTexture = null;
+        selectedTextureSpan.textContent = '— не выбрано —';
+        checkReadyState();
+      }
+    } catch (err) {
+      console.error(err);
+      supplierDiv.innerHTML = '<div>Ошибка загрузки поставщиков</div>';
+    }
+  }
+
+  // Загрузка текстур для выбранного типа и поставщика
+  async function loadTextures() {
+    if (!currentMaterialType || !currentSupplier) return;
+    try {
+      const url = `${API_BASE}/api/client/textures?material_type=${currentMaterialType}&supplier=${currentSupplier}`;
+      const resp = await fetch(url, { headers: getHeaders() });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const textures = await resp.json();
+      if (!textures.length) {
+        texturesGrid.innerHTML = '<div style="grid-column:span 3; text-align:center;">Нет текстур</div>';
+        selectedTexture = null;
+        selectedTextureSpan.textContent = '— не выбрано —';
+        checkReadyState();
+        return;
+      }
+      selectedTexture = textures[0];
+      renderTextures(textures);
+    } catch (err) {
+      console.error(err);
+      texturesGrid.innerHTML = '<div style="grid-column:span 3; text-align:center; color:#cc0000;">❌ Ошибка загрузки</div>';
+      selectedTexture = null;
+      selectedTextureSpan.textContent = 'Ошибка';
+      checkReadyState();
+    }
+  }
+
+  function renderTextures(textures) {
+    texturesGrid.innerHTML = '';
+    textures.forEach(tex => {
+      const card = document.createElement('div');
+      card.className = 'texture-card';
+      if (selectedTexture?.name === tex.name) card.classList.add('selected');
+      // Загружаем картинку через fetch для обхода ngrok
+      let imageUrl = tex.url;
+      if (!imageUrl.startsWith('http')) {
+        imageUrl = API_BASE + (imageUrl.startsWith('/') ? imageUrl : '/' + imageUrl);
+      }
+      fetch(imageUrl, { headers: getHeaders() })
+        .then(res => res.blob())
+        .then(blob => {
+          const objectUrl = URL.createObjectURL(blob);
+          card.style.backgroundImage = `url('${objectUrl}')`;
+        })
+        .catch(err => console.error('Ошибка загрузки текстуры:', err));
+      card.addEventListener('click', () => {
+        selectedTexture = tex;
+        document.querySelectorAll('.texture-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        selectedTextureSpan.textContent = tex.name;
+        checkReadyState();
+      });
+      texturesGrid.appendChild(card);
+    });
+    checkReadyState();
+  }
+
+  // Загрузка цветов затирки
+  async function loadGroutColors() {
+    try {
+      const resp = await fetch(`${API_BASE}/api/client/grout-colors`, { headers: getHeaders() });
+      if (!resp.ok) throw new Error();
+      const colors = await resp.json();
+      groutColorsContainer.innerHTML = colors.map(c => `
+        <div class="grout-color" data-name="${c.name}" data-hex="${c.hex_code}" style="background-color: ${c.hex_code};"></div>
+      `).join('');
+      document.querySelectorAll('.grout-color').forEach(el => {
+        el.addEventListener('click', () => {
+          selectedGroutColorName = el.dataset.name;
+          document.querySelectorAll('.grout-color').forEach(cc => cc.classList.remove('selected'));
+          el.classList.add('selected');
+        });
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  // Скрытие/показ выбора затирки и поставщика в зависимости от типа материала
+  function toggleMaterialDependentUI() {
+    if (currentMaterialType === 'decorative_stone') {
+      supplierCard.style.display = 'none';
+      groutCard.style.display = 'none';
+    } else {
+      supplierCard.style.display = 'block';
+      groutCard.style.display = 'block';
+    }
+  }
+
+  // Polling статуса
+  async function pollStatus(requestId) {
+    let attempts = 0;
+    if (pollingInterval) clearInterval(pollingInterval);
+    pollingInterval = setInterval(async () => {
+      attempts++;
+      try {
+        const resp = await fetch(`${API_BASE}/status/${requestId}`, { headers: getHeaders() });
+        if (!resp.ok) {
+          if (resp.status === 404) return;
+          throw new Error();
+        }
+        const data = await resp.json();
+        if (data.status === 'success') {
+          clearInterval(pollingInterval);
+          generateBtn.disabled = false;
+          generateBtn.classList.add('ready');
+          generateBtn.innerHTML = '✨ ВИЗУАЛИЗИРОВАТЬ';
+          let imgUrl = data.result_url;
+          if (imgUrl.startsWith('/')) imgUrl = API_BASE + imgUrl;
+          setPreviewImage(imgUrl);
+          showSuccess('✅ Готово!');
+        } else if (data.status === 'error') {
+          clearInterval(pollingInterval);
+          generateBtn.disabled = false;
+          generateBtn.classList.add('ready');
+          generateBtn.innerHTML = '✨ ВИЗУАЛИЗИРОВАТЬ';
+          showError('❌ Ошибка генерации');
+        } else if (attempts >= MAX_POLL_ATTEMPTS) {
+          clearInterval(pollingInterval);
+          generateBtn.disabled = false;
+          generateBtn.classList.add('ready');
+          generateBtn.innerHTML = '✨ ВИЗУАЛИЗИРОВАТЬ';
+          showError('⏱ Превышено время ожидания');
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }, POLL_INTERVAL);
+  }
+
+  // Генерация
+  generateBtn.addEventListener('click', async () => {
+    if (!currentPhotoFile || !selectedTexture) return;
+    generateBtn.disabled = true;
+    generateBtn.classList.remove('ready');
+    generateBtn.innerHTML = '<span class="spinner"></span> ИИ в работе...';
+    if (pollingInterval) clearInterval(pollingInterval);
+
+    const formData = new FormData();
+    formData.append('file', currentPhotoFile);
+    formData.append('texture', selectedTexture.name);
+    formData.append('category', currentCategory);
+    formData.append('material_type', currentMaterialType);
+    formData.append('supplier', currentSupplier);
+    if (selectedGroutColorName && currentMaterialType !== 'decorative_stone') {
+      formData.append('grout_color_name', selectedGroutColorName);
+    }
+
+    try {
+      const resp = await fetch(`${API_BASE}/api/client/generate`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: getHeaders(),
+        body: formData
+      });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || data.detail || 'Ошибка сервера');
+      if (!data.request_id) throw new Error('Нет request_id');
+      generateBtn.innerHTML = '<span class="spinner"></span> Обработка...';
+      pollStatus(data.request_id);
+    } catch (err) {
+      console.error(err);
+      generateBtn.disabled = false;
+      generateBtn.classList.add('ready');
+      generateBtn.innerHTML = '✨ ВИЗУАЛИЗИРОВАТЬ';
+      showError(`❌ ${err.message}`);
+    }
+  });
+
+  // Переключение категории (фасад/интерьер)
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentCategory = btn.dataset.category;
+    });
+  });
+
+  // Выбор типа материала
+  const materialTypes = ['standard', 'rigel', 'decorative_stone'];
+  materialTypeDiv.innerHTML = materialTypes.map(t => `
+    <button class="material-btn" data-type="${t}">${materialNames[t]}</button>
+  `).join('');
+  document.querySelectorAll('.material-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.material-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentMaterialType = btn.dataset.type;
+      toggleMaterialDependentUI();
+      // Сбрасываем текущий выбор
+      selectedTexture = null;
+      selectedTextureSpan.textContent = '— не выбрано —';
+      texturesGrid.innerHTML = '';
+      if (currentMaterialType === 'decorative_stone') {
+        // Для декоративного камня поставщик не нужен, загружаем текстуры без поставщика
+        // Но API требует supplier, поэтому используем фиксированного? В бэкенде для decorative_stone есть поставщики.
+        // Пока просто загружаем поставщиков и текстуры
+        loadSuppliers();
+      } else {
+        loadSuppliers();
+      }
+      checkReadyState();
+    });
+  });
+
+  // Обработка файла
+  function handleFile(file) {
+    if (!file) return false;
+    if (!['image/jpeg','image/jpg','image/png'].includes(file.type)) {
+      showError('❌ Только JPG/PNG');
+      return false;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      showError('❌ Файл >10 МБ');
+      return false;
+    }
+    currentPhotoFile = file;
+    checkReadyState();
+    const reader = new FileReader();
+    reader.onload = e => setPreviewImage(e.target.result);
+    reader.readAsDataURL(file);
+    return true;
+  }
+
+  dropzone.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', e => {
+    if (e.target.files[0]) handleFile(e.target.files[0]);
+  });
+  ['dragenter','dragover','dragleave','drop'].forEach(ev => {
+    dropzone.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); });
+  });
+  dropzone.addEventListener('dragenter', () => dropzone.classList.add('drag-over'));
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+  dropzone.addEventListener('drop', e => {
+    dropzone.classList.remove('drag-over');
+    if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+  });
+
+  removePhotoBtn.addEventListener('click', resetPreview);
+
+  // Инициализация: выбираем первый тип материала по умолчанию
+  function init() {
+    // Активируем кнопку standard
+    const standardBtn = document.querySelector('.material-btn[data-type="standard"]');
+    if (standardBtn) standardBtn.click();
+    loadGroutColors();
+  }
+  init();
+</script>
+</body>
+</html>

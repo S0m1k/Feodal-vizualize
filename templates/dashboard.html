@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель сотрудника — Визуализатор</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #f5f7fb;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            padding: 2rem 1rem;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .content { padding: 2rem; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .logout-btn {
+            background: none;
+            border: 1px solid #ff3b3b;
+            color: #ff3b3b;
+            padding: 8px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+        }
+        .tabs {
+            display: flex;
+            gap: 12px;
+            border-bottom: 2px solid #e2e8f2;
+            margin-bottom: 1.5rem;
+        }
+        .tab-btn {
+            background: none;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 10px 24px;
+            cursor: pointer;
+            color: #5b677b;
+            border-radius: 40px 40px 0 0;
+        }
+        .tab-btn.active {
+            color: #ff3b3b;
+            border-bottom: 2px solid #ff3b3b;
+        }
+        .filters {
+            background: #f1f3f7;
+            padding: 16px;
+            border-radius: 24px;
+            margin-bottom: 24px;
+        }
+        .filter-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+        .filter-group {
+            flex: 1;
+            min-width: 150px;
+        }
+        .filter-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #2d3a5e;
+        }
+        .filter-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 40px;
+            border: 1px solid #cdd9ed;
+            background: white;
+        }
+        .upload-area {
+            border: 2px dashed #cdd9ed;
+            border-radius: 28px;
+            background: #fafcff;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 1.5rem;
+        }
+        .upload-area.drag-over { border-color: #ff3b3b; background: #fff5f5; }
+        .upload-icon { font-size: 2.5rem; margin-bottom: 0.75rem; color: #8f9bb3; }
+        .preview-container {
+            margin-top: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+        .preview-img {
+            max-width: 100%;
+            max-height: 280px;
+            border-radius: 20px;
+        }
+        .remove-photo {
+            position: absolute;
+            top: 10px; right: 10px;
+            background: rgba(0,0,0,0.6);
+            border: none;
+            border-radius: 30px;
+            color: white;
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+        .textures-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin: 1rem 0;
+        }
+        .texture-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .texture-card.selected { border-color: #ff3b3b; }
+        .texture-preview {
+            aspect-ratio: 1/1;
+            background-size: cover;
+            background-position: center;
+        }
+        .texture-name {
+            padding: 12px;
+            text-align: center;
+            font-weight: 500;
+            border-top: 1px solid #edf2f7;
+        }
+        .grout-section {
+            margin: 16px 0;
+        }
+        .grout-colors-grid {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        .grout-color {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .grout-color.selected { border-color: #ff3b3b; transform: scale(1.05); }
+        .generate-btn {
+            width: 100%;
+            padding: 16px;
+            background: #cbd5e1;
+            color: white;
+            border: none;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: not-allowed;
+            margin: 24px 0;
+            transition: all 0.2s;
+        }
+        .generate-btn.ready { background: #ff3b3b; cursor: pointer; }
+        .spinner {
+            width: 20px; height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.6s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .preview-area {
+            flex-grow: 1;
+            background: #f1f5f9;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            min-height: 400px;
+        }
+        .empty-state { text-align: center; color: #94a3b8; }
+        .main-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 20px;
+        }
+        .image-controls {
+            position: absolute;
+            bottom: 24px;
+            display: flex;
+            gap: 12px;
+            background: rgba(255,255,255,0.9);
+            padding: 10px 20px;
+            border-radius: 30px;
+            backdrop-filter: blur(4px);
+        }
+        .control-btn {
+            background: none;
+            border: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            color: #475569;
+        }
+        .control-btn:hover { color: #ff3b3b; }
+        .status-overlay, .error-overlay {
+            position: absolute;
+            top: 24px; right: 24px;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: none;
+        }
+        .status-overlay { background: #10b981; }
+        .error-overlay { background: #ff3b3b; }
+        .result-area { margin: 20px 0; text-align: center; }
+        .success-message { background: #10b981; color: white; padding: 8px 16px; border-radius: 40px; display: inline-block; }
+        .error-message { background: #ff3b3b; color: white; padding: 8px 16px; border-radius: 40px; display: inline-block; }
+        /* История */
+        .history-section { margin-top: 40px; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 20px;
+            overflow: auto;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f2;
+        }
+        th { background: #f8fafd; font-weight: 600; }
+        .history-img { max-width: 60px; max-height: 60px; border-radius: 8px; cursor: pointer; }
+        .pagination {
+            margin-top: 20px;
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+        .page-btn {
+            padding: 6px 12px;
+            border: 1px solid #cdd9ed;
+            background: white;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+        .page-btn.active { background: #ff3b3b; color: white; border-color: #ff3b3b; }
+        /* Админ панель */
+        .admin-panel {
+            margin-top: 20px;
+            padding: 0 8px;
+        }
+        .admin-panel h3 {
+            margin: 24px 0 16px 0;
+            font-size: 1.2rem;
+            color: #0f172a;
+        }
+        .admin-form {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+        .admin-form input, .admin-form select {
+            padding: 10px 14px;
+            border-radius: 40px;
+            border: 1px solid #cdd9ed;
+            background: white;
+            font-size: 0.9rem;
+        }
+        .admin-form button {
+            padding: 10px 20px;
+            background: #ff3b3b;
+            color: white;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .user-table, .grout-table, .textures-table {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .delete-user, .delete-texture, .delete-grout {
+            background: none;
+            border: none;
+            color: #ff3b3b;
+            cursor: pointer;
+            font-weight: bold;
+            padding: 6px 12px;
+        }
+        .generation-filter {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+        .generation-filter select, .generation-filter input {
+            padding: 8px 12px;
+            border-radius: 40px;
+            border: 1px solid #cdd9ed;
+        }
+        .generation-filter button {
+            padding: 8px 20px;
+            background: #ff3b3b;
+            color: white;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+        }
+        @media (max-width: 768px) {
+            .textures-grid { grid-template-columns: repeat(2, 1fr); }
+            .admin-form { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="content">
+        <div class="header">
+            <h2>Панель сотрудника</h2>
+            <button id="logoutBtn" class="logout-btn">Выйти</button>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="generator">🎨 Генератор</button>
+            <button class="tab-btn" data-tab="history">📜 История</button>
+            <button id="adminTabBtn" class="tab-btn" data-tab="admin" style="display:none;">⚙️ Администрирование</button>
+        </div>
+
+        <!-- Генератор -->
+        <div id="generatorTab" class="tab-content">
+            <div class="filters">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label>Тип материала</label>
+                        <select id="materialTypeSelect">
+                            <option value="standard">Стандартный кирпич</option>
+                            <option value="rigel">Ригель (тонкий)</option>
+                            <option value="decorative_stone">Декоративный камень</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Поставщик</label>
+                        <select id="supplierSelect"></select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="dropzone" class="upload-area">
+                <div class="upload-icon">📸</div>
+                <div class="upload-text">Перетащите фото или нажмите для выбора</div>
+                <div class="upload-hint">JPG, PNG до 10 МБ</div>
+                <input type="file" id="fileInput" accept="image/jpeg,image/jpg,image/png" style="display:none">
+            </div>
+            <div id="previewWrapper"></div>
+
+            <div class="textures-section">
+                <div class="section-title">Выберите текстуру:</div>
+                <div id="texturesGrid" class="textures-grid"></div>
+            </div>
+
+            <div class="grout-section">
+                <label>Цвет затирки:</label>
+                <div id="groutColorsGrid" class="grout-colors-grid"></div>
+            </div>
+
+            <button id="generateBtn" class="generate-btn">✨ Визуализировать</button>
+            <div id="resultArea" class="result-area"></div>
+        </div>
+
+        <!-- История -->
+        <div id="historyTab" class="tab-content" style="display:none;">
+            <div id="historyTable"></div>
+            <div id="historyPagination" class="pagination"></div>
+        </div>
+
+        <!-- Администрирование -->
+        <div id="adminTab" class="tab-content" style="display:none;">
+            <div class="admin-panel">
+                <h3>👥 Пользователи</h3>
+                <div class="admin-form">
+                    <input type="text" id="newUsername" placeholder="Логин">
+                    <input type="password" id="newPassword" placeholder="Пароль">
+                    <select id="newRole">
+                        <option value="manager">Менеджер</option>
+                        <option value="admin">Администратор</option>
+                    </select>
+                    <button id="createUserBtn">Создать</button>
+                </div>
+                <div id="usersList"></div>
+
+                <h3>🎨 Цвета затирки</h3>
+                <div class="admin-form">
+                    <input type="text" id="groutName" placeholder="Название">
+                    <input type="text" id="groutHex" placeholder="#FFFFFF">
+                    <button id="addGroutBtn">Добавить цвет</button>
+                </div>
+                <div id="groutColorsList"></div>
+
+                <h3>🧱 Текстуры</h3>
+                <div class="admin-form">
+                    <input type="text" id="textureName" placeholder="Название">
+                    <select id="textureMaterialType">
+                        <option value="standard">Стандартный кирпич</option>
+                        <option value="rigel">Ригель</option>
+                        <option value="decorative_stone">Декоративный камень</option>
+                    </select>
+                    <select id="textureSupplier">
+                        <option value="redstone">Redstone</option>
+                        <option value="redstone_premium">Redstone Premium</option>
+                        <option value="krasny_kamen">Красный Камень</option>
+                    </select>
+                    <input type="file" id="textureFile" accept="image/jpeg,image/jpg,image/png">
+                    <button id="addTextureBtn">Добавить текстуру</button>
+                </div>
+                <div id="texturesList"></div>
+
+                <h3>📊 Все генерации</h3>
+                <div class="generation-filter">
+                    <select id="filterUserType">
+                        <option value="">Все типы</option>
+                        <option value="client">Клиент</option>
+                        <option value="internal">Сотрудник</option>
+                    </select>
+                    <input type="text" id="filterUserId" placeholder="ID пользователя">
+                    <button id="applyFilterBtn">Применить фильтр</button>
+                </div>
+                <div id="allGenerationsTable"></div>
+                <div id="adminPagination" class="pagination"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="imageModal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.9); justify-content:center; align-items:center;">
+    <span id="modalClose" style="position:absolute; top:20px; right:35px; color:white; font-size:40px; cursor:pointer;">&times;</span>
+    <img id="modalImage" style="max-width:90%; max-height:90%; object-fit:contain;">
+</div>
+
+<script>
+    // ========== НАСТРОЙКИ ==========
+    // Для локальной разработки оставляем пустую строку (все запросы на текущий домен/порт)
+    // При деплое на сервер замените на ваш домен (например, 'https://ваш-домен.ru')
+    const API_BASE = '';   // ← при локальной отладке оставить пустым
+
+    let currentUser = null;
+    let currentMaterialType = 'standard';
+    let currentSupplier = null;
+    let selectedTexture = null;
+    let selectedGroutColorName = null;
+    let currentPhotoFile = null;
+    let pollingInterval = null;
+
+    // DOM элементы
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const previewWrapper = document.getElementById('previewWrapper');
+    const texturesGrid = document.getElementById('texturesGrid');
+    const generateBtn = document.getElementById('generateBtn');
+    const resultArea = document.getElementById('resultArea');
+    const materialTypeSelect = document.getElementById('materialTypeSelect');
+    const supplierSelect = document.getElementById('supplierSelect');
+    const groutColorsGrid = document.getElementById('groutColorsGrid');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImage');
+    const closeModal = document.getElementById('modalClose');
+
+    function getHeaders() {
+        return { 'ngrok-skip-browser-warning': 'true' };
+    }
+
+    // Получение текущего пользователя
+    async function fetchCurrentUser() {
+        try {
+            const resp = await fetch(`${API_BASE}/auth/me`, { credentials: 'include', headers: getHeaders() });
+            if (resp.ok) {
+                currentUser = await resp.json();
+                if (currentUser.role === 'admin') {
+                    document.getElementById('adminTabBtn').style.display = 'block';
+                }
+            } else {
+                window.location.href = '/login';
+            }
+        } catch (err) {
+            console.error(err);
+            window.location.href = '/login';
+        }
+    }
+
+    // Загрузка поставщиков
+    async function loadSuppliers() {
+        if (!currentMaterialType) return;
+        try {
+            const resp = await fetch(`${API_BASE}/api/internal/suppliers?material_type=${currentMaterialType}`, { credentials: 'include', headers: getHeaders() });
+            const suppliers = await resp.json();
+            supplierSelect.innerHTML = '';
+            suppliers.forEach(s => {
+                const option = document.createElement('option');
+                option.value = s.code;
+                option.textContent = s.name;
+                supplierSelect.appendChild(option);
+            });
+            if (suppliers.length) {
+                currentSupplier = suppliers[0].code;
+                loadTextures();
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    // Загрузка текстур
+    async function loadTextures() {
+        if (!currentMaterialType || !currentSupplier) return;
+        try {
+            const url = `${API_BASE}/api/internal/textures?material_type=${currentMaterialType}&supplier=${currentSupplier}`;
+            const resp = await fetch(url, { credentials: 'include', headers: getHeaders() });
+            if (!resp.ok) throw new Error('Ошибка загрузки текстур');
+            const textures = await resp.json();
+            if (!textures.length) {
+                texturesGrid.innerHTML = '<div>Нет текстур</div>';
+                selectedTexture = null;
+                return;
+            }
+            selectedTexture = textures[0];
+            renderTextures(textures);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    function renderTextures(textures) {
+        texturesGrid.innerHTML = '';
+        textures.forEach(tex => {
+            const card = document.createElement('div');
+            card.className = 'texture-card';
+            if (selectedTexture?.name === tex.name) card.classList.add('selected');
+            let imageUrl = tex.url;
+            if (!imageUrl.startsWith('http')) {
+                imageUrl = `${API_BASE}${imageUrl}`;
+            }
+            const preview = document.createElement('div');
+            preview.className = 'texture-preview';
+            preview.style.backgroundImage = `url("${imageUrl}")`;
+            const name = document.createElement('div');
+            name.className = 'texture-name';
+            name.textContent = tex.name;
+            card.appendChild(preview);
+            card.appendChild(name);
+            card.addEventListener('click', () => {
+                selectedTexture = tex;
+                document.querySelectorAll('.texture-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+            });
+            texturesGrid.appendChild(card);
+        });
+    }
+
+    // Загрузка цветов затирки
+    async function loadGroutColors() {
+        try {
+            const resp = await fetch(`${API_BASE}/api/client/grout-colors`, { headers: getHeaders() });
+            const colors = await resp.json();
+            groutColorsGrid.innerHTML = colors.map(c => `
+                <div class="grout-color" data-name="${c.name}" style="background-color: ${c.hex_code};"></div>
+            `).join('');
+            document.querySelectorAll('.grout-color').forEach(el => {
+                el.addEventListener('click', () => {
+                    selectedGroutColorName = el.dataset.name;
+                    document.querySelectorAll('.grout-color').forEach(cc => cc.classList.remove('selected'));
+                    el.classList.add('selected');
+                });
+            });
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    // Управление предпросмотром
+    function setPreviewImage(src) {
+        let previewArea = document.querySelector('.preview-area');
+        if (!previewArea.querySelector('.empty-state')) {
+            previewArea.innerHTML = `
+                <div class="empty-state" id="emptyState">Загрузите фото</div>
+                <img src="" id="mainImage" class="main-image" style="display:none;">
+                <div class="image-controls" id="imageControls" style="display:none;">
+                    <button class="control-btn" id="removePhotoBtn">✕ Очистить фото</button>
+                </div>
+            `;
+        }
+        const empty = document.getElementById('emptyState');
+        const img = document.getElementById('mainImage');
+        const controls = document.getElementById('imageControls');
+        if (empty) empty.style.display = 'none';
+        if (img) {
+            img.style.display = 'block';
+            img.src = src;
+        }
+        if (controls) controls.style.display = 'flex';
+        const removeBtn = document.getElementById('removePhotoBtn');
+        if (removeBtn) {
+            removeBtn.onclick = () => {
+                if (empty) empty.style.display = 'block';
+                if (img) img.style.display = 'none';
+                if (controls) controls.style.display = 'none';
+                currentPhotoFile = null;
+                previewWrapper.innerHTML = '';
+                fileInput.value = '';
+            };
+        }
+    }
+
+    // Опрос статуса
+    async function pollStatus(requestId) {
+        let attempts = 0;
+        if (pollingInterval) clearInterval(pollingInterval);
+        pollingInterval = setInterval(async () => {
+            attempts++;
+            try {
+                const resp = await fetch(`${API_BASE}/status/${requestId}`, { headers: getHeaders() });
+                if (!resp.ok) {
+                    if (resp.status === 404) return;
+                    throw new Error();
+                }
+                const data = await resp.json();
+                if (data.status === 'success') {
+                    clearInterval(pollingInterval);
+                    generateBtn.disabled = false;
+                    generateBtn.classList.add('ready');
+                    generateBtn.innerHTML = '✨ Визуализировать';
+                    const imgUrl = data.result_url.startsWith('http') ? data.result_url : API_BASE + data.result_url;
+                    setPreviewImage(imgUrl);
+                    resultArea.innerHTML = '<div class="success-message">✅ Готово!</div>';
+                    setTimeout(() => { resultArea.innerHTML = ''; }, 3000);
+                } else if (data.status === 'error') {
+                    clearInterval(pollingInterval);
+                    generateBtn.disabled = false;
+                    generateBtn.classList.add('ready');
+                    generateBtn.innerHTML = '✨ Визуализировать';
+                    resultArea.innerHTML = '<div class="error-message">❌ Ошибка генерации</div>';
+                } else if (attempts >= 90) {
+                    clearInterval(pollingInterval);
+                    generateBtn.disabled = false;
+                    generateBtn.classList.add('ready');
+                    generateBtn.innerHTML = '✨ Визуализировать';
+                    resultArea.innerHTML = '<div class="error-message">⏱ Превышено время ожидания</div>';
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }, 2000);
+    }
+
+    // Генерация
+    generateBtn.addEventListener('click', async () => {
+        if (!currentPhotoFile || !selectedTexture) {
+            alert('Загрузите фото и выберите текстуру');
+            return;
+        }
+        generateBtn.disabled = true;
+        generateBtn.classList.remove('ready');
+        generateBtn.innerHTML = '<span class="spinner"></span> ИИ в работе...';
+        if (pollingInterval) clearInterval(pollingInterval);
+
+        const formData = new FormData();
+        formData.append('file', currentPhotoFile);
+        formData.append('texture', selectedTexture.name);
+        formData.append('category', 'facade');
+        formData.append('material_type', currentMaterialType);
+        formData.append('supplier', currentSupplier);
+        if (selectedGroutColorName) {
+            formData.append('grout_color_name', selectedGroutColorName);
+        }
+
+        try {
+            const resp = await fetch(`${API_BASE}/api/internal/generate`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: getHeaders(),
+                body: formData
+            });
+            const data = await resp.json();
+            if (!resp.ok) throw new Error(data.detail || 'Ошибка сервера');
+            if (data.request_id) {
+                pollStatus(data.request_id);
+            } else if (data.result_url) {
+                setPreviewImage(API_BASE + data.result_url);
+                resultArea.innerHTML = '<div class="success-message">✅ Готово!</div>';
+                generateBtn.disabled = false;
+                generateBtn.classList.add('ready');
+                generateBtn.innerHTML = '✨ Визуализировать';
+            } else {
+                throw new Error('Не получен request_id или result_url');
+            }
+        } catch (err) {
+            console.error(err);
+            generateBtn.disabled = false;
+            generateBtn.classList.add('ready');
+            generateBtn.innerHTML = '✨ Визуализировать';
+            resultArea.innerHTML = `<div class="error-message">❌ ${err.message}</div>`;
+        }
+    });
+
+    // Обработка файла
+    function handleFile(file) {
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+            alert('Неверный формат');
+            return;
+        }
+        if (file.size > 10 * 1024 * 1024) {
+            alert('Файл больше 10 МБ');
+            return;
+        }
+        currentPhotoFile = file;
+        const reader = new FileReader();
+        reader.onload = e => {
+            previewWrapper.innerHTML = `
+                <div class="preview-container">
+                    <img src="${e.target.result}" class="preview-img">
+                    <button class="remove-photo" id="removePhotoBtn">✕</button>
+                </div>`;
+            document.getElementById('removePhotoBtn')?.addEventListener('click', () => {
+                currentPhotoFile = null;
+                previewWrapper.innerHTML = '';
+                fileInput.value = '';
+            });
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Drag & drop
+    dropzone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+    ['dragenter','dragover','dragleave','drop'].forEach(ev => {
+        dropzone.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); });
+    });
+    dropzone.addEventListener('dragenter', () => dropzone.classList.add('drag-over'));
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+    dropzone.addEventListener('drop', e => {
+        dropzone.classList.remove('drag-over');
+        handleFile(e.dataTransfer.files[0]);
+    });
+
+    materialTypeSelect.addEventListener('change', () => {
+        currentMaterialType = materialTypeSelect.value;
+        loadSuppliers();
+    });
+    supplierSelect.addEventListener('change', () => {
+        currentSupplier = supplierSelect.value;
+        loadTextures();
+    });
+
+    logoutBtn.addEventListener('click', async () => {
+        await fetch(`${API_BASE}/auth/logout`, { method: 'POST', credentials: 'include', headers: getHeaders() });
+        window.location.href = '/login';
+    });
+
+    // Переключение вкладок
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
+            document.getElementById(`${btn.dataset.tab}Tab`).style.display = 'block';
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            if (btn.dataset.tab === 'history') loadHistory(1);
+            else if (btn.dataset.tab === 'admin' && currentUser?.role === 'admin') {
+                loadUsers();
+                loadGroutColorsAdmin();
+                loadAllTextures();
+                loadAllGenerations(1);
+            }
+        });
+    });
+
+    // ========== История ==========
+    async function loadHistory(page = 1) {
+        try {
+            const resp = await fetch(`${API_BASE}/api/internal/history?page=${page}&per_page=10`, { credentials: 'include', headers: getHeaders() });
+            const data = await resp.json();
+            if (!resp.ok) throw new Error(data.detail);
+            renderHistory(data.items);
+            renderPagination(data.page, data.pages, 'history');
+        } catch (err) {
+            document.getElementById('historyTable').innerHTML = '<div class="error-message">Ошибка загрузки истории</div>';
+        }
+    }
+
+    function renderHistory(items) {
+        const container = document.getElementById('historyTable');
+        if (!items.length) {
+            container.innerHTML = '<div>Нет записей</div>';
+            return;
+        }
+        const table = document.createElement('table');
+        table.innerHTML = `
+            <thead>
+                <tr><th>ID</th><th>Дата</th><th>Тип материала</th><th>Поставщик</th><th>Текстура</th><th>Цвет затирки</th><th>Результат</th></tr>
+            </thead>
+            <tbody>
+                ${items.map(item => `
+                    <tr>
+                        <td>${item.id}</td>
+                        <td>${new Date(item.created_at).toLocaleString()}</td>
+                        <td>${item.material_type || '-'}</td>
+                        <td>${item.supplier || '-'}</td>
+                        <td>${item.texture_name}</td>
+                        <td>${item.grout_color || '-'}</td>
+                        <td>${item.output_image_url ? `<img src="${item.output_image_url}" class="history-img" onclick="openModal('${item.output_image_url}')">` : '-'}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        `;
+        container.innerHTML = '';
+        container.appendChild(table);
+    }
+
+    // ========== Админские функции ==========
+    async function loadUsers() {
+        if (!currentUser || currentUser.role !== 'admin') return;
+        try {
+            const resp = await fetch(`${API_BASE}/api/internal/users`, { credentials: 'include', headers: getHeaders() });
+            const users = await resp.json();
+            const container = document.getElementById('usersList');
+            if (!users.length) { container.innerHTML = '<div>Нет пользователей</div>'; return; }
+            const table = document.createElement('table');
+            table.className = 'user-table';
+            table.innerHTML = `
+                <thead><tr><th>ID</th><th>Логин</th><th>Роль</th><th>Действие</th></tr></thead>
+                <tbody>
+                    ${users.map(u => `
+                        <tr>
+                            <td>${u.id}</td>
+                            <td>${u.username}</td>
+                            <td>${u.role}</td>
+                            <td>${u.id !== currentUser.id ? `<button class="delete-user" data-id="${u.id}">Удалить</button>` : ''}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+            container.innerHTML = '';
+            container.appendChild(table);
+            document.querySelectorAll('.delete-user').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const userId = btn.dataset.id;
+                    if (confirm('Удалить пользователя?')) {
+                        await fetch(`${API_BASE}/api/internal/users/${userId}`, { method: 'DELETE', credentials: 'include', headers: getHeaders() });
+                        loadUsers();
+                    }
+                });
+            });
+        } catch (err) { console.error(err); }
+    }
+
+    async function createUser() {
+        const username = document.getElementById('newUsername').value.trim();
+        const password = document.getElementById('newPassword').value;
+        const role = document.getElementById('newRole').value;
+        if (!username || !password) return alert('Заполните логин и пароль');
+        try {
+            const resp = await fetch(`${API_BASE}/api/internal/users`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ username, password, role })
+            });
+            if (resp.ok) {
+                document.getElementById('newUsername').value = '';
+                document.getElementById('newPassword').value = '';
+                loadUsers();
+            } else {
+                const err = await resp.json();
+                alert(err.detail || 'Ошибка');
+            }
+        } catch (err) { alert('Ошибка соединения'); }
+    }
+
+    async function loadGroutColorsAdmin() {
+        if (!currentUser || currentUser.role !== 'admin') return;
+        try {
+            const resp = await fetch(`${API_BASE}/api/internal/grout-colors`, { credentials: 'include', headers: getHeaders() });
+            const colors = await resp.json();
+            const container = document.getElementById('groutColorsList');
+            if (!colors.length) { container.innerHTML = '<div>Нет цветов</div>'; return; }
+            const table = document.createElement('table');
+            table.innerHTML = `
+                <thead><tr><th>ID</th><th>Название</th><th>Hex</th><th>Действие</th></tr></thead>
+                <tbody>
+                    ${colors.map(c => `
+                        <tr>
+                            <td>${c.id}</td>
+                            <td>${c.name}</td>
+                            <td>${c.hex_code}</td>
+                            <td><button class="delete-grout" data-id="${c.id}">Удалить</button></td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+            container.innerHTML = '';
+            container.appendChild(table);
+            document.querySelectorAll('.delete-grout').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const id = btn.dataset.id;
+                    if (confirm('Удалить цвет?')) {
+                        await fetch(`${API_BASE}/api/internal/grout-colors/${id}`, { method: 'DELETE', credentials: 'include', headers: getHeaders() });
+                        loadGroutColorsAdmin();
+                        loadGroutColors();
+                    }
+                });
+            });
+        } catch (err) { console.error(err); }
+    }
+
+    async function addGroutColor() {
+        const name = document.getElementById('groutName').value.trim();
+        const hex = document.getElementById('groutHex').value.trim();
+        if (!name || !hex) return alert('Заполните название и hex');
+        try {
+            const resp = await fetch(`${API_BASE}/api/internal/grout-colors`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ name, hex_code: hex })
+            });
+            if (resp.ok) {
+                document.getElementById('groutName').value = '';
+                document.getElementById('groutHex').value = '';
+                loadGroutColorsAdmin();
+                loadGroutColors();
+            } else {
+                alert('Ошибка добавления цвета');
+            }
+        } catch (err) { alert('Ошибка'); }
+    }
+
+    async function loadAllTextures() {
+        if (!currentUser || currentUser.role !== 'admin') return;
+        try {
+            const resp = await fetch(`${API_BASE}/api/internal/textures/all`, { credentials: 'include', headers: getHeaders() });
+            const textures = await resp.json();
+            const container = document.getElementById('texturesList');
+            if (!textures.length) { container.innerHTML = '<div>Нет текстур</div>'; return; }
+            const typeMap = { standard: 'Стандартный', rigel: 'Ригель', decorative_stone: 'Декоративный' };
+            const supplierMap = { redstone: 'Redstone', redstone_premium: 'Redstone Premium', krasny_kamen: 'Красный Камень' };
+            const table = document.createElement('table');
+            table.innerHTML = `
+                <thead><tr><th>ID</th><th>Название</th><th>Тип</th><th>Поставщик</th><th>Файл</th><th>Действие</th></tr></thead>
+                <tbody>
+                    ${textures.map(t => `
+                        <tr>
+                            <td>${t.id}</td>
+                            <td>${t.name}</td>
+                            <td>${typeMap[t.material_type]}</td>
+                            <td>${supplierMap[t.supplier]}</td>
+                            <td>${t.filename}</td>
+                            <td><button class="delete-texture" data-id="${t.id}">Удалить</button></td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+            container.innerHTML = '';
+            container.appendChild(table);
+            document.querySelectorAll('.delete-texture').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const id = btn.dataset.id;
+                    if (confirm('Удалить текстуру?')) {
+                        await fetch(`${API_BASE}/api/internal/textures/${id}`, { method: 'DELETE', credentials: 'include', headers: getHeaders() });
+                        loadAllTextures();
+                        if (currentMaterialType && currentSupplier) loadTextures();
+                    }
+                });
+            });
+        } catch (err) { console.error(err); }
+    }
+
+    async function addTexture() {
+        const name = document.getElementById('textureName').value.trim();
+        const material_type = document.getElementById('textureMaterialType').value;
+        const supplier = document.getElementById('textureSupplier').value;
+        const file = document.getElementById('textureFile').files[0];
+        if (!name || !file) return alert('Заполните название и выберите файл');
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('material_type', material_type);
+        formData.append('supplier', supplier);
+        formData.append('file', file);
+        try {
+            const resp = await fetch(`${API_BASE}/api/internal/textures`, {
+                method: 'POST',
+                credentials: 'include',
+                body: formData
+            });
+            if (resp.ok) {
+                document.getElementById('textureName').value = '';
+                document.getElementById('textureFile').value = '';
+                loadAllTextures();
+                if (currentMaterialType && currentSupplier) loadTextures();
+            } else {
+                alert('Ошибка добавления текстуры');
+            }
+        } catch (err) { alert('Ошибка'); }
+    }
+
+    async function loadAllGenerations(page = 1) {
+        if (!currentUser || currentUser.role !== 'admin') return;
+        const userType = document.getElementById('filterUserType').value;
+        const userId = document.getElementById('filterUserId').value.trim();
+        let url = `${API_BASE}/api/internal/generations/all?page=${page}&per_page=10`;
+        if (userType) url += `&user_type=${userType}`;
+        if (userId) url += `&user_id=${userId}`;
+        try {
+            const resp = await fetch(url, { credentials: 'include', headers: getHeaders() });
+            const data = await resp.json();
+            renderAllGenerations(data.items);
+            renderPagination(data.page, data.pages, 'admin');
+        } catch (err) { console.error(err); }
+    }
+
+    function renderAllGenerations(items) {
+        const container = document.getElementById('allGenerationsTable');
+        if (!items.length) {
+            container.innerHTML = '<div>Нет генераций</div>';
+            return;
+        }
+        const table = document.createElement('table');
+        table.innerHTML = `
+            <thead><tr><th>ID</th><th>Тип</th><th>ID пользователя</th><th>Дата</th><th>Тип материала</th><th>Поставщик</th><th>Текстура</th><th>Цвет затирки</th><th>Результат</th></tr></thead>
+            <tbody>
+                ${items.map(item => `
+                    <tr>
+                        <td>${item.id}</td>
+                        <td>${item.user_type === 'client' ? 'Клиент' : 'Сотрудник'}</td>
+                        <td>${item.user_id}</td>
+                        <td>${new Date(item.created_at).toLocaleString()}</td>
+                        <td>${item.material_type || '-'}</td>
+                        <td>${item.supplier || '-'}</td>
+                        <td>${item.texture_name}</td>
+                        <td>${item.grout_color || '-'}</td>
+                        <td>${item.output_image_url ? `<img src="${item.output_image_url}" class="history-img" onclick="openModal('${item.output_image_url}')">` : '-'}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        `;
+        container.innerHTML = '';
+        container.appendChild(table);
+    }
+
+    function renderPagination(current, total, type) {
+        const containerId = type === 'history' ? 'historyPagination' : 'adminPagination';
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        if (total <= 1) { container.innerHTML = ''; return; }
+        let html = '';
+        for (let i = 1; i <= total; i++) {
+            html += `<button class="page-btn ${i === current ? 'active' : ''}" data-page="${i}">${i}</button>`;
+        }
+        container.innerHTML = html;
+        container.querySelectorAll('.page-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const page = parseInt(btn.dataset.page);
+                if (type === 'history') loadHistory(page);
+                else loadAllGenerations(page);
+            });
+        });
+    }
+
+    window.openModal = (src) => {
+        modal.style.display = 'flex';
+        modalImg.src = src;
+    };
+    closeModal.onclick = () => modal.style.display = 'none';
+    window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+
+    document.getElementById('createUserBtn')?.addEventListener('click', createUser);
+    document.getElementById('addGroutBtn')?.addEventListener('click', addGroutColor);
+    document.getElementById('addTextureBtn')?.addEventListener('click', addTexture);
+    document.getElementById('applyFilterBtn')?.addEventListener('click', () => loadAllGenerations(1));
+
+    fetchCurrentUser().then(() => {
+        loadSuppliers();
+        loadGroutColors();
+    });
+</script>
+</body>
+</html>
