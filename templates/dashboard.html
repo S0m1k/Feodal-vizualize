@@ -467,6 +467,10 @@
           <button class="cat-btn active" data-cat="facade">🏠 Фасад</button>
           <button class="cat-btn" data-cat="interior">🛋 Интерьер</button>
         </div>
+
+        <div class="vis-divider"></div>
+        <div class="section-label">Цвет затирки</div>
+        <div class="grout-row" id="groutRow"></div>
       </div>
 
       <!-- Right: result -->
@@ -485,9 +489,6 @@
           </div>
         </div>
 
-        <div class="section-label">Цвет затирки</div>
-        <div class="grout-row" id="groutRow"></div>
-
         <button class="gen-btn" id="generateBtn">✨ Визуализировать</button>
         <div class="status-banner" id="statusBanner"></div>
       </div>
@@ -501,9 +502,9 @@
       <div class="filter-group">
         <label>Тип материала</label>
         <select id="catMatType">
-          <option value="standard">Стандартный кирпич</option>
-          <option value="rigel">Ригель (тонкий)</option>
-          <option value="decorative_stone">Декоративный камень</option>
+          <option value="standard">Кирпич</option>
+          <option value="rigel">Ригель</option>
+          <option value="decorative_stone">Камень</option>
         </select>
       </div>
       <div class="filter-group">
@@ -560,9 +561,9 @@
       <div class="admin-form">
         <input type="text" id="textureName" placeholder="Название">
         <select id="textureMaterialType">
-          <option value="standard">Стандартный кирпич</option>
+          <option value="standard">Кирпич</option>
           <option value="rigel">Ригель</option>
-          <option value="decorative_stone">Декоративный камень</option>
+          <option value="decorative_stone">Камень</option>
         </select>
         <select id="textureSupplier">
           <option value="redstone">Redstone</option>
@@ -605,9 +606,9 @@
         <div class="filter-group">
           <label>Тип материала</label>
           <select id="modalMatType">
-            <option value="standard">Стандартный кирпич</option>
-            <option value="rigel">Ригель (тонкий)</option>
-            <option value="decorative_stone">Декоративный камень</option>
+            <option value="standard">Кирпич</option>
+            <option value="rigel">Ригель</option>
+            <option value="decorative_stone">Камень</option>
           </select>
         </div>
         <div class="filter-group">
@@ -1149,7 +1150,7 @@ async function loadAllTextures() {
         const textures = await r.json();
         const c = document.getElementById('texturesList');
         if (!textures.length) { c.innerHTML = '<div>Нет текстур</div>'; return; }
-        const tMap = { standard: 'Стандартный', rigel: 'Ригель', decorative_stone: 'Декоративный' };
+        const tMap = { standard: 'Кирпич', rigel: 'Ригель', decorative_stone: 'Камень' };
         const sMap = { redstone: 'Redstone', redstone_premium: 'Redstone Premium', krasny_kamen: 'Красный Камень' };
         c.innerHTML = `<table>
             <thead><tr><th>ID</th><th>Название</th><th>Тип</th><th>Поставщик</th><th>Файл</th><th>Действие</th></tr></thead>
