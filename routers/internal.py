@@ -1,7 +1,7 @@
 import os
 import uuid
 import shutil
-import requests
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, Form, File, Query, Request
 from database import get_db
 from middleware import get_current_manager, get_current_user, get_current_admin
@@ -137,9 +137,10 @@ async def internal_generate(
             raise HTTPException(status_code=500, detail="Ошибка генерации: пустой output_url")
 
         try:
-            img_resp = requests.get(output_url, timeout=60)
-            img_resp.raise_for_status()
-            result_bytes = img_resp.content
+            async with httpx.AsyncClient(timeout=60.0) as dl_client:
+                img_resp = await dl_client.get(output_url)
+                img_resp.raise_for_status()
+                result_bytes = img_resp.content
         except Exception as e:
             logger.error("internal_generate download_error output_url=%s error=%s", output_url, e)
             raise HTTPException(status_code=502, detail=f"Не удалось скачать результат: {e}")

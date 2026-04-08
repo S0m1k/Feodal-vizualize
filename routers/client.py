@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 from redis import Redis
 from database import get_db
 from utils.generation import generate_image
-import requests
+import httpx
 import logging
 
 router = APIRouter(tags=["client"])
@@ -174,8 +174,10 @@ async def client_generate(
         raise HTTPException(status_code=500, detail="Ошибка генерации: пустой output_url")
 
     try:
-        img_resp = requests.get(output_url, timeout=60)
-        img_resp.raise_for_status()
+        async with httpx.AsyncClient(timeout=60.0) as dl_client:
+            img_resp = await dl_client.get(output_url)
+            img_resp.raise_for_status()
+            img_bytes = img_resp.content
     except Exception as e:
         os.unlink(temp_path)
         logger.error("client_generate download_error output_url=%s error=%s", output_url, e)
@@ -186,7 +188,7 @@ async def client_generate(
     output_filename = f"{uuid.uuid4().hex}.jpg"
     output_path = os.path.join(output_dir, output_filename)
     with open(output_path, "wb") as f:
-        f.write(img_resp.content)
+        f.write(img_bytes)
 
     db = await get_db()
     try:
