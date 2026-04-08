@@ -1,6 +1,7 @@
 import os
 import uuid
 from datetime import date, datetime, timedelta
+from urllib.parse import quote
 from fastapi import APIRouter, Request, Response, UploadFile, Form, HTTPException, Depends
 from fastapi.responses import JSONResponse
 from redis import Redis
@@ -146,7 +147,7 @@ async def client_generate(
 
     base_url = resolve_public_base_url(request)
     photo_url = f"{base_url}/temp/client/{temp_filename}"
-    texture_url = f"{base_url}/textures/{material_type}/{supplier}/{filename}"
+    texture_url = f"{base_url}/textures/{material_type}/{supplier}/{quote(filename)}"
     grout_hex = None
     if grout_color_name and material_type != "decorative_stone":
         db = await get_db()

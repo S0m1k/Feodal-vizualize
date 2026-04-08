@@ -2,6 +2,7 @@ import os
 import uuid
 import shutil
 import httpx
+from urllib.parse import quote
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, Form, File, Query, Request
 from database import get_db
 from middleware import get_current_manager, get_current_user, get_current_admin
@@ -108,7 +109,7 @@ async def internal_generate(
         if not row:
             raise HTTPException(status_code=404, detail="Текстура не найдена")
         filename = row["filename"]
-        texture_url = f"{base_url}/textures/{material_type}/{supplier}/{filename}"
+        texture_url = f"{base_url}/textures/{material_type}/{supplier}/{quote(filename)}"
 
         grout_hex = None
         if grout_color_name and material_type != "decorative_stone":
