@@ -598,36 +598,16 @@
 
     // Управление предпросмотром
     function setPreviewImage(src) {
-        let previewArea = document.querySelector('.preview-area');
-        if (!previewArea.querySelector('.empty-state')) {
-            previewArea.innerHTML = `
-                <div class="empty-state" id="emptyState">Загрузите фото</div>
-                <img src="" id="mainImage" class="main-image" style="display:none;">
-                <div class="image-controls" id="imageControls" style="display:none;">
-                    <button class="control-btn" id="removePhotoBtn">✕ Очистить фото</button>
-                </div>
-            `;
-        }
-        const empty = document.getElementById('emptyState');
-        const img = document.getElementById('mainImage');
-        const controls = document.getElementById('imageControls');
-        if (empty) empty.style.display = 'none';
-        if (img) {
-            img.style.display = 'block';
-            img.src = src;
-        }
-        if (controls) controls.style.display = 'flex';
-        const removeBtn = document.getElementById('removePhotoBtn');
-        if (removeBtn) {
-            removeBtn.onclick = () => {
-                if (empty) empty.style.display = 'block';
-                if (img) img.style.display = 'none';
-                if (controls) controls.style.display = 'none';
-                currentPhotoFile = null;
-                previewWrapper.innerHTML = '';
-                fileInput.value = '';
-            };
-        }
+        previewWrapper.innerHTML = `
+            <div class="preview-container">
+                <img src="${src}" class="preview-img" id="mainImage">
+                <button class="remove-photo" id="removePhotoBtn">✕</button>
+            </div>`;
+        document.getElementById('removePhotoBtn')?.addEventListener('click', () => {
+            currentPhotoFile = null;
+            previewWrapper.innerHTML = '';
+            fileInput.value = '';
+        });
     }
 
     // Опрос статуса
