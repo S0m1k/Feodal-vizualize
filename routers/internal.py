@@ -6,7 +6,7 @@ from urllib.parse import quote
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, Form, File, Query, Request
 from database import get_db
 from middleware import get_current_manager, get_current_user, get_current_admin
-from utils.generation import generate_image
+from utils.generation import generate_image, build_prompt
 from rauth import get_password_hash
 from pydantic import BaseModel
 import sqlite3
@@ -29,25 +29,6 @@ def resolve_public_base_url(request: Request) -> str:
     return str(request.base_url).rstrip("/")
 
 
-def build_prompt(category: str, material_type: str, grout_color_hex: str = None) -> str:
-    if material_type == "decorative_stone":
-        prompt = "Replace the surface with EXACTLY the provided decorative stone texture. Copy the stone's color, pattern, and relief precisely. Maintain realistic lighting and shadows. Do not add bricks."
-    else:
-        if category == "facade":
-            if material_type == "standard":
-                prompt = "Replace the house facade with EXACTLY the provided brick texture. Copy color, tone, brick size, pattern. Preserve windows, doors, roof, shadows."
-            else:
-                prompt = "Replace the house facade with EXACTLY the provided brick texture. IMPORTANT: This is a Riegel (thin brick) – 2x thinner than standard. Make brick height 3x smaller."
-        else:
-            if material_type == "standard":
-                prompt = "Replace the interior wall with EXACTLY the provided brick texture. Copy color, tone, brick size, pattern. Preserve furniture, windows, lighting."
-            else:
-                prompt = "Replace the interior wall with EXACTLY the provided brick texture. IMPORTANT: This is a Riegel (thin brick) – 2x thinner than standard. Make brick height 3x smaller."
-
-    if grout_color_hex and material_type != "decorative_stone":
-        prompt += f" Use grout color HEX {grout_color_hex} between bricks."
-    prompt += " Photorealistic result."
-    return prompt
 # ===== Модели =====
 class UserCreateModel(BaseModel):
     username: str

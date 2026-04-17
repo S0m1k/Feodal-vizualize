@@ -32,6 +32,31 @@ def _extract_output_url(status_data: dict) -> str | None:
     return None
 
 
+def build_prompt(category: str, material_type: str, grout_color_hex: str = None) -> str:
+    """Единый промт для клиентского и внутреннего роутеров."""
+    exact_copy = "Replace the surface with EXACTLY the provided texture. Copy color, pattern, and relief precisely."
+
+    if material_type == "decorative_stone":
+        prompt = f"{exact_copy} Maintain realistic lighting and shadows. Do not add bricks."
+    else:
+        target = "house facade" if category == "facade" else "interior wall"
+
+        if material_type == "standard":
+            prompt = (f"Replace the {target} with EXACTLY the provided brick texture. "
+                      f"Copy color, size, and pattern. Preserve architecture and shadows.")
+        else:
+            # Ригель: ультра-длинный и тонкий формат
+            prompt = (f"Replace the {target} with EXACTLY the provided texture. "
+                      f"IMPORTANT: Apply as Riegel bricks—ultra-long and very thin. "
+                      f"Maintain a 1:8 height-to-width ratio. Strict horizontal alignment.")
+
+    if grout_color_hex and material_type != "decorative_stone":
+        prompt += f" Use grout color HEX {grout_color_hex} for mortar joints."
+
+    prompt += " Photorealistic, architectural visualization, 8k."
+    return prompt
+
+
 async def generate_image(image_url: str, texture_url: str, prompt: str) -> dict:
     """
     Отправляет запрос к нейросети и возвращает {'output_url': url}.

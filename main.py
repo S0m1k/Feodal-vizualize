@@ -30,7 +30,11 @@ redis_client = Redis(host='localhost', port=6379, decode_responses=True)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://swiftly-natural-sitar.tilda.ws"],
+    allow_origins=[
+        "https://rstone.tech",
+        "https://www.rstone.tech",
+        "https://swiftly-natural-sitar.tilda.ws",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -99,6 +103,10 @@ def login_page():
 @app.get("/dashboard")
 def dashboard_page():
     return FileResponse("templates/dashboard.html")
+
+@app.get("/client")
+def client_widget():
+    return FileResponse("index.html")
 
 @app.get("/")
 def root():

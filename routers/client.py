@@ -6,7 +6,7 @@ from fastapi import APIRouter, Request, Response, UploadFile, Form, HTTPExceptio
 from fastapi.responses import JSONResponse
 from redis import Redis
 from database import get_db
-from utils.generation import generate_image
+from utils.generation import generate_image, build_prompt
 import httpx
 import logging
 
@@ -44,24 +44,6 @@ def increment_count(client_id: str) -> int:
         redis_client.expire(key, int((midnight - now).total_seconds()))
     return new_count
 
-def build_prompt(category: str, material_type: str, grout_color_hex: str = None) -> str:
-    if material_type == "decorative_stone":
-        base = "Replace the surface with EXACTLY the provided decorative stone texture. Copy the stone's color, pattern, and relief precisely. Maintain realistic lighting and shadows. Do not add bricks."
-    else:
-        if category == "facade":
-            if material_type == "standard":
-                base = "Replace the house facade with EXACTLY the provided brick texture. Copy color, tone, brick size, pattern. Preserve windows, doors, roof, shadows."
-            else:  # rigel
-                base = "Replace the house facade with EXACTLY the provided brick texture. IMPORTANT: This is a Riegel (thin brick) – 2x thinner than standard. Make brick height 3x smaller."
-        else:  # interior
-            if material_type == "standard":
-                base = "Replace the interior wall with EXACTLY the provided brick texture. Copy color, tone, brick size, pattern. Preserve furniture, windows, lighting."
-            else:
-                base = "Replace the interior wall with EXACTLY the provided brick texture. IMPORTANT: This is a Riegel (thin brick) – 2x thinner than standard. Make brick height 3x smaller."
-    if grout_color_hex and material_type != "decorative_stone":
-        base += f" Use grout color HEX {grout_color_hex} between bricks."
-    base += " Photorealistic result."
-    return base
 
 @router.get("/suppliers")
 async def get_suppliers(material_type: str):

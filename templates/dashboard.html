@@ -656,6 +656,7 @@ let modalTexList        = [];
 let catMatTypeVal       = 'standard';
 let catSupplierVal      = null;
 let catTexList          = [];
+let usersMap            = {};  // id → username, populated by loadUsers()
 
 // ============================================================
 //  HELPERS
@@ -1064,6 +1065,7 @@ async function loadUsers() {
     try {
         const r = await fetch(`${API_BASE}/api/internal/users`, { credentials: 'include', headers: H() });
         const users = await r.json();
+        usersMap = Object.fromEntries(users.map(u => [String(u.id), u.username]));
         const c = document.getElementById('usersList');
         if (!users.length) { c.innerHTML = '<div>Нет пользователей</div>'; return; }
         c.innerHTML = `<table>
@@ -1216,7 +1218,7 @@ function renderAllGenerations(items) {
         <tbody>${items.map(item => `<tr>
           <td>${item.id}</td>
           <td><span class="badge badge-${item.user_type}">${item.user_type === 'client' ? 'Клиент' : 'Сотрудник'}</span></td>
-          <td>${item.user_id}</td>
+          <td>${item.user_type === 'internal' ? (usersMap[String(item.user_id)] || item.user_id) : item.user_id}</td>
           <td>${new Date(item.created_at).toLocaleString('ru')}</td>
           <td>${item.material_type || '—'}</td>
           <td>${item.supplier || '—'}</td>
