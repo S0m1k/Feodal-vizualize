@@ -33,6 +33,8 @@ app.add_middleware(
     allow_origins=[
         "https://rstone.tech",
         "https://www.rstone.tech",
+        "https://rstone.ru",
+        "https://www.rstone.ru",
         "https://swiftly-natural-sitar.tilda.ws",
     ],
     allow_credentials=True,

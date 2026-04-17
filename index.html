@@ -10,9 +10,9 @@
        ============================================================ */
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
-      --acc:    #e85d04;
-      --acc2:   #f48c06;
-      --red:    #e63946;
+      --acc:    #c0392b;
+      --acc2:   #e74c3c;
+      --red:    #c0392b;
       --green:  #10b981;
       --bg:     #f4f6fb;
       --card:   #ffffff;
@@ -33,11 +33,11 @@
        TIPS BANNER
        ============================================================ */
     .tips-bar {
-      background: #fff8f4;
-      border-bottom: 1px solid #fde0c8;
+      background: #fff5f5;
+      border-bottom: 1px solid #ffd5d5;
       padding: 8px 24px;
       display: flex; align-items: center; gap: 6px;
-      font-size: .78rem; color: #7a4a20; flex-wrap: wrap;
+      font-size: .78rem; color: #7a2020; flex-wrap: wrap;
     }
     .tips-bar strong { color: var(--acc); font-weight: 700; margin-right: 6px; }
     .tips-bar span { display: flex; align-items: center; gap: 4px; margin-right: 12px; }
@@ -87,7 +87,7 @@
     }
     .cat-btn.active {
       background: var(--acc); border-color: var(--acc);
-      color: #fff; box-shadow: 0 3px 12px rgba(232,93,4,.3);
+      color: #fff; box-shadow: 0 3px 12px rgba(192,57,43,.3);
     }
     .cat-hint { font-size: .72rem; color: var(--muted); text-align: center; }
 
@@ -117,7 +117,7 @@
       text-align: center; cursor: pointer; transition: all .2s;
       user-select: none;
     }
-    .dropzone:hover, .dropzone.drag { border-color: var(--acc); background: #fff8f4; }
+    .dropzone:hover, .dropzone.drag { border-color: var(--acc); background: #fff5f5; }
     .dropzone input { display: none; }
     .dz-icon { font-size: 2rem; margin-bottom: 8px; opacity: .55; }
     .dz-text { font-weight: 600; color: #3d4f66; font-size: .88rem; margin-bottom: 3px; }
@@ -149,7 +149,7 @@
       font-size: .8rem; font-weight: 700; cursor: pointer;
       color: var(--muted); transition: all .15s;
     }
-    .mat-btn.active { border-color: var(--acc); color: var(--acc); background: #fff8f4; }
+    .mat-btn.active { border-color: var(--acc); color: var(--acc); background: #fff5f5; }
 
     /* Supplier chips */
     .sup-row {
@@ -161,7 +161,7 @@
       font-size: .76rem; font-weight: 600; cursor: pointer;
       color: var(--muted); transition: all .15s;
     }
-    .sup-btn.active { border-color: var(--acc); color: var(--acc); background: #fff8f4; }
+    .sup-btn.active { border-color: var(--acc); color: var(--acc); background: #fff5f5; }
 
     /* Texture grid */
     .tex-grid {
@@ -181,7 +181,7 @@
       transition: all .18s; background: #f4f6fb;
     }
     .tex-card:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,.12); }
-    .tex-card.sel { border-color: var(--acc); box-shadow: 0 0 0 3px rgba(232,93,4,.15); }
+    .tex-card.sel { border-color: var(--acc); box-shadow: 0 0 0 3px rgba(192,57,43,.15); }
     .tex-img { aspect-ratio: 1; background-size: cover; background-position: center; }
     .tex-lbl {
       padding: 5px 6px; font-size: .7rem; font-weight: 600;
@@ -192,7 +192,7 @@
 
     /* Selected texture badge */
     .sel-tex-badge {
-      background: #fff8f4; border: 1.5px solid #fdd0aa;
+      background: #fff5f5; border: 1.5px solid #ffcdd2;
       border-radius: 10px; padding: 8px 12px;
       font-size: .82rem; font-weight: 700; color: var(--acc);
       display: none; margin-bottom: 6px;
@@ -209,7 +209,7 @@
       box-shadow: 0 1px 4px rgba(0,0,0,.14); transition: all .15s;
     }
     .swatch:hover { transform: scale(1.1); }
-    .swatch.sel { border-color: var(--acc); transform: scale(1.12); box-shadow: 0 0 0 3px rgba(232,93,4,.2); }
+    .swatch.sel { border-color: var(--acc); transform: scale(1.12); box-shadow: 0 0 0 3px rgba(192,57,43,.2); }
 
     /* Remaining + generate */
     .gen-wrap { padding: 16px 20px; position: sticky; bottom: 0; background: var(--card); border-top: 1px solid var(--border); }
@@ -222,9 +222,9 @@
     }
     .gen-btn.ready {
       background: linear-gradient(135deg, var(--acc), var(--acc2));
-      cursor: pointer; box-shadow: 0 4px 18px rgba(232,93,4,.35);
+      cursor: pointer; box-shadow: 0 4px 18px rgba(192,57,43,.35);
     }
-    .gen-btn.ready:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(232,93,4,.45); }
+    .gen-btn.ready:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(192,57,43,.45); }
     .gen-info { font-size: .72rem; color: var(--muted); text-align: center; margin-top: 6px; }
     .gen-info.warn { color: var(--red); font-weight: 700; }
     .spinner {
