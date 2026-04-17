@@ -654,9 +654,7 @@ async function loadSuppliers() {
   supRow.innerHTML = '<span style="font-size:.78rem;color:var(--muted);">Загрузка…</span>';
   texGrid.innerHTML = '<div style="grid-column:span 3;padding:16px 0;text-align:center;color:var(--muted);">Загрузка…</div>';
   try {
-    const r = await fetch(`${API_BASE}/api/client/suppliers?material_type=${currentMat}`, {
-      headers: { 'ngrok-skip-browser-warning': 'true' }
-    });
+    const r = await fetch(`${API_BASE}/api/client/suppliers?material_type=${currentMat}`);
     if (!r.ok) throw new Error();
     const sups = await r.json();
     if (!sups.length) { supRow.innerHTML = ''; texGrid.innerHTML = '<div style="grid-column:span 3;padding:16px 0;text-align:center;color:var(--muted);">Нет поставщиков</div>'; return; }
@@ -690,9 +688,7 @@ async function loadTextures() {
   if (!currentSup) return;
   texGrid.innerHTML = '<div style="grid-column:span 3;padding:16px 0;text-align:center;color:var(--muted);">Загрузка…</div>';
   try {
-    const r = await fetch(`${API_BASE}/api/client/textures?material_type=${currentMat}&supplier=${currentSup}`, {
-      headers: { 'ngrok-skip-browser-warning': 'true' }
-    });
+    const r = await fetch(`${API_BASE}/api/client/textures?material_type=${currentMat}&supplier=${currentSup}`);
     if (!r.ok) throw new Error();
     const list = await r.json();
     if (!list.length) {
@@ -743,9 +739,7 @@ function renderTextures(list) {
 // ================================================================
 async function loadGroutColors() {
   try {
-    const r = await fetch(`${API_BASE}/api/client/grout-colors`, {
-      headers: { 'ngrok-skip-browser-warning': 'true' }
-    });
+    const r = await fetch(`${API_BASE}/api/client/grout-colors`);
     if (!r.ok) throw new Error();
     const colors = await r.json();
     groutRow.innerHTML = colors.map(c =>
@@ -784,9 +778,7 @@ function pollStatus(requestId) {
   pollingTimer = setInterval(async () => {
     attempts++;
     try {
-      const r = await fetch(`${API_BASE}/status/${requestId}`, {
-        headers: { 'ngrok-skip-browser-warning': 'true' }
-      });
+      const r = await fetch(`${API_BASE}/status/${requestId}`);
       if (!r.ok) { if (r.status === 404) return; throw new Error(`HTTP ${r.status}`); }
       const d = await r.json();
       if (d.status === 'success') {

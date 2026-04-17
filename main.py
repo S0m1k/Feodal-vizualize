@@ -1,16 +1,12 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 import os
 from dotenv import load_dotenv
 from routers import auth, internal, client
-from database import init_db_sync
-from fastapi import FastAPI, HTTPException, Depends
-from database import get_db
+from database import init_db_sync, get_db
 from redis import Redis
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi import Request
 
 load_dotenv()
 import logging
@@ -22,12 +18,38 @@ logging.basicConfig(
 app = FastAPI()
 redis_client = Redis(host='localhost', port=6379, decode_responses=True)
 
+# Публичные клиентские пути — разрешаем любой Origin (без credentials)
+_PUBLIC_CLIENT_PATHS = (
+    "/api/client/suppliers",
+    "/api/client/textures",
+    "/api/client/grout-colors",
+    "/status/",
+)
 
+@app.middleware("http")
+async def public_cors_middleware(request: Request, call_next):
+    origin = request.headers.get("origin", "")
+    is_public = any(request.url.path.startswith(p) for p in _PUBLIC_CLIENT_PATHS)
 
+    # Обрабатываем preflight OPTIONS для публичных маршрутов
+    if is_public and request.method == "OPTIONS":
+        r = Response()
+        r.headers["Access-Control-Allow-Origin"] = origin or "*"
+        r.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+        r.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, ngrok-skip-browser-warning"
+        r.headers["Access-Control-Max-Age"] = "86400"
+        return r
 
+    response = await call_next(request)
 
+    # Добавляем CORS-заголовок для публичных GET-ответов
+    if is_public and origin:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Vary"] = "Origin"
 
+    return response
 
+# CORS для авторизованных маршрутов (дашборд, generate, auth)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -41,8 +63,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
 
 
 init_db_sync()
@@ -60,28 +80,28 @@ def get_temp_client(filename: str):
     filepath = os.path.join("temp/client", filename)
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404)
-    return FileResponse(filepath, headers={"ngrok-skip-browser-warning": "true"})
+    return FileResponse(filepath)
 
 @app.get("/temp/internal/{filename}")
 def get_temp_internal(filename: str):
     filepath = os.path.join("temp/internal", filename)
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404)
-    return FileResponse(filepath, headers={"ngrok-skip-browser-warning": "true"})
+    return FileResponse(filepath)
 
 @app.get("/generated/client/{filename}")
 def get_generated_client(filename: str):
     filepath = os.path.join("data/generations/client", filename)
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404)
-    return FileResponse(filepath, headers={"ngrok-skip-browser-warning": "true"})
+    return FileResponse(filepath)
 
 @app.get("/generated/internal/{user_id}/{filename}")
 def get_generated_internal(user_id: str, filename: str):
     filepath = os.path.join("data/generations/internal", user_id, filename)
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404)
-    return FileResponse(filepath, headers={"ngrok-skip-browser-warning": "true"})
+    return FileResponse(filepath)
 
 # Эндпоинты для отдачи текстур без префикса /textures (для совместимости с фронтом)
 @app.get("/standard/{filename}")
@@ -89,14 +109,14 @@ def standard_texture(filename: str):
     filepath = os.path.join("textures", "standard", filename)
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404)
-    return FileResponse(filepath, headers={"ngrok-skip-browser-warning": "true"})
+    return FileResponse(filepath)
 
 @app.get("/rigel/{filename}")
 def rigel_texture(filename: str):
     filepath = os.path.join("textures", "rigel", filename)
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404)
-    return FileResponse(filepath, headers={"ngrok-skip-browser-warning": "true"})
+    return FileResponse(filepath)
 
 @app.get("/login")
 def login_page():
@@ -133,6 +153,7 @@ async def add_cross_origin_resource_policy(request: Request, call_next):
     if request.url.path.startswith("/textures/"):
         response.headers["Cross-Origin-Resource-Policy"] = "cross-origin"
     return response
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000, workers=1)
