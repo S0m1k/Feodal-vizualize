@@ -34,26 +34,33 @@ def _extract_output_url(status_data: dict) -> str | None:
 
 def build_prompt(category: str, material_type: str, grout_color_hex: str = None) -> str:
     """Единый промт для клиентского и внутреннего роутеров."""
-    exact_copy = "Replace the surface with EXACTLY the provided texture. Copy color, pattern, and relief precisely."
+    base_instruction = "Preserve all original house geometry, windows, roof, shadows, and environment EXACTLY."
 
     if material_type == "decorative_stone":
-        prompt = f"{exact_copy} Maintain realistic lighting and shadows. Do not add bricks."
+        prompt = (f"{base_instruction} Replace facade with the provided decorative stone texture, "
+                  f"replicated with extremely high-density tiling. Each stone block must be "
+                  f"rendered significantly smaller than the original wall panels, creating a "
+                  f"detailed, intricate, high-repetition pattern of rough rock textures across "
+                  f"the entire surface. No large blocks.")
     else:
         target = "house facade" if category == "facade" else "interior wall"
 
         if material_type == "standard":
-            prompt = (f"Replace the {target} with EXACTLY the provided brick texture. "
-                      f"Copy color, size, and pattern. Preserve architecture and shadows.")
+            prompt = (f"{base_instruction} Replace the {target} with the provided brick texture. "
+                      f"Apply with high-density brickwork and frequent repetition. "
+                      f"Copy exact color and tone, but make the individual brick size "
+                      f"noticeably smaller, creating a tight, precise coursing pattern.")
         else:
-            # Ригель: ультра-длинный и тонкий формат
-            prompt = (f"Replace the {target} with EXACTLY the provided texture. "
-                      f"IMPORTANT: Apply as Riegel bricks—ultra-long and very thin. "
-                      f"Maintain a 1:8 height-to-width ratio. Strict horizontal alignment.")
+            # Ригель: пропорция 1:10, плотная укладка
+            prompt = (f"{base_instruction} Replace the {target} with EXACTLY the provided texture. "
+                      f"IMPORTANT: Apply as Riegel bricks—ultra-long, very thin. "
+                      f"Maintain a 1:10 height-to-width ratio. Use dense tiling for a tight, "
+                      f"repetitive pattern of long, narrow courses.")
 
     if grout_color_hex and material_type != "decorative_stone":
-        prompt += f" Use grout color HEX {grout_color_hex} for mortar joints."
+        prompt += f" Use grout color HEX {grout_color_hex} for precise mortar joints."
 
-    prompt += " Photorealistic, architectural visualization, 8k."
+    prompt += " Photorealistic, architectural visualization, 8k resolution, sharp details."
     return prompt
 
 
