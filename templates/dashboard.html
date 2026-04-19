@@ -589,6 +589,7 @@
         </select>
         <input type="text" id="filterUserId" placeholder="ID пользователя">
         <button id="applyFilterBtn">Применить</button>
+        <button id="deleteSelectedBtn" class="del-btn" style="display:none;margin-left:auto;" onclick="deleteSelectedGenerations()">🗑 Удалить выбранные</button>
       </div>
       <div id="allGenerationsTable"></div>
       <div class="pagination" id="adminPagination"></div>
@@ -1212,13 +1213,17 @@ async function loadAllGenerations(page = 1) {
 }
 function renderAllGenerations(items) {
     const c = document.getElementById('allGenerationsTable');
-    if (!items.length) { c.innerHTML = '<div style="padding:16px;color:#9aadcc;">Нет генераций</div>'; return; }
+    const delBtn = document.getElementById('deleteSelectedBtn');
+    if (!items.length) { c.innerHTML = '<div style="padding:16px;color:#9aadcc;">Нет генераций</div>'; delBtn.style.display='none'; return; }
+    delBtn.style.display = 'inline-flex';
     c.innerHTML = `<table>
         <thead><tr>
+          <th><input type="checkbox" id="selectAllGen" title="Выбрать все" onclick="toggleSelectAllGenerations(this)"></th>
           <th>ID</th><th>Тип</th><th>Пользователь</th><th>Дата</th>
           <th>Материал</th><th>Поставщик</th><th>Текстура</th><th>Затирка</th><th>Результат</th>
         </tr></thead>
         <tbody>${items.map(item => `<tr>
+          <td><input type="checkbox" class="gen-cb" data-id="${item.id}" onchange="updateDeleteBtn()"></td>
           <td>${item.id}</td>
           <td><span class="badge badge-${item.user_type}">${item.user_type === 'client' ? 'Клиент' : 'Сотрудник'}</span></td>
           <td>${item.user_type === 'internal' ? (usersMap[String(item.user_id)] || item.user_id) : item.user_id}</td>
@@ -1233,6 +1238,31 @@ function renderAllGenerations(items) {
               : '—'}</td>
         </tr>`).join('')}</tbody>
     </table>`;
+}
+function toggleSelectAllGenerations(cb) {
+    document.querySelectorAll('.gen-cb').forEach(el => el.checked = cb.checked);
+    updateDeleteBtn();
+}
+function updateDeleteBtn() {
+    const selected = document.querySelectorAll('.gen-cb:checked').length;
+    const btn = document.getElementById('deleteSelectedBtn');
+    if (btn) btn.textContent = selected ? `🗑 Удалить выбранные (${selected})` : '🗑 Удалить выбранные';
+}
+async function deleteSelectedGenerations() {
+    const ids = [...document.querySelectorAll('.gen-cb:checked')].map(el => Number(el.dataset.id));
+    if (!ids.length) return;
+    if (!confirm(`Удалить ${ids.length} генерац${ids.length === 1 ? 'ию' : 'ии'}? Файлы на сервере будут удалены.`)) return;
+    try {
+        const r = await fetch(`${API_BASE}/api/internal/generations`, {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: { ...H(), 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids }),
+        });
+        if (!r.ok) throw new Error(await r.text());
+        const d = await r.json();
+        loadAllGenerations(1);
+    } catch(e) { alert('Ошибка удаления: ' + e.message); }
 }
 
 // ============================================================

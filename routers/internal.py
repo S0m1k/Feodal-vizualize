@@ -9,6 +9,7 @@ from middleware import get_current_manager, get_current_user, get_current_admin
 from utils.generation import generate_image, build_prompt
 from rauth import get_password_hash
 from pydantic import BaseModel
+from typing import List
 import sqlite3
 from redis import Redis
 import logging
@@ -310,6 +311,37 @@ async def get_all_generations(
             item["output_image_url"] = f"/generated/internal/{item['user_id']}/{os.path.basename(item['output_image_path'])}"
         items.append(item)
     return {"items": items, "total": total, "page": page, "per_page": per_page, "pages": (total + per_page - 1) // per_page}
+
+class DeleteGenerationsRequest(BaseModel):
+    ids: List[int]
+
+@router.delete("/generations", dependencies=[Depends(get_current_admin)])
+async def delete_generations(req: DeleteGenerationsRequest):
+    if not req.ids:
+        return {"deleted": 0}
+    db = await get_db()
+    try:
+        placeholders = ",".join("?" * len(req.ids))
+        cursor = await db.execute(
+            f"SELECT id, input_image_path, output_image_path FROM generations WHERE id IN ({placeholders})",
+            req.ids,
+        )
+        rows = await cursor.fetchall()
+        for row in rows:
+            for path in [row["input_image_path"], row["output_image_path"]]:
+                if path and os.path.exists(path):
+                    try:
+                        os.unlink(path)
+                    except Exception as e:
+                        logger.warning("Не удалось удалить файл %s: %s", path, e)
+        await db.execute(
+            f"DELETE FROM generations WHERE id IN ({placeholders})",
+            req.ids,
+        )
+        await db.commit()
+    finally:
+        await db.close()
+    return {"deleted": len(rows)}
 
 # ========== Управление цветами затирки ==========
 @router.get("/grout-colors")
