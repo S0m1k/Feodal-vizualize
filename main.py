@@ -2,11 +2,13 @@ from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
+import asyncio
 import os
 from dotenv import load_dotenv
 from routers import auth, internal, client
 from database import init_db_sync, get_db
 from redis import Redis
+from utils.balance_checker import balance_checker_loop
 
 load_dotenv()
 import logging
@@ -67,9 +69,17 @@ app.add_middleware(
 
 init_db_sync()
 
+@app.on_event("startup")
+async def startup_event():
+    asyncio.create_task(balance_checker_loop(redis_client))
+
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(internal.router, prefix="/api/internal", tags=["internal"])
 app.include_router(client.router, prefix="/api/client", tags=["client"])
+
+# Статические файлы (иконки, прочее)
+os.makedirs("static", exist_ok=True)
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Раздача статических файлов (текстур)
 app.mount("/textures", StaticFiles(directory="textures"), name="textures")
