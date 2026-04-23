@@ -55,7 +55,7 @@ def build_prompt(category: str, material_type: str, grout_color_hex: str = None)
             # Ригель: пропорция 1:8, высокая горизонтальная плотность
             prompt = (f"{base} Replace {target} with EXACTLY the provided texture. "
                       f"CRITICAL: Apply as Riegel-style bricks. Proportions: extremely long and thin. "
-                      f"Height-to-width ratio 1:8. High horizontal density. "
+                      f"Height-to-width ratio 1:10. High horizontal density. "
                       f"Create a continuous linear aesthetic.")
 
     if grout_color_hex and material_type != "decorative_stone":
