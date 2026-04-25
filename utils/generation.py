@@ -66,14 +66,16 @@ def build_prompt(category: str, material_type: str, grout_color_hex: str = None)
 
 
 def build_belt_prompt(category: str) -> str:
-    """Промт для сервиса 'Пояса': красная зона → декоративный горизонтальный пояс."""
+    """Промт для сервиса 'Пояса': красная зона → вертикальная кладка (солдатский ряд)."""
     target = "house facade" if category == "facade" else "interior wall"
     return (
-        f"Preserve all original {target} geometry, windows, doors, and environment EXACTLY. "
-        f"The red-highlighted zones on the image indicate decorative belt courses. "
-        f"In these red zones ONLY, apply the provided brick texture as a horizontal decorative "
-        f"belt course with tight coursing pattern. "
-        f"All areas outside the red zones must remain completely unchanged. "
+        f"Preserve all original {target} geometry, windows, doors, and surrounding environment EXACTLY. "
+        f"The red-highlighted zones mark decorative horizontal belt courses. "
+        f"In the red zones ONLY: rearrange the EXISTING bricks into a vertical soldier-course pattern — "
+        f"bricks standing upright on their ends, oriented vertically. "
+        f"Use the exact same brick color, tone, and material as the rest of the facade. "
+        f"The belt must blend seamlessly with the surrounding brickwork at its edges. "
+        f"Do NOT change anything outside the red zones. "
         f"Hyper-realistic architectural rendering, 8k, photorealistic sunlight."
     )
 

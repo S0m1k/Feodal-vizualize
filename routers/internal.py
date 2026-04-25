@@ -627,6 +627,19 @@ async def plinth_generate(
     request_id = str(uuid.uuid4())
     user_id    = str(current_user.get("id"))
 
+    # Resolve the actual filename from DB (texture form field is the display name)
+    db = await get_db()
+    try:
+        cur = await db.execute(
+            "SELECT filename FROM materials WHERE name = ? AND material_type = ? AND supplier = ?",
+            (texture, material_type, supplier),
+        )
+        row = await cur.fetchone()
+    finally:
+        await db.close()
+    if not row:
+        raise HTTPException(status_code=404, detail=f"Текстура «{texture}» не найдена")
+
     filename  = f"{uuid.uuid4()}.jpg"
     temp_path = os.path.join(TEMP_DIR, filename)
     content   = await annotated_photo.read()
@@ -635,7 +648,7 @@ async def plinth_generate(
 
     base_url    = _resolve_base_url()
     photo_url   = f"{base_url}/temp/internal/{filename}"
-    texture_url = f"{base_url}/textures/{material_type}/{supplier}/{quote(texture)}"
+    texture_url = f"{base_url}/textures/{material_type}/{supplier}/{quote(row['filename'])}"
     prompt      = build_plinth_prompt()
 
     redis_client.setex(f"gen_status:{request_id}", 3600, "processing")
