@@ -181,7 +181,7 @@ async def client_generate(
     prompt = build_prompt(category, material_type, grout_hex)
 
     try:
-        result_data = await generate_image(photo_url, texture_url, prompt)
+        result_data = await generate_image([photo_url, texture_url], prompt)
     except Exception as e:
         logger.error("client_generate ai_error client_id=%s error=%s", client_id, e)
         raise HTTPException(status_code=502, detail=f"Ошибка AI API: {e}")

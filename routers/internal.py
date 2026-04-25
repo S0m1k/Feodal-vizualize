@@ -112,7 +112,7 @@ async def internal_generate(
         prompt = build_prompt(category, material_type, grout_hex)
 
         try:
-            result_data = await generate_image(photo_url, texture_url, prompt)
+            result_data = await generate_image([photo_url, texture_url], prompt)
         except Exception as e:
             logger.error("internal_generate ai_error user_id=%s error=%s", current_user.get("id"), e)
             raise HTTPException(status_code=502, detail=f"Ошибка AI API: {e}")
@@ -540,8 +540,7 @@ def _resolve_base_url() -> str:
 
 async def _run_zone_generation(
     request_id: str,
-    photo_url: str,
-    texture_url: str,
+    image_urls: list,
     prompt: str,
     user_id: str,
     service_type: str,
@@ -552,7 +551,11 @@ async def _run_zone_generation(
 ):
     """Фоновая задача генерации для Поясов / Цоколя."""
     try:
-        result = await generate_image(photo_url, texture_url, prompt)
+        logger.info(
+            "Zone generation start request_id=%s service=%s num_urls=%d",
+            request_id, service_type, len(image_urls),
+        )
+        result = await generate_image(image_urls, prompt)
         output_url = result["output_url"]
 
         output_dir = os.path.join(GENERATED_DIR, user_id)
@@ -588,12 +591,10 @@ async def _run_zone_generation(
 @router.post("/belt/generate")
 async def belt_generate(
     annotated_photo: UploadFile = File(...),
-    texture: str = Form(...),
-    material_type: str = Form(...),
-    supplier: str = Form(...),
     category: str = Form("facade"),
     current_user = Depends(get_current_manager),
 ):
+    """Генерация пояса — текстура не нужна, работаем только с аннотированным фото."""
     request_id = str(uuid.uuid4())
     user_id    = str(current_user.get("id"))
 
@@ -603,15 +604,14 @@ async def belt_generate(
     with open(temp_path, "wb") as f:
         f.write(content)
 
-    base_url    = _resolve_base_url()
-    photo_url   = f"{base_url}/temp/internal/{filename}"
-    texture_url = f"{base_url}/textures/{material_type}/{supplier}/{quote(texture)}"
-    prompt      = build_belt_prompt(category)
+    base_url  = _resolve_base_url()
+    photo_url = f"{base_url}/temp/internal/{filename}"
+    prompt    = build_belt_prompt(category)
 
     redis_client.setex(f"gen_status:{request_id}", 3600, "processing")
     asyncio.create_task(_run_zone_generation(
-        request_id, photo_url, texture_url, prompt,
-        user_id, "belt", texture, temp_path, material_type, supplier,
+        request_id, [photo_url], prompt,
+        user_id, "belt", "", temp_path, "", "",
     ))
     return {"request_id": request_id}
 
@@ -640,7 +640,7 @@ async def plinth_generate(
 
     redis_client.setex(f"gen_status:{request_id}", 3600, "processing")
     asyncio.create_task(_run_zone_generation(
-        request_id, photo_url, texture_url, prompt,
+        request_id, [photo_url, texture_url], prompt,
         user_id, "plinth", texture, temp_path, material_type, supplier,
     ))
     return {"request_id": request_id}

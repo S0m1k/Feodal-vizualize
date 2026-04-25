@@ -90,9 +90,10 @@ def build_plinth_prompt() -> str:
     )
 
 
-async def generate_image(image_url: str, texture_url: str, prompt: str) -> dict:
+async def generate_image(image_urls: list, prompt: str) -> dict:
     """
     Отправляет запрос к нейросети и возвращает {'output_url': url}.
+    image_urls — список URL изображений (обычно [photo_url] или [photo_url, texture_url]).
     Использует асинхронный режим с опросом статуса.
     """
     api_key = os.getenv("GEN_API_KEY") or os.getenv("API_KEY")
@@ -108,7 +109,7 @@ async def generate_image(image_url: str, texture_url: str, prompt: str) -> dict:
     payload = {
         "is_sync": False,
         "prompt": prompt,
-        "image_urls": [image_url, texture_url],
+        "image_urls": image_urls,
         "num_images": 1,
         "aspect_ratio": "16:9",
         "resolution": "1K",
@@ -120,10 +121,11 @@ async def generate_image(image_url: str, texture_url: str, prompt: str) -> dict:
         request_id = None
         try:
             logger.info(
-                "GenAPI POST start endpoint=%s is_sync=%s num_images=%s",
+                "GenAPI POST start endpoint=%s is_sync=%s num_images=%s num_image_urls=%s",
                 NANO_BANANA_ENDPOINT,
                 payload.get("is_sync"),
                 payload.get("num_images"),
+                len(image_urls),
             )
             t0 = time.monotonic()
             resp = await client.post(NANO_BANANA_ENDPOINT, json=payload, headers=headers)

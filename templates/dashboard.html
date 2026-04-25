@@ -134,6 +134,26 @@
     }
     .zone-gen-btn:disabled { opacity: .5; cursor: not-allowed; }
 
+    /* ===== ZONE RESULT THUMBNAIL ===== */
+    .zone-result-panel { display: none; }
+    .zone-result-panel.visible { display: block; }
+    .zone-result-panel img {
+      max-height: 220px; max-width: 100%;
+      border-radius: 12px; cursor: zoom-in;
+      display: block;
+      box-shadow: 0 4px 18px rgba(0,0,0,.12);
+    }
+
+    /* ===== SUPPLIER CHIPS ===== */
+    .supplier-chip {
+      padding: 5px 16px; border-radius: 20px;
+      border: 1.5px solid #dde4f0; background: #fff;
+      cursor: pointer; font-size: .82rem; font-weight: 500;
+      transition: all .15s; color: #1e2a3b;
+    }
+    .supplier-chip:hover { border-color: #c0392b; color: #c0392b; }
+    .supplier-chip.active { background: #c0392b; border-color: #c0392b; color: #fff; }
+
     /* ===== LEADS TABLE ===== */
     .leads-count { font-size: .8rem; color: #9aadcc; margin-left: 8px; font-weight: 400; }
 
@@ -714,47 +734,42 @@
   <section class="page" id="page-belt">
     <h1 class="page-title">🏗 Пояса</h1>
     <p style="color:#5b6fa0;margin-bottom:20px;font-size:.9rem;">
-      Загрузите фото, выберите текстуру, затем обведите красным зоны горизонтального декоративного пояса.
+      Загрузите фото здания, обозначьте красным зоны горизонтального декоративного пояса и нажмите «Сгенерировать».
     </p>
-    <div class="zone-layout">
-      <div class="zone-left">
-        <div class="card">
-          <div class="step-title" style="margin-bottom:10px;">1. Фото здания</div>
-          <div class="dropzone" id="beltDrop" style="min-height:100px;">
-            <span>📷 Перетащите или нажмите</span>
-            <input type="file" id="beltFile" accept="image/*" style="display:none">
-          </div>
+    <div style="max-width:900px;display:flex;flex-direction:column;gap:20px;">
+
+      <!-- Step 1: Photo -->
+      <div class="card">
+        <div class="step-title" style="margin-bottom:10px;">1. Фото здания</div>
+        <div class="dropzone" id="beltDrop" style="min-height:110px;">
+          <span>📷 Перетащите или нажмите</span>
+          <input type="file" id="beltFile" accept="image/*" style="display:none">
         </div>
-        <div class="card">
-          <div class="step-title" style="margin-bottom:10px;">2. Текстура пояса</div>
-          <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;" id="beltMatBtns">
-            <button class="mat-btn active" data-mat="standard" onclick="setBeltMat(this,'standard')">Кирпич</button>
-            <button class="mat-btn" data-mat="rigel" onclick="setBeltMat(this,'rigel')">Ригель</button>
-          </div>
-          <select id="beltSupplierSel" style="width:100%;margin-bottom:8px;padding:6px 10px;border-radius:8px;border:1.5px solid #dde4f0;" onchange="loadBeltTextures()">
-            <option value="">— Поставщик —</option>
-          </select>
-          <div class="zone-tex-grid" id="beltTexGrid"><div style="color:#9aadcc;font-size:.82rem;padding:8px;">Выберите тип и поставщика</div></div>
-        </div>
-        <div class="card" id="beltCanvasCard" style="display:none;">
-          <div class="step-title" style="margin-bottom:8px;">3. Обозначьте зону <span style="color:#e53935">красным</span></div>
-          <div class="brush-ctrl">
-            <label>Кисть</label>
-            <input type="range" id="beltBrush" min="4" max="50" value="14">
-            <button onclick="beltDrawer&&beltDrawer.reset()">Очистить</button>
-          </div>
-          <div class="canvas-wrap" id="beltCanvasWrap"><canvas id="beltCanvas"></canvas></div>
-        </div>
-        <div class="card" style="display:flex;align-items:center;gap:10px;">
-          <label style="font-size:.82rem;color:#5b6fa0;">Категория:</label>
-          <select id="beltCategory" style="flex:1;padding:6px 10px;border-radius:8px;border:1.5px solid #dde4f0;">
-            <option value="facade">Фасад</option>
-            <option value="interior">Интерьер</option>
-          </select>
-        </div>
-        <button class="zone-gen-btn" id="beltGenBtn" onclick="generateBelt()">Сгенерировать →</button>
       </div>
-      <div class="zone-result" id="beltResult"><span class="zone-hint">Результат появится здесь</span></div>
+
+      <!-- Step 2: Canvas (shown after photo loaded) -->
+      <div class="card" id="beltCanvasCard" style="display:none;">
+        <div class="step-title" style="margin-bottom:8px;">2. Обозначьте зоны пояса <span style="color:#e53935">красным</span></div>
+        <div class="brush-ctrl">
+          <label>Кисть</label>
+          <input type="range" id="beltBrush" min="4" max="50" value="14">
+          <button onclick="beltDrawer&&beltDrawer.reset()">Очистить</button>
+        </div>
+        <div class="canvas-wrap" id="beltCanvasWrap"><canvas id="beltCanvas"></canvas></div>
+      </div>
+
+      <!-- Category + Generate -->
+      <div class="card" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <label style="font-size:.82rem;color:#5b6fa0;white-space:nowrap;">Категория:</label>
+        <select id="beltCategory" style="padding:6px 10px;border-radius:8px;border:1.5px solid #dde4f0;">
+          <option value="facade">Фасад</option>
+          <option value="interior">Интерьер</option>
+        </select>
+        <button class="zone-gen-btn" id="beltGenBtn" style="width:auto;flex:1;min-width:200px;margin:0;" onclick="generateBelt()">Сгенерировать →</button>
+      </div>
+
+      <!-- Result thumbnail -->
+      <div id="beltResult" class="zone-result-panel"></div>
     </div>
   </section>
 
@@ -762,40 +777,53 @@
   <section class="page" id="page-plinth">
     <h1 class="page-title">🧱 Цоколь</h1>
     <p style="color:#5b6fa0;margin-bottom:20px;font-size:.9rem;">
-      Загрузите фото, выберите текстуру цоколя, затем обведите красным зону внизу фасада.
+      Загрузите фото, выберите текстуру цоколя и обведите красным нижнюю зону фасада.
     </p>
-    <div class="zone-layout">
-      <div class="zone-left">
-        <div class="card">
-          <div class="step-title" style="margin-bottom:10px;">1. Фото здания</div>
-          <div class="dropzone" id="plinthDrop" style="min-height:100px;">
-            <span>📷 Перетащите или нажмите</span>
-            <input type="file" id="plinthFile" accept="image/*" style="display:none">
-          </div>
+    <div style="max-width:900px;display:flex;flex-direction:column;gap:20px;">
+
+      <!-- Step 1: Photo -->
+      <div class="card">
+        <div class="step-title" style="margin-bottom:10px;">1. Фото здания</div>
+        <div class="dropzone" id="plinthDrop" style="min-height:110px;">
+          <span>📷 Перетащите или нажмите</span>
+          <input type="file" id="plinthFile" accept="image/*" style="display:none">
         </div>
-        <div class="card">
-          <div class="step-title" style="margin-bottom:10px;">2. Текстура цоколя</div>
-          <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;" id="plinthMatBtns">
-            <button class="mat-btn active" data-mat="decorative_stone" onclick="setPlinthMat(this,'decorative_stone')">Камень</button>
-            <button class="mat-btn" data-mat="standard" onclick="setPlinthMat(this,'standard')">Кирпич</button>
-          </div>
-          <select id="plinthSupplierSel" style="width:100%;margin-bottom:8px;padding:6px 10px;border-radius:8px;border:1.5px solid #dde4f0;" onchange="loadPlinthTextures()">
-            <option value="">— Поставщик —</option>
-          </select>
-          <div class="zone-tex-grid" id="plinthTexGrid"><div style="color:#9aadcc;font-size:.82rem;padding:8px;">Выберите тип и поставщика</div></div>
-        </div>
-        <div class="card" id="plinthCanvasCard" style="display:none;">
-          <div class="step-title" style="margin-bottom:8px;">3. Обозначьте зону цоколя <span style="color:#e53935">красным</span></div>
-          <div class="brush-ctrl">
-            <label>Кисть</label>
-            <input type="range" id="plinthBrush" min="4" max="50" value="14">
-            <button onclick="plinthDrawer&&plinthDrawer.reset()">Очистить</button>
-          </div>
-          <div class="canvas-wrap" id="plinthCanvasWrap"><canvas id="plinthCanvas"></canvas></div>
-        </div>
-        <button class="zone-gen-btn" id="plinthGenBtn" onclick="generatePlinth()">Сгенерировать →</button>
       </div>
-      <div class="zone-result" id="plinthResult"><span class="zone-hint">Результат появится здесь</span></div>
+
+      <!-- Step 2: Texture selection (visualizer-style) -->
+      <div class="card">
+        <div class="step-title" style="margin-bottom:12px;">2. Текстура цоколя</div>
+        <!-- Material type tabs -->
+        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;" id="plinthMatBtns">
+          <button class="mat-btn active" data-mat="decorative_stone" onclick="setPlinthMat(this,'decorative_stone')">Камень</button>
+          <button class="mat-btn" data-mat="standard" onclick="setPlinthMat(this,'standard')">Кирпич</button>
+          <button class="mat-btn" data-mat="rigel" onclick="setPlinthMat(this,'rigel')">Ригель</button>
+        </div>
+        <!-- Supplier chips -->
+        <div id="plinthSupplierChips" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+          <span style="color:#9aadcc;font-size:.82rem;">Загрузка поставщиков…</span>
+        </div>
+        <!-- Texture grid -->
+        <div class="zone-tex-grid" id="plinthTexGrid">
+          <div style="color:#9aadcc;font-size:.82rem;padding:8px;">Выберите поставщика</div>
+        </div>
+      </div>
+
+      <!-- Step 3: Canvas (shown after photo loaded) -->
+      <div class="card" id="plinthCanvasCard" style="display:none;">
+        <div class="step-title" style="margin-bottom:8px;">3. Обозначьте зону цоколя <span style="color:#e53935">красным</span></div>
+        <div class="brush-ctrl">
+          <label>Кисть</label>
+          <input type="range" id="plinthBrush" min="4" max="50" value="14">
+          <button onclick="plinthDrawer&&plinthDrawer.reset()">Очистить</button>
+        </div>
+        <div class="canvas-wrap" id="plinthCanvasWrap"><canvas id="plinthCanvas"></canvas></div>
+      </div>
+
+      <button class="zone-gen-btn" id="plinthGenBtn" onclick="generatePlinth()">Сгенерировать →</button>
+
+      <!-- Result thumbnail -->
+      <div id="plinthResult" class="zone-result-panel"></div>
     </div>
   </section>
 
@@ -1636,44 +1664,92 @@ function createDrawer(canvasId) {
 }
 
 // ============================================================
-//  BELT (Пояса)
+//  BELT (Пояса) — без выбора текстуры
 // ============================================================
-let beltDrawer=null, beltTex=null, beltMat='standard';
+let beltDrawer = null, beltInited = false;
 
 function initBeltPage() {
-    if (beltDrawer) return; // уже инициализирован
-    setupZoneDrop('beltDrop','beltFile', file => {
+    if (beltInited) return;
+    beltInited = true;
+    setupZoneDrop('beltDrop', 'beltFile', file => {
         if (!beltDrawer) beltDrawer = createDrawer('beltCanvas');
         beltDrawer.loadImage(file);
-        document.getElementById('beltCanvasCard').style.display='';
+        document.getElementById('beltCanvasCard').style.display = '';
     });
     document.getElementById('beltBrush').addEventListener('input', e => beltDrawer?.setBrush(+e.target.value));
-    loadZoneSuppliers('belt', beltMat);
 }
-function setBeltMat(btn, mat) {
-    beltMat = mat;
-    document.querySelectorAll('#beltMatBtns .mat-btn').forEach(b => b.classList.remove('active'));
+
+async function generateBelt() {
+    if (!beltDrawer?.isReady()) return alert('Загрузите фото здания');
+    const blob = await beltDrawer.getBlob();
+    const fd = new FormData();
+    fd.append('annotated_photo', blob, 'belt.jpg');
+    fd.append('category', document.getElementById('beltCategory').value);
+    const resultDiv = document.getElementById('beltResult');
+    resultDiv.className = 'zone-result-panel visible';
+    resultDiv.innerHTML = '<div style="padding:24px;color:#9aadcc;text-align:center;">⏳ Генерация… (до 2 мин)</div>';
+    try {
+        const r = await fetch(`${API_BASE}/api/internal/belt/generate`, { method: 'POST', credentials: 'include', headers: H(), body: fd });
+        const d = await r.json();
+        if (d.request_id) pollZoneResult(d.request_id, 'beltResult');
+        else resultDiv.innerHTML = `<div style="padding:16px;color:#e53935;">Ошибка: ${d.detail || 'неизвестная'}</div>`;
+    } catch(e) { resultDiv.innerHTML = `<div style="padding:16px;color:#e53935;">${e}</div>`; }
+}
+
+// ============================================================
+//  PLINTH (Цоколь) — выбор текстуры как в визуализаторе
+// ============================================================
+let plinthDrawer = null, plinthTex = null, plinthMat = 'decorative_stone', plinthInited = false;
+
+function initPlinthPage() {
+    if (plinthInited) return;
+    plinthInited = true;
+    setupZoneDrop('plinthDrop', 'plinthFile', file => {
+        if (!plinthDrawer) plinthDrawer = createDrawer('plinthCanvas');
+        plinthDrawer.loadImage(file);
+        document.getElementById('plinthCanvasCard').style.display = '';
+    });
+    document.getElementById('plinthBrush').addEventListener('input', e => plinthDrawer?.setBrush(+e.target.value));
+    loadPlinthSupplierChips(plinthMat);
+}
+
+function setPlinthMat(btn, mat) {
+    plinthMat = mat;
+    plinthTex = null;
+    document.querySelectorAll('#plinthMatBtns .mat-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    loadZoneSuppliers('belt', mat);
+    document.getElementById('plinthTexGrid').innerHTML = '<div style="color:#9aadcc;font-size:.82rem;padding:8px;">Выберите поставщика</div>';
+    loadPlinthSupplierChips(mat);
 }
-async function loadZoneSuppliers(prefix, mat) {
-    const sel = document.getElementById(`${prefix}SupplierSel`);
-    sel.innerHTML = '<option value="">— Поставщик —</option>';
-    const r = await fetch(`${API_BASE}/api/internal/suppliers?material_type=${mat}`, { credentials:'include', headers:H() });
-    const list = await r.json();
-    list.forEach(s => { const o=document.createElement('option'); o.value=s.code; o.textContent=s.name; sel.appendChild(o); });
-    document.getElementById(`${prefix}TexGrid`).innerHTML = '<div style="color:#9aadcc;font-size:.82rem;padding:8px;">Выберите поставщика</div>';
+
+async function loadPlinthSupplierChips(mat) {
+    const container = document.getElementById('plinthSupplierChips');
+    container.innerHTML = '<span style="color:#9aadcc;font-size:.82rem;">Загрузка…</span>';
+    try {
+        const r = await fetch(`${API_BASE}/api/internal/suppliers?material_type=${mat}`, { credentials: 'include', headers: H() });
+        const list = await r.json();
+        if (!list.length) { container.innerHTML = '<span style="color:#9aadcc;font-size:.82rem;">Нет поставщиков</span>'; return; }
+        container.innerHTML = list.map(s =>
+            `<button class="supplier-chip" data-code="${s.code}" onclick="selectPlinthSupplier('${s.code}',this)">${s.name}</button>`
+        ).join('');
+    } catch(e) { container.innerHTML = '<span style="color:#e53935;font-size:.82rem;">Ошибка загрузки</span>'; }
 }
-async function loadBeltTextures() {
-    const sup = document.getElementById('beltSupplierSel').value;
-    if (!sup) return;
-    const r = await fetch(`${API_BASE}/api/internal/textures?material_type=${beltMat}&supplier=${sup}`, { credentials:'include', headers:H() });
-    const list = await r.json();
-    renderZoneTextures('belt', list, beltMat, sup);
+
+async function selectPlinthSupplier(code, el) {
+    document.querySelectorAll('#plinthSupplierChips .supplier-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    const grid = document.getElementById('plinthTexGrid');
+    grid.innerHTML = '<div style="color:#9aadcc;font-size:.82rem;padding:8px;">Загрузка…</div>';
+    try {
+        const r = await fetch(`${API_BASE}/api/internal/textures?material_type=${plinthMat}&supplier=${code}`, { credentials: 'include', headers: H() });
+        const list = await r.json();
+        renderZoneTextures('plinth', list, plinthMat, code);
+    } catch(e) { grid.innerHTML = '<div style="color:#e53935;font-size:.82rem;padding:8px;">Ошибка загрузки</div>'; }
 }
+
 function renderZoneTextures(prefix, list, mat, sup) {
     const grid = document.getElementById(`${prefix}TexGrid`);
-    if (!list.length) { grid.innerHTML='<div style="color:#9aadcc;font-size:.82rem;padding:8px;">Нет текстур</div>'; return; }
+    if (!list.length) { grid.innerHTML = '<div style="color:#9aadcc;font-size:.82rem;padding:8px;">Нет текстур</div>'; return; }
     grid.innerHTML = list.map(t => {
         const url = t.url.startsWith('http') ? t.url : `${API_BASE}${t.url}`;
         return `<div class="zone-tex-card" onclick="selectZoneTex('${prefix}','${t.name}','${url}','${mat}','${sup}',this)">
@@ -1681,59 +1757,13 @@ function renderZoneTextures(prefix, list, mat, sup) {
         </div>`;
     }).join('');
 }
+
 function selectZoneTex(prefix, name, url, mat, sup, el) {
-    document.querySelectorAll(`#${prefix}TexGrid .zone-tex-card`).forEach(c=>c.classList.remove('sel'));
+    document.querySelectorAll(`#${prefix}TexGrid .zone-tex-card`).forEach(c => c.classList.remove('sel'));
     el.classList.add('sel');
-    if (prefix === 'belt')   { beltTex   = {name,url,material_type:mat,supplier:sup}; }
-    if (prefix === 'plinth') { plinthTex = {name,url,material_type:mat,supplier:sup}; }
-}
-async function generateBelt() {
-    if (!beltDrawer?.isReady()) return alert('Загрузите фото здания');
-    if (!beltTex) return alert('Выберите текстуру пояса');
-    const blob = await beltDrawer.getBlob();
-    const fd = new FormData();
-    fd.append('annotated_photo', blob, 'belt.jpg');
-    fd.append('texture', beltTex.name);
-    fd.append('material_type', beltTex.material_type);
-    fd.append('supplier', beltTex.supplier);
-    fd.append('category', document.getElementById('beltCategory').value);
-    document.getElementById('beltResult').innerHTML = '<div style="padding:40px;color:#9aadcc;text-align:center;">⏳ Генерация… (до 2 мин)</div>';
-    try {
-        const r = await fetch(`${API_BASE}/api/internal/belt/generate`, { method:'POST', credentials:'include', headers:H(), body:fd });
-        const d = await r.json();
-        if (d.request_id) pollZoneResult(d.request_id, 'beltResult');
-        else document.getElementById('beltResult').innerHTML = `<div style="padding:20px;color:#e53935;">Ошибка: ${d.detail||'неизвестная'}</div>`;
-    } catch(e) { document.getElementById('beltResult').innerHTML = `<div style="padding:20px;color:#e53935;">${e}</div>`; }
+    if (prefix === 'plinth') { plinthTex = { name, url, material_type: mat, supplier: sup }; }
 }
 
-// ============================================================
-//  PLINTH (Цоколь)
-// ============================================================
-let plinthDrawer=null, plinthTex=null, plinthMat='decorative_stone';
-
-function initPlinthPage() {
-    if (plinthDrawer) return;
-    setupZoneDrop('plinthDrop','plinthFile', file => {
-        if (!plinthDrawer) plinthDrawer = createDrawer('plinthCanvas');
-        plinthDrawer.loadImage(file);
-        document.getElementById('plinthCanvasCard').style.display='';
-    });
-    document.getElementById('plinthBrush').addEventListener('input', e => plinthDrawer?.setBrush(+e.target.value));
-    loadZoneSuppliers('plinth', plinthMat);
-}
-function setPlinthMat(btn, mat) {
-    plinthMat = mat;
-    document.querySelectorAll('#plinthMatBtns .mat-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    loadZoneSuppliers('plinth', mat);
-}
-async function loadPlinthTextures() {
-    const sup = document.getElementById('plinthSupplierSel').value;
-    if (!sup) return;
-    const r = await fetch(`${API_BASE}/api/internal/textures?material_type=${plinthMat}&supplier=${sup}`, { credentials:'include', headers:H() });
-    const list = await r.json();
-    renderZoneTextures('plinth', list, plinthMat, sup);
-}
 async function generatePlinth() {
     if (!plinthDrawer?.isReady()) return alert('Загрузите фото здания');
     if (!plinthTex) return alert('Выберите текстуру цоколя');
@@ -1743,13 +1773,15 @@ async function generatePlinth() {
     fd.append('texture', plinthTex.name);
     fd.append('material_type', plinthTex.material_type);
     fd.append('supplier', plinthTex.supplier);
-    document.getElementById('plinthResult').innerHTML = '<div style="padding:40px;color:#9aadcc;text-align:center;">⏳ Генерация… (до 2 мин)</div>';
+    const resultDiv = document.getElementById('plinthResult');
+    resultDiv.className = 'zone-result-panel visible';
+    resultDiv.innerHTML = '<div style="padding:24px;color:#9aadcc;text-align:center;">⏳ Генерация… (до 2 мин)</div>';
     try {
-        const r = await fetch(`${API_BASE}/api/internal/plinth/generate`, { method:'POST', credentials:'include', headers:H(), body:fd });
+        const r = await fetch(`${API_BASE}/api/internal/plinth/generate`, { method: 'POST', credentials: 'include', headers: H(), body: fd });
         const d = await r.json();
         if (d.request_id) pollZoneResult(d.request_id, 'plinthResult');
-        else document.getElementById('plinthResult').innerHTML = `<div style="padding:20px;color:#e53935;">Ошибка: ${d.detail||'неизвестная'}</div>`;
-    } catch(e) { document.getElementById('plinthResult').innerHTML = `<div style="padding:20px;color:#e53935;">${e}</div>`; }
+        else resultDiv.innerHTML = `<div style="padding:16px;color:#e53935;">Ошибка: ${d.detail || 'неизвестная'}</div>`;
+    } catch(e) { resultDiv.innerHTML = `<div style="padding:16px;color:#e53935;">${e}</div>`; }
 }
 
 function pollZoneResult(requestId, divId) {
@@ -1757,20 +1789,32 @@ function pollZoneResult(requestId, divId) {
     const timer = setInterval(async () => {
         if (++attempts > 90) {
             clearInterval(timer);
-            document.getElementById(divId).innerHTML = '<div style="padding:20px;color:#e53935;">Таймаут генерации</div>';
+            const d = document.getElementById(divId);
+            d.className = 'zone-result-panel visible';
+            d.innerHTML = '<div style="padding:16px;color:#e53935;">Таймаут генерации — попробуйте ещё раз</div>';
             return;
         }
         try {
             const r = await fetch(`${API_BASE}/status/${requestId}`);
             if (!r.ok) return;
-            const d = await r.json();
-            if (d.status === 'success') {
+            const resp = await r.json();
+            if (resp.status === 'success') {
                 clearInterval(timer);
-                const url = d.result_url.startsWith('http') ? d.result_url : `${API_BASE}${d.result_url}`;
-                document.getElementById(divId).innerHTML = `<img src="${url}" style="max-width:100%;border-radius:12px;cursor:zoom-in;" onclick="openLightbox('${url}')">`;
-            } else if (d.status === 'error') {
+                const url = resp.result_url.startsWith('http') ? resp.result_url : `${API_BASE}${resp.result_url}`;
+                const div = document.getElementById(divId);
+                div.className = 'zone-result-panel visible';
+                div.innerHTML = `
+                    <div class="card" style="padding:14px;">
+                        <div style="font-size:.8rem;color:#5b6fa0;margin-bottom:8px;">
+                            ✅ Результат <span style="opacity:.7">(нажмите для увеличения)</span>
+                        </div>
+                        <img src="${url}" onclick="openLightbox('${url}')" alt="Результат генерации">
+                    </div>`;
+            } else if (resp.status === 'error') {
                 clearInterval(timer);
-                document.getElementById(divId).innerHTML = '<div style="padding:20px;color:#e53935;">Ошибка генерации</div>';
+                const div = document.getElementById(divId);
+                div.className = 'zone-result-panel visible';
+                div.innerHTML = '<div style="padding:16px;color:#e53935;font-size:.9rem;">⚠️ Ошибка генерации. Попробуйте ещё раз.</div>';
             }
         } catch {}
     }, 2000);
