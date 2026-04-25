@@ -792,6 +792,12 @@ function pollStatus(requestId) {
         setBadge('ok', '✅ Готово!');
         setTimeout(() => previewBadge.className = 'preview-badge', 5000);
         refreshBtn();
+        // Лид-форма после 2-й генерации
+        const genCount = parseInt(localStorage.getItem('rsv_gen_count') || '0') + 1;
+        localStorage.setItem('rsv_gen_count', genCount);
+        if (genCount >= 2 && !localStorage.getItem('rsv_lead_done')) {
+          setTimeout(showLeadModal, 1200);
+        }
       } else if (d.status === 'error') {
         clearInterval(pollingTimer);
         setGenerating(false);
@@ -887,6 +893,61 @@ function init() {
 }
 
 init();
+
+// ================================================================
+//  LEAD CAPTURE MODAL
+// ================================================================
+function showLeadModal() {
+  document.getElementById('leadModal').style.display = 'flex';
+}
+function closeLeadModal() {
+  document.getElementById('leadModal').style.display = 'none';
+  localStorage.setItem('rsv_lead_done', '1');
+}
+async function submitLead(e) {
+  e.preventDefault();
+  const name        = document.getElementById('leadName').value.trim();
+  const contact     = document.getElementById('leadContact').value.trim();
+  const contactType = document.getElementById('leadType').value;
+  if (!name || !contact) return;
+  const fd = new FormData();
+  fd.append('name', name); fd.append('contact', contact); fd.append('contact_type', contactType);
+  try {
+    await fetch(`${API_BASE}/api/client/leads`, { method: 'POST', credentials: 'include', body: fd });
+  } catch {}
+  closeLeadModal();
+  toast('Спасибо! Мы свяжемся с вами в ближайшее время 😊', 'ok');
+}
 </script>
+
+<!-- LEAD MODAL -->
+<div id="leadModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#fff;border-radius:20px;padding:32px 28px;max-width:380px;width:100%;position:relative;box-shadow:0 16px 48px rgba(0,0,0,.2);">
+    <button onclick="closeLeadModal()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:1.3rem;cursor:pointer;color:#9aadcc;">✕</button>
+    <div style="font-size:1.8rem;margin-bottom:8px;">🎉</div>
+    <h2 style="font-size:1.15rem;font-weight:700;color:#1a2436;margin-bottom:6px;">Понравился результат?</h2>
+    <p style="font-size:.87rem;color:#5b6fa0;margin-bottom:20px;">Оставьте контакт — мы пришлём персональное предложение и рассчитаем стоимость материалов.</p>
+    <form onsubmit="submitLead(event)" style="display:flex;flex-direction:column;gap:12px;">
+      <input id="leadName" type="text" placeholder="Ваше имя" required
+        style="padding:11px 14px;border:1.5px solid #dde4f0;border-radius:12px;font-size:.9rem;outline:none;">
+      <div style="display:flex;gap:8px;">
+        <select id="leadType" style="padding:11px 10px;border:1.5px solid #dde4f0;border-radius:12px;font-size:.85rem;background:#fff;cursor:pointer;outline:none;">
+          <option value="phone">📱 Телефон</option>
+          <option value="email">📧 Email</option>
+        </select>
+        <input id="leadContact" type="text" placeholder="+7 (___) ___-__-__" required
+          style="flex:1;padding:11px 14px;border:1.5px solid #dde4f0;border-radius:12px;font-size:.9rem;outline:none;">
+      </div>
+      <button type="submit"
+        style="padding:13px;border:none;border-radius:14px;background:linear-gradient(135deg,#c0392b,#e74c3c);color:#fff;font-size:.95rem;font-weight:700;cursor:pointer;">
+        Отправить →
+      </button>
+      <button type="button" onclick="closeLeadModal()"
+        style="background:none;border:none;color:#9aadcc;font-size:.82rem;cursor:pointer;padding:4px;">
+        Не сейчас
+      </button>
+    </form>
+  </div>
+</div>
 </body>
 </html>

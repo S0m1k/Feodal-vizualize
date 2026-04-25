@@ -6,7 +6,9 @@ from urllib.parse import quote
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, Form, File, Query, Request
 from database import get_db
 from middleware import get_current_manager, get_current_user, get_current_admin
-from utils.generation import generate_image, build_prompt
+import asyncio
+from utils.generation import generate_image, build_prompt, build_belt_prompt, build_plinth_prompt
+from utils.notifications import create_notification
 from rauth import get_password_hash
 from pydantic import BaseModel
 from typing import List
@@ -455,3 +457,190 @@ async def delete_texture(material_id: int, current_admin = Depends(get_current_a
     finally:
         await db.close()
     return {"message": "Deleted"}
+
+
+# ============================================================
+#  LEADS
+# ============================================================
+@router.get("/leads")
+async def get_leads(
+    page: int = Query(1, ge=1),
+    per_page: int = Query(20, ge=1, le=100),
+    current_admin = Depends(get_current_admin),
+):
+    db = await get_db()
+    try:
+        cursor = await db.execute(
+            "SELECT * FROM leads ORDER BY created_at DESC LIMIT ? OFFSET ?",
+            (per_page, (page - 1) * per_page),
+        )
+        rows = await cursor.fetchall()
+        total_cur = await db.execute("SELECT COUNT(*) FROM leads")
+        total = (await total_cur.fetchone())[0]
+    finally:
+        await db.close()
+    return {
+        "items": [dict(r) for r in rows],
+        "total": total,
+        "page": page,
+        "pages": (total + per_page - 1) // per_page,
+    }
+
+
+# ============================================================
+#  NOTIFICATIONS
+# ============================================================
+@router.get("/notifications")
+async def get_notifications(current_admin = Depends(get_current_admin)):
+    db = await get_db()
+    try:
+        cur = await db.execute(
+            "SELECT * FROM notifications ORDER BY created_at DESC LIMIT 50"
+        )
+        rows = await cur.fetchall()
+        unread_cur = await db.execute(
+            "SELECT COUNT(*) FROM notifications WHERE is_read = 0"
+        )
+        unread = (await unread_cur.fetchone())[0]
+    finally:
+        await db.close()
+    return {"unread_count": unread, "notifications": [dict(r) for r in rows]}
+
+
+@router.post("/notifications/{notif_id}/read")
+async def mark_notification_read(notif_id: int, current_admin = Depends(get_current_admin)):
+    db = await get_db()
+    try:
+        await db.execute(
+            "UPDATE notifications SET is_read = 1 WHERE id = ?", (notif_id,)
+        )
+        await db.commit()
+    finally:
+        await db.close()
+    return {"ok": True}
+
+
+@router.post("/notifications/read-all")
+async def mark_all_notifications_read(current_admin = Depends(get_current_admin)):
+    db = await get_db()
+    try:
+        await db.execute("UPDATE notifications SET is_read = 1")
+        await db.commit()
+    finally:
+        await db.close()
+    return {"ok": True}
+
+
+# ============================================================
+#  ZONE GENERATION (Пояса / Цоколь)
+# ============================================================
+def _resolve_base_url() -> str:
+    return os.getenv("PUBLIC_BASE_URL", "https://rstone.tech").rstrip("/")
+
+
+async def _run_zone_generation(
+    request_id: str,
+    photo_url: str,
+    texture_url: str,
+    prompt: str,
+    user_id: str,
+    service_type: str,
+    texture_name: str,
+    temp_path: str,
+    material_type: str,
+    supplier: str,
+):
+    """Фоновая задача генерации для Поясов / Цоколя."""
+    try:
+        result = await generate_image(photo_url, texture_url, prompt)
+        output_url = result["output_url"]
+
+        output_dir = os.path.join(GENERATED_DIR, user_id)
+        os.makedirs(output_dir, exist_ok=True)
+        out_filename = f"{uuid.uuid4()}.jpg"
+        out_path = os.path.join(output_dir, out_filename)
+
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            resp = await client.get(output_url)
+            with open(out_path, "wb") as f:
+                f.write(resp.content)
+
+        result_url = f"/generated/internal/{user_id}/{out_filename}"
+        redis_client.setex(f"gen_status:{request_id}", 3600, f"success:{result_url}")
+
+        db = await get_db()
+        try:
+            await db.execute(
+                "INSERT INTO generations (user_type, user_id, input_image_path, output_image_path, "
+                "prompt, texture_name, category, material_type, supplier) VALUES (?,?,?,?,?,?,?,?,?)",
+                ("internal", user_id, temp_path, out_path, prompt,
+                 texture_name, service_type, material_type, supplier),
+            )
+            await db.commit()
+        finally:
+            await db.close()
+
+    except Exception as e:
+        logger.error("Zone generation failed request_id=%s: %s", request_id, e)
+        redis_client.setex(f"gen_status:{request_id}", 3600, "error")
+
+
+@router.post("/belt/generate")
+async def belt_generate(
+    annotated_photo: UploadFile = File(...),
+    texture: str = Form(...),
+    material_type: str = Form(...),
+    supplier: str = Form(...),
+    category: str = Form("facade"),
+    current_user = Depends(get_current_manager),
+):
+    request_id = str(uuid.uuid4())
+    user_id    = str(current_user.get("id"))
+
+    filename  = f"{uuid.uuid4()}.jpg"
+    temp_path = os.path.join(TEMP_DIR, filename)
+    content   = await annotated_photo.read()
+    with open(temp_path, "wb") as f:
+        f.write(content)
+
+    base_url    = _resolve_base_url()
+    photo_url   = f"{base_url}/temp/internal/{filename}"
+    texture_url = f"{base_url}/textures/{material_type}/{supplier}/{quote(texture)}"
+    prompt      = build_belt_prompt(category)
+
+    redis_client.setex(f"gen_status:{request_id}", 3600, "processing")
+    asyncio.create_task(_run_zone_generation(
+        request_id, photo_url, texture_url, prompt,
+        user_id, "belt", texture, temp_path, material_type, supplier,
+    ))
+    return {"request_id": request_id}
+
+
+@router.post("/plinth/generate")
+async def plinth_generate(
+    annotated_photo: UploadFile = File(...),
+    texture: str = Form(...),
+    material_type: str = Form(...),
+    supplier: str = Form(...),
+    current_user = Depends(get_current_manager),
+):
+    request_id = str(uuid.uuid4())
+    user_id    = str(current_user.get("id"))
+
+    filename  = f"{uuid.uuid4()}.jpg"
+    temp_path = os.path.join(TEMP_DIR, filename)
+    content   = await annotated_photo.read()
+    with open(temp_path, "wb") as f:
+        f.write(content)
+
+    base_url    = _resolve_base_url()
+    photo_url   = f"{base_url}/temp/internal/{filename}"
+    texture_url = f"{base_url}/textures/{material_type}/{supplier}/{quote(texture)}"
+    prompt      = build_plinth_prompt()
+
+    redis_client.setex(f"gen_status:{request_id}", 3600, "processing")
+    asyncio.create_task(_run_zone_generation(
+        request_id, photo_url, texture_url, prompt,
+        user_id, "plinth", texture, temp_path, material_type, supplier,
+    ))
+    return {"request_id": request_id}

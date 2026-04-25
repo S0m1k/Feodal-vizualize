@@ -43,6 +43,100 @@
     }
     .logout-btn:hover { background: #ff3b3b; color: #fff; }
 
+    /* ===== BELL / NOTIFICATIONS ===== */
+    .bell-btn {
+      position: relative; background: none; border: none;
+      font-size: 1.25rem; cursor: pointer; padding: 7px 9px;
+      border-radius: 10px; transition: background .15s; color: #1e2a3b;
+    }
+    .bell-btn:hover { background: #f0f2f7; }
+    .notif-badge {
+      display: none; position: absolute; top: 2px; right: 2px;
+      min-width: 18px; height: 18px; padding: 0 4px;
+      background: #e53935; color: #fff; border-radius: 99px;
+      font-size: .68rem; font-weight: 700;
+      align-items: center; justify-content: center;
+    }
+    .notif-panel {
+      display: none; position: absolute; top: 58px; right: 16px;
+      width: 360px; max-height: 480px; overflow-y: auto;
+      background: #fff; border-radius: 16px; z-index: 500;
+      box-shadow: 0 8px 32px rgba(0,0,0,.15);
+    }
+    .notif-panel.open { display: block; }
+    .notif-head {
+      padding: 14px 18px; border-bottom: 1px solid #eaf0f8;
+      display: flex; align-items: center; justify-content: space-between;
+      font-weight: 700; font-size: .9rem;
+    }
+    .notif-read-all {
+      background: none; border: none; color: #5b6fa0; font-size: .78rem;
+      cursor: pointer; padding: 2px 8px; border-radius: 6px;
+    }
+    .notif-read-all:hover { background: #f0f4ff; color: #3b4fa0; }
+    .notif-item {
+      display: flex; gap: 12px; padding: 12px 18px;
+      border-bottom: 1px solid #f0f4fb; cursor: pointer; transition: background .1s;
+    }
+    .notif-item:hover { background: #f8faff; }
+    .notif-item.unread { background: #fff8f8; border-left: 3px solid #e53935; }
+    .notif-icon { font-size: 1.2rem; flex-shrink: 0; }
+    .notif-msg { font-size: .84rem; color: #1e2a3b; margin-bottom: 2px; }
+    .notif-time { font-size: .74rem; color: #9aadcc; }
+    .notif-empty { padding: 24px; text-align: center; color: #9aadcc; font-size: .85rem; }
+
+    /* ===== CANVAS DRAWING TOOL ===== */
+    .zone-layout {
+      display: grid; grid-template-columns: 360px 1fr; gap: 24px; align-items: start;
+    }
+    @media(max-width:860px) { .zone-layout { grid-template-columns: 1fr; } }
+    .zone-left { display: flex; flex-direction: column; gap: 18px; }
+    .canvas-wrap {
+      border: 2px dashed #c8d4e8; border-radius: 14px;
+      overflow: hidden; background: #f4f6fb; cursor: crosshair;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 160px;
+    }
+    .canvas-wrap canvas { display: block; max-width: 100%; touch-action: none; }
+    .brush-ctrl {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; background: #f4f6fb; border-radius: 12px;
+    }
+    .brush-ctrl label { font-size: .8rem; color: #5b6fa0; white-space: nowrap; }
+    .brush-ctrl input[type=range] { flex: 1; }
+    .brush-ctrl button {
+      padding: 5px 12px; border: none; border-radius: 8px;
+      background: #e8ecf8; color: #3b4fa0; font-size: .8rem; cursor: pointer;
+    }
+    .brush-ctrl button:hover { background: #d0d8f0; }
+    .zone-result {
+      background: #fff; border-radius: 20px; padding: 24px;
+      box-shadow: 0 2px 16px rgba(0,0,0,.06); min-height: 280px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .zone-result img { max-width: 100%; border-radius: 12px; cursor: zoom-in; }
+    .zone-hint { color: #9aadcc; font-size: .9rem; }
+    .zone-tex-grid {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 8px;
+      max-height: 220px; overflow-y: auto;
+    }
+    .zone-tex-card {
+      border-radius: 10px; overflow: hidden; border: 2px solid transparent;
+      cursor: pointer; transition: all .15s; aspect-ratio: 1;
+    }
+    .zone-tex-card img { width: 100%; height: 100%; object-fit: cover; }
+    .zone-tex-card.sel { border-color: #e53935; box-shadow: 0 0 0 3px rgba(229,57,53,.15); }
+    .zone-gen-btn {
+      width: 100%; padding: 14px; border: none; border-radius: 14px;
+      background: linear-gradient(135deg, #e53935, #c62828);
+      color: #fff; font-size: 1rem; font-weight: 700; cursor: pointer;
+      transition: opacity .15s;
+    }
+    .zone-gen-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ===== LEADS TABLE ===== */
+    .leads-count { font-size: .8rem; color: #9aadcc; margin-left: 8px; font-weight: 400; }
+
     /* ===== SIDEBAR ===== */
     .sidebar-overlay {
       display: none; position: fixed; inset: 0;
@@ -408,8 +502,20 @@
     <button class="burger-btn" id="burgerBtn" aria-label="Открыть меню">☰</button>
     <span class="header-title">Панель сотрудника</span>
   </div>
-  <button class="logout-btn" id="logoutBtn">Выйти</button>
+  <div style="display:flex;align-items:center;gap:10px;position:relative;">
+    <button class="bell-btn" id="bellBtn" title="Уведомления">
+      🔔<span class="notif-badge" id="notifBadge"></span>
+    </button>
+    <button class="logout-btn" id="logoutBtn">Выйти</button>
+  </div>
 </header>
+<div class="notif-panel" id="notifPanel">
+  <div class="notif-head">
+    <span>Уведомления</span>
+    <button class="notif-read-all" onclick="markAllNotifRead()">Прочитать все</button>
+  </div>
+  <div id="notifList"><div class="notif-empty">Загрузка…</div></div>
+</div>
 
 <!-- SIDEBAR -->
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -420,6 +526,8 @@
   </div>
   <ul class="sidebar-nav">
     <li><span class="nav-link active" data-page="visualizer"><span class="nav-icon">🎨</span> Визуализатор</span></li>
+    <li><span class="nav-link" data-page="belt"><span class="nav-icon">🏗</span> Пояса</span></li>
+    <li><span class="nav-link" data-page="plinth"><span class="nav-icon">🧱</span> Цоколь</span></li>
     <li><span class="nav-link" data-page="catalog"><span class="nav-icon">📚</span> Каталог</span></li>
     <li><span class="nav-link" data-page="history"><span class="nav-icon">📜</span> История</span></li>
     <li id="adminNavItem" style="display:none;"><span class="nav-link" data-page="admin"><span class="nav-icon">⚙️</span> Администрирование</span></li>
@@ -594,6 +702,101 @@
       <div id="allGenerationsTable"></div>
       <div class="pagination" id="adminPagination"></div>
     </div>
+
+    <div class="admin-section">
+      <h3>👤 Лиды <span class="leads-count" id="leadsCount"></span></h3>
+      <div id="leadsTable"><div style="padding:12px;color:#9aadcc;">Загрузка…</div></div>
+      <div class="pagination" id="leadsPagination"></div>
+    </div>
+  </section>
+
+  <!-- ====== BELT (Пояса) ====== -->
+  <section class="page" id="page-belt">
+    <h1 class="page-title">🏗 Пояса</h1>
+    <p style="color:#5b6fa0;margin-bottom:20px;font-size:.9rem;">
+      Загрузите фото, выберите текстуру, затем обведите красным зоны горизонтального декоративного пояса.
+    </p>
+    <div class="zone-layout">
+      <div class="zone-left">
+        <div class="card">
+          <div class="step-title" style="margin-bottom:10px;">1. Фото здания</div>
+          <div class="dropzone" id="beltDrop" style="min-height:100px;">
+            <span>📷 Перетащите или нажмите</span>
+            <input type="file" id="beltFile" accept="image/*" style="display:none">
+          </div>
+        </div>
+        <div class="card">
+          <div class="step-title" style="margin-bottom:10px;">2. Текстура пояса</div>
+          <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;" id="beltMatBtns">
+            <button class="mat-btn active" data-mat="standard" onclick="setBeltMat(this,'standard')">Кирпич</button>
+            <button class="mat-btn" data-mat="rigel" onclick="setBeltMat(this,'rigel')">Ригель</button>
+          </div>
+          <select id="beltSupplierSel" style="width:100%;margin-bottom:8px;padding:6px 10px;border-radius:8px;border:1.5px solid #dde4f0;" onchange="loadBeltTextures()">
+            <option value="">— Поставщик —</option>
+          </select>
+          <div class="zone-tex-grid" id="beltTexGrid"><div style="color:#9aadcc;font-size:.82rem;padding:8px;">Выберите тип и поставщика</div></div>
+        </div>
+        <div class="card" id="beltCanvasCard" style="display:none;">
+          <div class="step-title" style="margin-bottom:8px;">3. Обозначьте зону <span style="color:#e53935">красным</span></div>
+          <div class="brush-ctrl">
+            <label>Кисть</label>
+            <input type="range" id="beltBrush" min="4" max="50" value="14">
+            <button onclick="beltDrawer&&beltDrawer.reset()">Очистить</button>
+          </div>
+          <div class="canvas-wrap" id="beltCanvasWrap"><canvas id="beltCanvas"></canvas></div>
+        </div>
+        <div class="card" style="display:flex;align-items:center;gap:10px;">
+          <label style="font-size:.82rem;color:#5b6fa0;">Категория:</label>
+          <select id="beltCategory" style="flex:1;padding:6px 10px;border-radius:8px;border:1.5px solid #dde4f0;">
+            <option value="facade">Фасад</option>
+            <option value="interior">Интерьер</option>
+          </select>
+        </div>
+        <button class="zone-gen-btn" id="beltGenBtn" onclick="generateBelt()">Сгенерировать →</button>
+      </div>
+      <div class="zone-result" id="beltResult"><span class="zone-hint">Результат появится здесь</span></div>
+    </div>
+  </section>
+
+  <!-- ====== PLINTH (Цоколь) ====== -->
+  <section class="page" id="page-plinth">
+    <h1 class="page-title">🧱 Цоколь</h1>
+    <p style="color:#5b6fa0;margin-bottom:20px;font-size:.9rem;">
+      Загрузите фото, выберите текстуру цоколя, затем обведите красным зону внизу фасада.
+    </p>
+    <div class="zone-layout">
+      <div class="zone-left">
+        <div class="card">
+          <div class="step-title" style="margin-bottom:10px;">1. Фото здания</div>
+          <div class="dropzone" id="plinthDrop" style="min-height:100px;">
+            <span>📷 Перетащите или нажмите</span>
+            <input type="file" id="plinthFile" accept="image/*" style="display:none">
+          </div>
+        </div>
+        <div class="card">
+          <div class="step-title" style="margin-bottom:10px;">2. Текстура цоколя</div>
+          <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;" id="plinthMatBtns">
+            <button class="mat-btn active" data-mat="decorative_stone" onclick="setPlinthMat(this,'decorative_stone')">Камень</button>
+            <button class="mat-btn" data-mat="standard" onclick="setPlinthMat(this,'standard')">Кирпич</button>
+          </div>
+          <select id="plinthSupplierSel" style="width:100%;margin-bottom:8px;padding:6px 10px;border-radius:8px;border:1.5px solid #dde4f0;" onchange="loadPlinthTextures()">
+            <option value="">— Поставщик —</option>
+          </select>
+          <div class="zone-tex-grid" id="plinthTexGrid"><div style="color:#9aadcc;font-size:.82rem;padding:8px;">Выберите тип и поставщика</div></div>
+        </div>
+        <div class="card" id="plinthCanvasCard" style="display:none;">
+          <div class="step-title" style="margin-bottom:8px;">3. Обозначьте зону цоколя <span style="color:#e53935">красным</span></div>
+          <div class="brush-ctrl">
+            <label>Кисть</label>
+            <input type="range" id="plinthBrush" min="4" max="50" value="14">
+            <button onclick="plinthDrawer&&plinthDrawer.reset()">Очистить</button>
+          </div>
+          <div class="canvas-wrap" id="plinthCanvasWrap"><canvas id="plinthCanvas"></canvas></div>
+        </div>
+        <button class="zone-gen-btn" id="plinthGenBtn" onclick="generatePlinth()">Сгенерировать →</button>
+      </div>
+      <div class="zone-result" id="plinthResult"><span class="zone-hint">Результат появится здесь</span></div>
+    </div>
   </section>
 
 </main>
@@ -676,8 +879,10 @@ function showPage(id) {
     if (id === 'history') loadHistory(1);
     if (id === 'catalog') initCatalogPage();
     if (id === 'admin' && currentUser?.role === 'admin') {
-        loadUsers(); loadGroutColorsAdmin(); loadAllTextures(); loadAllGenerations(1);
+        loadUsers(); loadGroutColorsAdmin(); loadAllTextures(); loadAllGenerations(1); loadLeads(1);
     }
+    if (id === 'belt')   initBeltPage();
+    if (id === 'plinth') initPlinthPage();
 }
 
 // ============================================================
@@ -1269,8 +1474,8 @@ async function deleteSelectedGenerations() {
 //  PAGINATION (shared)
 // ============================================================
 function renderPagination(current, total, type) {
-    const id = type === 'history' ? 'historyPagination' : 'adminPagination';
-    const c  = document.getElementById(id);
+    const idMap = { history: 'historyPagination', admin: 'adminPagination', leads: 'leadsPagination' };
+    const c = document.getElementById(idMap[type] || 'adminPagination');
     if (!c || total <= 1) { if (c) c.innerHTML = ''; return; }
     let html = '';
     for (let i = 1; i <= total; i++)
@@ -1279,7 +1484,9 @@ function renderPagination(current, total, type) {
     c.querySelectorAll('.page-btn').forEach(btn =>
         btn.addEventListener('click', () => {
             const p = +btn.dataset.p;
-            if (type === 'history') loadHistory(p); else loadAllGenerations(p);
+            if (type === 'history') loadHistory(p);
+            else if (type === 'leads') loadLeads(p);
+            else loadAllGenerations(p);
         }));
 }
 
@@ -1294,7 +1501,291 @@ document.getElementById('applyFilterBtn')?.addEventListener('click', () => loadA
 // ============================================================
 //  INIT
 // ============================================================
-fetchCurrentUser().then(() => loadGroutColors());
+fetchCurrentUser().then(() => { loadGroutColors(); loadNotifications(); });
+
+// ============================================================
+//  NOTIFICATIONS
+// ============================================================
+let _notifOpen = false;
+document.getElementById('bellBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    _notifOpen = !_notifOpen;
+    document.getElementById('notifPanel').classList.toggle('open', _notifOpen);
+    if (_notifOpen) loadNotifications();
+});
+document.addEventListener('click', (e) => {
+    if (_notifOpen && !document.getElementById('notifPanel').contains(e.target)) {
+        _notifOpen = false;
+        document.getElementById('notifPanel').classList.remove('open');
+    }
+});
+
+async function loadNotifications() {
+    if (currentUser?.role !== 'admin') return;
+    try {
+        const r = await fetch(`${API_BASE}/api/internal/notifications`, { credentials: 'include', headers: H() });
+        const d = await r.json();
+        const badge = document.getElementById('notifBadge');
+        badge.textContent = d.unread_count;
+        badge.style.display = d.unread_count > 0 ? 'flex' : 'none';
+        const list = document.getElementById('notifList');
+        if (!d.notifications.length) {
+            list.innerHTML = '<div class="notif-empty">Нет уведомлений</div>';
+            return;
+        }
+        list.innerHTML = d.notifications.map(n => `
+            <div class="notif-item${n.is_read ? '' : ' unread'}" data-id="${n.id}" onclick="markNotifRead(${n.id},this)">
+              <span class="notif-icon">${n.type === 'lead' ? '👤' : '⚠️'}</span>
+              <div>
+                <div class="notif-msg">${n.message}</div>
+                <div class="notif-time">${new Date(n.created_at).toLocaleString('ru')}</div>
+              </div>
+            </div>`).join('');
+    } catch(e) { console.error(e); }
+}
+async function markNotifRead(id, el) {
+    await fetch(`${API_BASE}/api/internal/notifications/${id}/read`, { method:'POST', credentials:'include', headers:H() });
+    el.classList.remove('unread');
+    const badge = document.getElementById('notifBadge');
+    const cur = parseInt(badge.textContent || '0') - 1;
+    badge.textContent = Math.max(0, cur);
+    badge.style.display = cur > 1 ? 'flex' : 'none';
+}
+async function markAllNotifRead() {
+    await fetch(`${API_BASE}/api/internal/notifications/read-all`, { method:'POST', credentials:'include', headers:H() });
+    document.getElementById('notifBadge').style.display = 'none';
+    document.querySelectorAll('.notif-item.unread').forEach(el => el.classList.remove('unread'));
+}
+setInterval(() => { if (currentUser) loadNotifications(); }, 60000);
+
+// ============================================================
+//  LEADS
+// ============================================================
+async function loadLeads(page = 1) {
+    if (currentUser?.role !== 'admin') return;
+    try {
+        const r = await fetch(`${API_BASE}/api/internal/leads?page=${page}&per_page=20`, { credentials:'include', headers:H() });
+        const d = await r.json();
+        document.getElementById('leadsCount').textContent = `(${d.total})`;
+        const c = document.getElementById('leadsTable');
+        if (!d.items.length) { c.innerHTML = '<div style="padding:16px;color:#9aadcc;">Лидов пока нет</div>'; return; }
+        c.innerHTML = `<table>
+            <thead><tr><th>ID</th><th>Имя</th><th>Контакт</th><th>Тип</th><th>Дата</th></tr></thead>
+            <tbody>${d.items.map(l => `<tr>
+              <td>${l.id}</td>
+              <td>${l.name}</td>
+              <td>${l.contact}</td>
+              <td>${l.contact_type === 'email' ? '📧 Email' : '📱 Телефон'}</td>
+              <td>${new Date(l.created_at).toLocaleString('ru')}</td>
+            </tr>`).join('')}</tbody>
+        </table>`;
+        renderPagination(d.page, d.pages, 'leads');
+    } catch(e) { console.error(e); }
+}
+
+// ============================================================
+//  CANVAS DRAWING TOOL (общий для Поясов и Цоколя)
+// ============================================================
+function createDrawer(canvasId) {
+    const canvas = document.getElementById(canvasId);
+    const ctx    = canvas.getContext('2d');
+    let isDrawing = false, lastX = 0, lastY = 0, brushSize = 14, snapshot = null;
+
+    function loadImage(file) {
+        const img = new Image();
+        img.onload = () => {
+            canvas.width  = img.width;
+            canvas.height = img.height;
+            const maxW = (canvas.parentElement.clientWidth || 600) - 4;
+            const sc   = Math.min(1, maxW / img.width);
+            canvas.style.width  = Math.round(img.width  * sc) + 'px';
+            canvas.style.height = Math.round(img.height * sc) + 'px';
+            ctx.drawImage(img, 0, 0);
+            snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        };
+        img.src = URL.createObjectURL(file);
+    }
+    function pos(e) {
+        const r = canvas.getBoundingClientRect();
+        const sx = canvas.width / r.width, sy = canvas.height / r.height;
+        const src = e.touches ? e.touches[0] : e;
+        return { x: (src.clientX - r.left) * sx, y: (src.clientY - r.top) * sy };
+    }
+    function stroke(x, y) {
+        ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y);
+        ctx.strokeStyle = 'rgba(220,0,0,0.85)';
+        ctx.lineWidth = brushSize; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        ctx.stroke();
+        [lastX, lastY] = [x, y];
+    }
+    canvas.addEventListener('mousedown',  e => { isDrawing=true; const p=pos(e); [lastX,lastY]=[p.x,p.y]; });
+    canvas.addEventListener('mousemove',  e => { if(!isDrawing) return; const p=pos(e); stroke(p.x,p.y); });
+    canvas.addEventListener('mouseup',    () => { isDrawing=false; });
+    canvas.addEventListener('mouseleave', () => { isDrawing=false; });
+    canvas.addEventListener('touchstart', e => { e.preventDefault(); isDrawing=true; const p=pos(e); [lastX,lastY]=[p.x,p.y]; }, {passive:false});
+    canvas.addEventListener('touchmove',  e => { e.preventDefault(); if(!isDrawing) return; const p=pos(e); stroke(p.x,p.y); }, {passive:false});
+    canvas.addEventListener('touchend',   () => { isDrawing=false; });
+
+    return {
+        loadImage,
+        setBrush: s => { brushSize=s; },
+        reset:    () => { if(snapshot) ctx.putImageData(snapshot,0,0); },
+        isReady:  () => !!snapshot,
+        getBlob:  () => new Promise(res => canvas.toBlob(res,'image/jpeg',0.92)),
+    };
+}
+
+// ============================================================
+//  BELT (Пояса)
+// ============================================================
+let beltDrawer=null, beltTex=null, beltMat='standard';
+
+function initBeltPage() {
+    if (beltDrawer) return; // уже инициализирован
+    setupZoneDrop('beltDrop','beltFile', file => {
+        if (!beltDrawer) beltDrawer = createDrawer('beltCanvas');
+        beltDrawer.loadImage(file);
+        document.getElementById('beltCanvasCard').style.display='';
+    });
+    document.getElementById('beltBrush').addEventListener('input', e => beltDrawer?.setBrush(+e.target.value));
+    loadZoneSuppliers('belt', beltMat);
+}
+function setBeltMat(btn, mat) {
+    beltMat = mat;
+    document.querySelectorAll('#beltMatBtns .mat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    loadZoneSuppliers('belt', mat);
+}
+async function loadZoneSuppliers(prefix, mat) {
+    const sel = document.getElementById(`${prefix}SupplierSel`);
+    sel.innerHTML = '<option value="">— Поставщик —</option>';
+    const r = await fetch(`${API_BASE}/api/internal/suppliers?material_type=${mat}`, { credentials:'include', headers:H() });
+    const list = await r.json();
+    list.forEach(s => { const o=document.createElement('option'); o.value=s.code; o.textContent=s.name; sel.appendChild(o); });
+    document.getElementById(`${prefix}TexGrid`).innerHTML = '<div style="color:#9aadcc;font-size:.82rem;padding:8px;">Выберите поставщика</div>';
+}
+async function loadBeltTextures() {
+    const sup = document.getElementById('beltSupplierSel').value;
+    if (!sup) return;
+    const r = await fetch(`${API_BASE}/api/internal/textures?material_type=${beltMat}&supplier=${sup}`, { credentials:'include', headers:H() });
+    const list = await r.json();
+    renderZoneTextures('belt', list, beltMat, sup);
+}
+function renderZoneTextures(prefix, list, mat, sup) {
+    const grid = document.getElementById(`${prefix}TexGrid`);
+    if (!list.length) { grid.innerHTML='<div style="color:#9aadcc;font-size:.82rem;padding:8px;">Нет текстур</div>'; return; }
+    grid.innerHTML = list.map(t => {
+        const url = t.url.startsWith('http') ? t.url : `${API_BASE}${t.url}`;
+        return `<div class="zone-tex-card" onclick="selectZoneTex('${prefix}','${t.name}','${url}','${mat}','${sup}',this)">
+            <img src="${url}" alt="${t.name}" title="${t.name}">
+        </div>`;
+    }).join('');
+}
+function selectZoneTex(prefix, name, url, mat, sup, el) {
+    document.querySelectorAll(`#${prefix}TexGrid .zone-tex-card`).forEach(c=>c.classList.remove('sel'));
+    el.classList.add('sel');
+    if (prefix === 'belt')   { beltTex   = {name,url,material_type:mat,supplier:sup}; }
+    if (prefix === 'plinth') { plinthTex = {name,url,material_type:mat,supplier:sup}; }
+}
+async function generateBelt() {
+    if (!beltDrawer?.isReady()) return alert('Загрузите фото здания');
+    if (!beltTex) return alert('Выберите текстуру пояса');
+    const blob = await beltDrawer.getBlob();
+    const fd = new FormData();
+    fd.append('annotated_photo', blob, 'belt.jpg');
+    fd.append('texture', beltTex.name);
+    fd.append('material_type', beltTex.material_type);
+    fd.append('supplier', beltTex.supplier);
+    fd.append('category', document.getElementById('beltCategory').value);
+    document.getElementById('beltResult').innerHTML = '<div style="padding:40px;color:#9aadcc;text-align:center;">⏳ Генерация… (до 2 мин)</div>';
+    try {
+        const r = await fetch(`${API_BASE}/api/internal/belt/generate`, { method:'POST', credentials:'include', headers:H(), body:fd });
+        const d = await r.json();
+        if (d.request_id) pollZoneResult(d.request_id, 'beltResult');
+        else document.getElementById('beltResult').innerHTML = `<div style="padding:20px;color:#e53935;">Ошибка: ${d.detail||'неизвестная'}</div>`;
+    } catch(e) { document.getElementById('beltResult').innerHTML = `<div style="padding:20px;color:#e53935;">${e}</div>`; }
+}
+
+// ============================================================
+//  PLINTH (Цоколь)
+// ============================================================
+let plinthDrawer=null, plinthTex=null, plinthMat='decorative_stone';
+
+function initPlinthPage() {
+    if (plinthDrawer) return;
+    setupZoneDrop('plinthDrop','plinthFile', file => {
+        if (!plinthDrawer) plinthDrawer = createDrawer('plinthCanvas');
+        plinthDrawer.loadImage(file);
+        document.getElementById('plinthCanvasCard').style.display='';
+    });
+    document.getElementById('plinthBrush').addEventListener('input', e => plinthDrawer?.setBrush(+e.target.value));
+    loadZoneSuppliers('plinth', plinthMat);
+}
+function setPlinthMat(btn, mat) {
+    plinthMat = mat;
+    document.querySelectorAll('#plinthMatBtns .mat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    loadZoneSuppliers('plinth', mat);
+}
+async function loadPlinthTextures() {
+    const sup = document.getElementById('plinthSupplierSel').value;
+    if (!sup) return;
+    const r = await fetch(`${API_BASE}/api/internal/textures?material_type=${plinthMat}&supplier=${sup}`, { credentials:'include', headers:H() });
+    const list = await r.json();
+    renderZoneTextures('plinth', list, plinthMat, sup);
+}
+async function generatePlinth() {
+    if (!plinthDrawer?.isReady()) return alert('Загрузите фото здания');
+    if (!plinthTex) return alert('Выберите текстуру цоколя');
+    const blob = await plinthDrawer.getBlob();
+    const fd = new FormData();
+    fd.append('annotated_photo', blob, 'plinth.jpg');
+    fd.append('texture', plinthTex.name);
+    fd.append('material_type', plinthTex.material_type);
+    fd.append('supplier', plinthTex.supplier);
+    document.getElementById('plinthResult').innerHTML = '<div style="padding:40px;color:#9aadcc;text-align:center;">⏳ Генерация… (до 2 мин)</div>';
+    try {
+        const r = await fetch(`${API_BASE}/api/internal/plinth/generate`, { method:'POST', credentials:'include', headers:H(), body:fd });
+        const d = await r.json();
+        if (d.request_id) pollZoneResult(d.request_id, 'plinthResult');
+        else document.getElementById('plinthResult').innerHTML = `<div style="padding:20px;color:#e53935;">Ошибка: ${d.detail||'неизвестная'}</div>`;
+    } catch(e) { document.getElementById('plinthResult').innerHTML = `<div style="padding:20px;color:#e53935;">${e}</div>`; }
+}
+
+function pollZoneResult(requestId, divId) {
+    let attempts = 0;
+    const timer = setInterval(async () => {
+        if (++attempts > 90) {
+            clearInterval(timer);
+            document.getElementById(divId).innerHTML = '<div style="padding:20px;color:#e53935;">Таймаут генерации</div>';
+            return;
+        }
+        try {
+            const r = await fetch(`${API_BASE}/status/${requestId}`);
+            if (!r.ok) return;
+            const d = await r.json();
+            if (d.status === 'success') {
+                clearInterval(timer);
+                const url = d.result_url.startsWith('http') ? d.result_url : `${API_BASE}${d.result_url}`;
+                document.getElementById(divId).innerHTML = `<img src="${url}" style="max-width:100%;border-radius:12px;cursor:zoom-in;" onclick="openLightbox('${url}')">`;
+            } else if (d.status === 'error') {
+                clearInterval(timer);
+                document.getElementById(divId).innerHTML = '<div style="padding:20px;color:#e53935;">Ошибка генерации</div>';
+            }
+        } catch {}
+    }, 2000);
+}
+
+// Общая вспомогательная функция dropzone для зон
+function setupZoneDrop(dropId, fileId, onFile) {
+    const drop = document.getElementById(dropId);
+    const inp  = document.getElementById(fileId);
+    drop.addEventListener('click', () => inp.click());
+    inp.addEventListener('change', e => { if(e.target.files[0]) onFile(e.target.files[0]); });
+    drop.addEventListener('dragover', e => { e.preventDefault(); drop.style.borderColor='#e53935'; });
+    drop.addEventListener('dragleave', () => { drop.style.borderColor=''; });
+    drop.addEventListener('drop', e => { e.preventDefault(); drop.style.borderColor=''; if(e.dataTransfer.files[0]) onFile(e.dataTransfer.files[0]); });
+}
 </script>
 </body>
 </html>

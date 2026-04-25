@@ -65,6 +65,31 @@ def build_prompt(category: str, material_type: str, grout_color_hex: str = None)
     return prompt
 
 
+def build_belt_prompt(category: str) -> str:
+    """Промт для сервиса 'Пояса': красная зона → декоративный горизонтальный пояс."""
+    target = "house facade" if category == "facade" else "interior wall"
+    return (
+        f"Preserve all original {target} geometry, windows, doors, and environment EXACTLY. "
+        f"The red-highlighted zones on the image indicate decorative belt courses. "
+        f"In these red zones ONLY, apply the provided brick texture as a horizontal decorative "
+        f"belt course with tight coursing pattern. "
+        f"All areas outside the red zones must remain completely unchanged. "
+        f"Hyper-realistic architectural rendering, 8k, photorealistic sunlight."
+    )
+
+
+def build_plinth_prompt() -> str:
+    """Промт для сервиса 'Цоколь': красная зона внизу → облицовка цоколя."""
+    return (
+        f"Preserve all original facade geometry, windows, doors, and environment EXACTLY. "
+        f"The red-highlighted zone at the bottom of the image indicates the plinth area. "
+        f"In this red zone ONLY, apply the provided stone or brick texture as plinth cladding. "
+        f"The plinth cladding must blend naturally with the wall material above. "
+        f"All areas above the red zone must remain completely unchanged. "
+        f"Hyper-realistic architectural rendering, 8k, photorealistic sunlight."
+    )
+
+
 async def generate_image(image_url: str, texture_url: str, prompt: str) -> dict:
     """
     Отправляет запрос к нейросети и возвращает {'output_url': url}.

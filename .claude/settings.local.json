@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh pr create --title 'fix: replace blocking requests with httpx async' --body ':*)",
+      "Bash(gh pr create --title 'Rstone визуализатор: полный рефакторинг и новые фичи' --body ' *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
+    ]
+  }
+}

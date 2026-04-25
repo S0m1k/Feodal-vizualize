@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 from redis import Redis
 from database import get_db
 from utils.generation import generate_image, build_prompt
+from utils.notifications import send_email_sync, create_notification
 import httpx
 import logging
 
@@ -68,6 +69,39 @@ async def get_textures(material_type: str, supplier: str):
     finally:
         await db.close()
     return [{"name": row["name"], "url": f"/textures/{material_type}/{supplier}/{row['filename']}"} for row in rows]
+
+@router.post("/leads")
+async def submit_lead(
+    name: str = Form(...),
+    contact: str = Form(...),
+    contact_type: str = Form(...),
+):
+    if contact_type not in ("email", "phone"):
+        raise HTTPException(status_code=422, detail="contact_type must be 'email' or 'phone'")
+    db = await get_db()
+    try:
+        await db.execute(
+            "INSERT INTO leads (name, contact, contact_type) VALUES (?, ?, ?)",
+            (name.strip(), contact.strip(), contact_type),
+        )
+        await db.commit()
+        msg = f"Новый лид: {name} — {contact} ({contact_type})"
+        await create_notification(db, "lead", msg)
+    finally:
+        await db.close()
+
+    import asyncio
+    body = (
+        f"Новый лид из клиентского визуализатора!\n\n"
+        f"Имя:    {name}\n"
+        f"{'Email' if contact_type == 'email' else 'Телефон'}:  {contact}\n\n"
+        f"— Rstone автомониторинг"
+    )
+    loop = asyncio.get_event_loop()
+    loop.run_in_executor(None, send_email_sync, f"👤 Новый лид: {name}", body)
+
+    return {"ok": True}
+
 
 @router.get("/grout-colors")
 async def get_grout_colors():
