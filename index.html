@@ -897,6 +897,24 @@ init();
 // ================================================================
 //  LEAD CAPTURE MODAL
 // ================================================================
+function updateLeadContact() {
+  const type = document.getElementById('leadType').value;
+  const inp  = document.getElementById('leadContact');
+  inp.value  = '';
+  if (type === 'phone') {
+    inp.type        = 'tel';
+    inp.inputMode   = 'tel';
+    inp.autocomplete = 'tel';
+    inp.placeholder = '+7 (___) ___-__-__';
+  } else {
+    inp.type        = 'email';
+    inp.inputMode   = 'email';
+    inp.autocomplete = 'email';
+    inp.placeholder = 'you@example.com';
+  }
+  inp.focus();
+}
+
 function showLeadModal() {
   document.getElementById('leadModal').style.display = 'flex';
 }
@@ -931,11 +949,11 @@ async function submitLead(e) {
       <input id="leadName" type="text" placeholder="Ваше имя" required
         style="padding:11px 14px;border:1.5px solid #dde4f0;border-radius:12px;font-size:.9rem;outline:none;">
       <div style="display:flex;gap:8px;">
-        <select id="leadType" style="padding:11px 10px;border:1.5px solid #dde4f0;border-radius:12px;font-size:.85rem;background:#fff;cursor:pointer;outline:none;">
+        <select id="leadType" onchange="updateLeadContact()" style="padding:11px 10px;border:1.5px solid #dde4f0;border-radius:12px;font-size:.85rem;background:#fff;cursor:pointer;outline:none;">
           <option value="phone">📱 Телефон</option>
           <option value="email">📧 Email</option>
         </select>
-        <input id="leadContact" type="text" placeholder="+7 (___) ___-__-__" required
+        <input id="leadContact" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 (___) ___-__-__" required
           style="flex:1;padding:11px 14px;border:1.5px solid #dde4f0;border-radius:12px;font-size:.9rem;outline:none;">
       </div>
       <button type="submit"

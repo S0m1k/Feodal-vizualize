@@ -160,6 +160,37 @@
     }
     .zone-gen-btn:disabled { opacity: .5; cursor: not-allowed; }
 
+    /* ===== PHOTO UPLOADER (belt / plinth) ===== */
+    .photo-uploader { padding: 2px 0; }
+    .photo-uploader.drag-over .photo-uploader-empty { outline: 2px dashed #e53935; outline-offset: 4px; border-radius: 12px; }
+    .photo-uploader-empty { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+    .photo-add-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 22px; border-radius: 12px;
+      background: #f0f4ff; border: 1.5px solid #c0ccee;
+      color: #3b4fa0; font-size: .9rem; font-weight: 600;
+      cursor: pointer; transition: all .15s;
+    }
+    .photo-add-btn:hover { background: #e0e8ff; border-color: #99aadd; color: #2a3a90; }
+    .photo-uploader-hint { font-size: .75rem; color: #9aadcc; }
+    .photo-uploader-filled { display: flex; align-items: center; gap: 12px; }
+    .photo-uploader-thumb {
+      width: 62px; height: 62px; border-radius: 10px; object-fit: cover;
+      box-shadow: 0 2px 10px rgba(0,0,0,.12); flex-shrink: 0;
+    }
+    .photo-uploader-info { flex: 1; min-width: 0; }
+    .photo-uploader-name {
+      font-size: .82rem; font-weight: 600; color: #1e2a3b;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      max-width: 240px; margin-bottom: 5px;
+    }
+    .photo-change-btn {
+      background: none; border: none;
+      color: #e53935; font-size: .78rem; font-weight: 600;
+      cursor: pointer; padding: 0;
+    }
+    .photo-change-btn:hover { text-decoration: underline; }
+
     /* ===== ZONE RESULT THUMBNAIL ===== */
     .zone-result-panel { display: none; }
     .zone-result-panel.visible { display: block; }
@@ -766,10 +797,20 @@
 
       <!-- Step 1: Photo -->
       <div class="card">
-        <div class="step-title" style="margin-bottom:10px;">1. Фото здания</div>
-        <div class="dropzone" id="beltDrop" style="min-height:110px;">
-          <span>📷 Перетащите или нажмите</span>
+        <div class="step-title" style="margin-bottom:12px;">1. Фото здания</div>
+        <div class="photo-uploader" id="beltDrop">
           <input type="file" id="beltFile" accept="image/*" style="display:none">
+          <div class="photo-uploader-empty">
+            <button type="button" class="photo-add-btn" onclick="document.getElementById('beltFile').click()">📷 Добавить фото</button>
+            <span class="photo-uploader-hint">или перетащите файл · JPG, PNG</span>
+          </div>
+          <div class="photo-uploader-filled" style="display:none;">
+            <img class="photo-uploader-thumb" src="" alt="">
+            <div class="photo-uploader-info">
+              <div class="photo-uploader-name"></div>
+              <button type="button" class="photo-change-btn" onclick="document.getElementById('beltFile').click()">Изменить фото</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -809,10 +850,20 @@
 
       <!-- Step 1: Photo -->
       <div class="card">
-        <div class="step-title" style="margin-bottom:10px;">1. Фото здания</div>
-        <div class="dropzone" id="plinthDrop" style="min-height:110px;">
-          <span>📷 Перетащите или нажмите</span>
+        <div class="step-title" style="margin-bottom:12px;">1. Фото здания</div>
+        <div class="photo-uploader" id="plinthDrop">
           <input type="file" id="plinthFile" accept="image/*" style="display:none">
+          <div class="photo-uploader-empty">
+            <button type="button" class="photo-add-btn" onclick="document.getElementById('plinthFile').click()">📷 Добавить фото</button>
+            <span class="photo-uploader-hint">или перетащите файл · JPG, PNG</span>
+          </div>
+          <div class="photo-uploader-filled" style="display:none;">
+            <img class="photo-uploader-thumb" src="" alt="">
+            <div class="photo-uploader-info">
+              <div class="photo-uploader-name"></div>
+              <button type="button" class="photo-change-btn" onclick="document.getElementById('plinthFile').click()">Изменить фото</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1849,15 +1900,37 @@ function pollZoneResult(requestId, divId) {
     }, 2000);
 }
 
-// Общая вспомогательная функция dropzone для зон
+// Общая вспомогательная функция photo-uploader для зон
 function setupZoneDrop(dropId, fileId, onFile) {
-    const drop = document.getElementById(dropId);
-    const inp  = document.getElementById(fileId);
-    drop.addEventListener('click', () => inp.click());
-    inp.addEventListener('change', e => { if(e.target.files[0]) onFile(e.target.files[0]); });
-    drop.addEventListener('dragover', e => { e.preventDefault(); drop.style.borderColor='#e53935'; });
-    drop.addEventListener('dragleave', () => { drop.style.borderColor=''; });
-    drop.addEventListener('drop', e => { e.preventDefault(); drop.style.borderColor=''; if(e.dataTransfer.files[0]) onFile(e.dataTransfer.files[0]); });
+    const drop  = document.getElementById(dropId);
+    const inp   = document.getElementById(fileId);
+    const empty  = drop.querySelector('.photo-uploader-empty');
+    const filled = drop.querySelector('.photo-uploader-filled');
+    const thumb  = drop.querySelector('.photo-uploader-thumb');
+    const nameEl = drop.querySelector('.photo-uploader-name');
+
+    function load(file) {
+        if (empty && filled) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                thumb.src = e.target.result;
+                nameEl.textContent = file.name;
+                empty.style.display  = 'none';
+                filled.style.display = 'flex';
+            };
+            reader.readAsDataURL(file);
+        }
+        onFile(file);
+    }
+
+    inp.addEventListener('change', e => { if (e.target.files[0]) load(e.target.files[0]); });
+    drop.addEventListener('dragover',  e => { e.preventDefault(); drop.classList.add('drag-over'); });
+    drop.addEventListener('dragleave', () => drop.classList.remove('drag-over'));
+    drop.addEventListener('drop', e => {
+        e.preventDefault();
+        drop.classList.remove('drag-over');
+        if (e.dataTransfer.files[0]) load(e.dataTransfer.files[0]);
+    });
 }
 </script>
 </body>
