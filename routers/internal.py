@@ -435,8 +435,9 @@ async def add_texture(
             (name, filename, material_type, supplier)
         )
         await db.commit()
-    except sqlite3.IntegrityError:
-        raise HTTPException(status_code=400, detail="Material already exists")
+    except sqlite3.IntegrityError as e:
+        msg = "Material already exists" if "UNIQUE" in str(e) else f"DB constraint error: {e}"
+        raise HTTPException(status_code=400, detail=msg)
     finally:
         await db.close()
     return {"message": "Material added"}

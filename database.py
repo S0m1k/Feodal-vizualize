@@ -50,8 +50,8 @@ def init_db_sync():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             filename TEXT NOT NULL,
-            material_type TEXT NOT NULL CHECK(material_type IN ('standard', 'rigel', 'decorative_stone')),
-            supplier TEXT NOT NULL CHECK(supplier IN ('redstone', 'redstone_premium', 'krasny_kamen')),
+            material_type TEXT NOT NULL CHECK(material_type IN ('standard', 'rigel', 'decorative_stone', 'reika')),
+            supplier TEXT NOT NULL CHECK(supplier IN ('redstone', 'redstone_premium', 'krasny_kamen', 'reika')),
             UNIQUE(name, material_type, supplier)
         );
         CREATE TABLE IF NOT EXISTS leads (
@@ -69,6 +69,24 @@ def init_db_sync():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     """)
+
+    # Миграция: расширить CHECK-ограничения materials, если 'reika' ещё не включён
+    cur = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='materials'")
+    row = cur.fetchone()
+    if row and "'reika'" not in row[0]:
+        conn.executescript("""
+            ALTER TABLE materials RENAME TO materials_old;
+            CREATE TABLE materials (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                filename TEXT NOT NULL,
+                material_type TEXT NOT NULL CHECK(material_type IN ('standard', 'rigel', 'decorative_stone', 'reika')),
+                supplier TEXT NOT NULL CHECK(supplier IN ('redstone', 'redstone_premium', 'krasny_kamen', 'reika')),
+                UNIQUE(name, material_type, supplier)
+            );
+            INSERT INTO materials SELECT * FROM materials_old;
+            DROP TABLE materials_old;
+        """)
 
     # Добавляем начальные цвета затирки
     cur = conn.execute("SELECT COUNT(*) FROM grout_colors")
