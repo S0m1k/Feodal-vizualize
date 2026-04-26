@@ -160,6 +160,19 @@
     }
     .zone-gen-btn:disabled { opacity: .5; cursor: not-allowed; }
 
+    /* ===== MAT / MODE BUTTONS ===== */
+    .mat-btn {
+      padding: 8px 18px; border-radius: 10px;
+      border: 1.5px solid #dde4f0; background: #f4f6fb;
+      color: #3b4fa0; font-size: .85rem; font-weight: 600;
+      cursor: pointer; transition: all .15s; white-space: nowrap;
+    }
+    .mat-btn:hover { border-color: #c0392b; color: #c0392b; background: #fff1f1; }
+    .mat-btn.active {
+      background: #c0392b; border-color: #c0392b;
+      color: #fff; box-shadow: 0 2px 8px rgba(192,57,43,.25);
+    }
+
     /* ===== PHOTO UPLOADER (belt / plinth) ===== */
     .photo-uploader { padding: 2px 0; }
     .photo-uploader.drag-over .photo-uploader-empty { outline: 2px dashed #e53935; outline-offset: 4px; border-radius: 12px; }
@@ -944,22 +957,29 @@
         </div>
       </div>
 
-      <!-- Step 2: Texture selection -->
+      <!-- Step 2: Orientation -->
       <div class="card">
-        <div class="step-title" style="margin-bottom:12px;">2. Текстура рейки</div>
-        <!-- Supplier chips (only "Рейка" initially) -->
+        <div class="step-title" style="margin-bottom:10px;">2. Направление рейки</div>
+        <div style="display:flex;gap:10px;" id="reikaOrientBtns">
+          <button type="button" class="mat-btn active" onclick="setReikaOrient('horizontal',this)">↔ Горизонтально</button>
+          <button type="button" class="mat-btn" onclick="setReikaOrient('vertical',this)">↕ Вертикально</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Texture selection -->
+      <div class="card">
+        <div class="step-title" style="margin-bottom:12px;">3. Текстура рейки</div>
         <div id="reikaSupplierChips" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
           <span style="color:#9aadcc;font-size:.82rem;">Загрузка…</span>
         </div>
-        <!-- Texture grid -->
         <div class="zone-tex-grid" id="reikaTexGrid">
           <div style="color:#9aadcc;font-size:.82rem;padding:8px;">Выберите поставщика</div>
         </div>
       </div>
 
-      <!-- Step 3: Canvas (shown after photo loaded) -->
+      <!-- Step 4: Canvas (shown after photo loaded) -->
       <div class="card" id="reikaCanvasCard" style="display:none;">
-        <div class="step-title" style="margin-bottom:8px;">3. Обозначьте зону <span style="color:#e53935">красным</span></div>
+        <div class="step-title" style="margin-bottom:8px;">4. Обозначьте зону <span style="color:#e53935">красным</span></div>
         <div class="brush-ctrl">
           <label>Кисть</label>
           <input type="range" id="reikaBrush" min="4" max="50" value="14">
@@ -968,17 +988,7 @@
         <div class="canvas-wrap" id="reikaCanvasWrap"><canvas id="reikaCanvas"></canvas></div>
       </div>
 
-      <!-- Orientation + Generate -->
-      <div class="card" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-        <div style="display:flex;flex-direction:column;gap:6px;">
-          <label style="font-size:.78rem;color:#9aadcc;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Направление рейки</label>
-          <div style="display:flex;gap:8px;" id="reikaOrientBtns">
-            <button type="button" class="mat-btn active" onclick="setReikaOrient('horizontal',this)">↔ Горизонтально</button>
-            <button type="button" class="mat-btn" onclick="setReikaOrient('vertical',this)">↕ Вертикально</button>
-          </div>
-        </div>
-        <button class="zone-gen-btn" id="reikaGenBtn" style="width:auto;flex:1;min-width:200px;margin:0;align-self:flex-end;" onclick="generateReika()">Сгенерировать →</button>
-      </div>
+      <button class="zone-gen-btn" id="reikaGenBtn" onclick="generateReika()">Сгенерировать →</button>
 
       <!-- Result thumbnail -->
       <div id="reikaResult" class="zone-result-panel"></div>
