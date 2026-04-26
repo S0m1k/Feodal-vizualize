@@ -2,7 +2,7 @@ import os
 import uuid
 from datetime import date, datetime, timedelta
 from urllib.parse import quote
-from fastapi import APIRouter, Request, Response, UploadFile, Form, HTTPException, Depends
+from fastapi import APIRouter, Request, UploadFile, Form, HTTPException
 from fastapi.responses import JSONResponse
 from redis import Redis
 from database import get_db
@@ -15,6 +15,8 @@ router = APIRouter(tags=["client"])
 redis_client = Redis(host='localhost', port=6379, decode_responses=True)
 logger = logging.getLogger("client_generate")
 
+DAILY_LIMIT = 2  # генераций с одного IP в день
+
 
 def resolve_public_base_url(request: Request) -> str:
     configured = os.getenv("PUBLIC_BASE_URL")
@@ -22,24 +24,26 @@ def resolve_public_base_url(request: Request) -> str:
         return configured.rstrip("/")
     return str(request.base_url).rstrip("/")
 
-def get_client_id(request: Request, response: Response) -> str:
-    client_id = request.cookies.get("client_id")
-    if not client_id:
-        client_id = str(uuid.uuid4())
-        response.set_cookie(key="client_id", value=client_id, max_age=60*60*24*30, httponly=True, secure=True, samesite="Lax")
-    return client_id
 
-DAILY_LIMIT = 3  # 2 бесплатных + 1 бонус за лид
+def get_client_ip(request: Request) -> str:
+    """Реальный IP клиента с учётом reverse proxy (Caddy/nginx)."""
+    for header in ("X-Forwarded-For", "X-Real-IP", "CF-Connecting-IP"):
+        val = request.headers.get(header)
+        if val:
+            return val.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
 
-def can_generate(client_id: str) -> bool:
+
+def can_generate(client_ip: str) -> bool:
     today = date.today().isoformat()
-    key = f"limit:client:{client_id}:{today}"
+    key = f"limit:ip:{client_ip}:{today}"
     count = redis_client.get(key)
     return True if count is None else int(count) < DAILY_LIMIT
 
-def increment_count(client_id: str) -> int:
+
+def increment_count(client_ip: str) -> int:
     today = date.today().isoformat()
-    key = f"limit:client:{client_id}:{today}"
+    key = f"limit:ip:{client_ip}:{today}"
     new_count = redis_client.incr(key)
     if new_count == 1:
         now = datetime.now()
@@ -118,7 +122,6 @@ async def get_grout_colors():
 @router.post("/generate")
 async def client_generate(
     request: Request,
-    response: Response,
     file: UploadFile,
     texture: str = Form(...),
     category: str = Form("facade"),
@@ -126,16 +129,17 @@ async def client_generate(
     supplier: str = Form(...),
     grout_color_name: str = Form(None),
 ):
+    client_ip = get_client_ip(request)
     logger.info(
-        "client_generate start material_type=%s supplier=%s texture=%s category=%s grout=%s",
+        "client_generate start ip=%s material_type=%s supplier=%s texture=%s category=%s grout=%s",
+        client_ip,
         material_type,
         supplier,
         texture,
         category,
         grout_color_name,
     )
-    client_id = get_client_id(request, response)
-    if not can_generate(client_id):
+    if not can_generate(client_ip):
         return JSONResponse(status_code=429, content={"error": "Лимит исчерпан"})
 
     if not file.content_type.startswith("image/"):
@@ -185,7 +189,7 @@ async def client_generate(
     try:
         result_data = await generate_image([photo_url, texture_url], prompt)
     except Exception as e:
-        logger.error("client_generate ai_error client_id=%s error=%s", client_id, e)
+        logger.error("client_generate ai_error client_ip=%s error=%s", client_ip, e)
         raise HTTPException(status_code=502, detail=f"Ошибка AI API: {e}")
     output_url = result_data.get("output_url")
     if not output_url:
@@ -213,13 +217,13 @@ async def client_generate(
     try:
         await db.execute(
             "INSERT INTO generations (user_type, user_id, input_image_path, output_image_path, prompt, texture_name, grout_color, category, material_type, supplier) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            ("client", client_id, temp_path, output_path, prompt, texture, grout_color_name, category, material_type, supplier)
+            ("client", client_ip, temp_path, output_path, prompt, texture, grout_color_name, category, material_type, supplier)
         )
         await db.commit()
     finally:
         await db.close()
 
-    new_count = increment_count(client_id)
+    new_count = increment_count(client_ip)
     remaining = DAILY_LIMIT - new_count
     os.unlink(temp_path)
 
@@ -227,8 +231,8 @@ async def client_generate(
     result_url = f"/generated/client/{output_filename}"
     redis_client.setex(f"gen_status:{request_id}", 300, f"success:{result_url}")
     logger.info(
-        "client_generate success client_id=%s request_id=%s result_url=%s",
-        client_id,
+        "client_generate success client_ip=%s request_id=%s result_url=%s",
+        client_ip,
         request_id,
         result_url,
     )

@@ -580,7 +580,7 @@ function setRemaining(n) {
   remaining = n;
   if (n === null || n === undefined) { genInfo.textContent = ''; genInfo.className = 'gen-info'; return; }
   if (n <= 0) {
-    genInfo.textContent = '⛔ Дневной лимит исчерпан (3/3). Попробуйте завтра.';
+    genInfo.textContent = '⛔ Дневной лимит исчерпан (2/2). Попробуйте завтра.';
     genInfo.className = 'gen-info warn';
     genBtn.disabled = true; genBtn.classList.remove('ready');
   } else {
@@ -802,10 +802,8 @@ function pollStatus(requestId) {
         setBadge('ok', '✅ Готово!');
         setTimeout(() => previewBadge.className = 'preview-badge', 5000);
         refreshBtn();
-        // Лид-форма после 2-й генерации
-        const genCount = parseInt(localStorage.getItem('rsv_gen_count') || '0') + 1;
-        localStorage.setItem('rsv_gen_count', genCount);
-        if (genCount >= 2 && !localStorage.getItem('rsv_lead_done')) {
+        // Лид-форма: показываем когда лимит исчерпан (remaining === 0) и форма ещё не заполнялась
+        if (remaining !== null && remaining <= 0 && !localStorage.getItem('rsv_lead_done')) {
           setTimeout(showLeadModal, 1200);
         }
       } else if (d.status === 'error') {
@@ -828,7 +826,7 @@ function pollStatus(requestId) {
 genBtn.addEventListener('click', async () => {
   if (!photoFile || !selectedTex) { toast('Загрузите фото и выберите текстуру', 'warn'); return; }
   if (remaining !== null && remaining <= 0) {
-    toast('Вы исчерпали дневной лимит (3/3). Попробуйте завтра.', 'warn'); return;
+    toast('Вы исчерпали дневной лимит (2/2). Попробуйте завтра.', 'warn'); return;
   }
 
   setGenerating(true);
