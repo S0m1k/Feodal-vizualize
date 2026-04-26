@@ -29,11 +29,13 @@ def get_client_id(request: Request, response: Response) -> str:
         response.set_cookie(key="client_id", value=client_id, max_age=60*60*24*30, httponly=True, secure=True, samesite="Lax")
     return client_id
 
+DAILY_LIMIT = 3  # 2 бесплатных + 1 бонус за лид
+
 def can_generate(client_id: str) -> bool:
     today = date.today().isoformat()
     key = f"limit:client:{client_id}:{today}"
     count = redis_client.get(key)
-    return True if count is None else int(count) < 2
+    return True if count is None else int(count) < DAILY_LIMIT
 
 def increment_count(client_id: str) -> int:
     today = date.today().isoformat()
@@ -218,7 +220,7 @@ async def client_generate(
         await db.close()
 
     new_count = increment_count(client_id)
-    remaining = 2 - new_count
+    remaining = DAILY_LIMIT - new_count
     os.unlink(temp_path)
 
     request_id = str(uuid.uuid4())

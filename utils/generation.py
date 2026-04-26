@@ -65,18 +65,45 @@ def build_prompt(category: str, material_type: str, grout_color_hex: str = None)
     return prompt
 
 
-def build_belt_prompt(category: str) -> str:
-    """Промт для сервиса 'Пояса': красная зона → вертикальная кладка (солдатский ряд)."""
+def build_belt_prompt(category: str, mode: str = "soldier") -> str:
+    """Промт для сервиса 'Пояса'.
+    mode='soldier' — вертикальный солдатский ряд,
+    mode='checker' — шахматный (шахматная перевязка стоячих кирпичей).
+    """
     target = "house facade" if category == "facade" else "interior wall"
+    if mode == "checker":
+        pattern = (
+            "a checkerboard soldier-course pattern — bricks standing upright on their ends, "
+            "arranged in alternating offset rows so every other brick is shifted by half a brick "
+            "creating a diagonal / staggered checker effect"
+        )
+    else:  # soldier
+        pattern = (
+            "a vertical soldier-course pattern — bricks standing perfectly upright on their ends, "
+            "oriented vertically in straight, evenly-spaced rows"
+        )
     return (
         f"Preserve all original {target} geometry, windows, doors, and surrounding environment EXACTLY. "
         f"The red-highlighted zones mark decorative horizontal belt courses. "
-        f"In the red zones ONLY: rearrange the EXISTING bricks into a vertical soldier-course pattern — "
-        f"bricks standing upright on their ends, oriented vertically. "
+        f"In the red zones ONLY: rearrange the EXISTING bricks into {pattern}. "
         f"Use the exact same brick color, tone, and material as the rest of the facade. "
         f"The belt must blend seamlessly with the surrounding brickwork at its edges. "
         f"Do NOT change anything outside the red zones. "
         f"Hyper-realistic architectural rendering, 8k, photorealistic sunlight."
+    )
+
+
+def build_reika_prompt() -> str:
+    """Промт для сервиса 'Рейка': красная зона → облицовка рейкой из каталога."""
+    return (
+        "Preserve all original facade geometry, windows, doors, and environment EXACTLY. "
+        "The red-highlighted zones indicate areas to be clad with the provided reika (slatted wood panel) texture. "
+        "In the red zones ONLY, apply the provided reika texture. "
+        "The slats should be oriented horizontally by default; follow the zone shape if it clearly suggests vertical. "
+        "Maintain realistic material scale — the slats should look like full-size architectural cladding panels. "
+        "Ensure seamless integration with the surrounding surfaces at zone edges. "
+        "All areas outside the red zones must remain completely unchanged. "
+        "Hyper-realistic architectural rendering, 8k, photorealistic sunlight."
     )
 
 

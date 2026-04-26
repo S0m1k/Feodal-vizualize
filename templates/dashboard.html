@@ -605,6 +605,7 @@
     <li><span class="nav-link active" data-page="visualizer"><span class="nav-icon">🎨</span> Визуализатор</span></li>
     <li><span class="nav-link" data-page="belt"><span class="nav-icon">🏗</span> Пояса</span></li>
     <li><span class="nav-link" data-page="plinth"><span class="nav-icon">🧱</span> Цоколь</span></li>
+    <li><span class="nav-link" data-page="reika"><span class="nav-icon">🪵</span> Рейка</span></li>
     <li><span class="nav-link" data-page="catalog"><span class="nav-icon">📚</span> Каталог</span></li>
     <li><span class="nav-link" data-page="history"><span class="nav-icon">📜</span> История</span></li>
     <li id="adminNavItem" style="display:none;"><span class="nav-link" data-page="admin"><span class="nav-icon">⚙️</span> Администрирование</span></li>
@@ -825,14 +826,23 @@
         <div class="canvas-wrap" id="beltCanvasWrap"><canvas id="beltCanvas"></canvas></div>
       </div>
 
-      <!-- Category + Generate -->
-      <div class="card" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-        <label style="font-size:.82rem;color:#5b6fa0;white-space:nowrap;">Категория:</label>
-        <select id="beltCategory" style="padding:6px 10px;border-radius:8px;border:1.5px solid #dde4f0;">
-          <option value="facade">Фасад</option>
-          <option value="interior">Интерьер</option>
-        </select>
-        <button class="zone-gen-btn" id="beltGenBtn" style="width:auto;flex:1;min-width:200px;margin:0;" onclick="generateBelt()">Сгенерировать →</button>
+      <!-- Mode + Category + Generate -->
+      <div class="card" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:.78rem;color:#9aadcc;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Режим кладки</label>
+          <div style="display:flex;gap:8px;" id="beltModeBtns">
+            <button type="button" class="mat-btn active" onclick="setBeltMode('soldier',this)">🧱 Солдатик</button>
+            <button type="button" class="mat-btn" onclick="setBeltMode('checker',this)">♟ Шахматный</button>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:.78rem;color:#9aadcc;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Категория</label>
+          <select id="beltCategory" style="padding:7px 10px;border-radius:8px;border:1.5px solid #dde4f0;">
+            <option value="facade">Фасад</option>
+            <option value="interior">Интерьер</option>
+          </select>
+        </div>
+        <button class="zone-gen-btn" id="beltGenBtn" style="width:auto;flex:1;min-width:200px;margin:0;align-self:flex-end;" onclick="generateBelt()">Сгенерировать →</button>
       </div>
 
       <!-- Result thumbnail -->
@@ -901,6 +911,64 @@
 
       <!-- Result thumbnail -->
       <div id="plinthResult" class="zone-result-panel"></div>
+    </div>
+  </section>
+
+  <!-- ====== REIKA (Рейка) ====== -->
+  <section class="page" id="page-reika">
+    <h1 class="page-title">🪵 Рейка</h1>
+    <p style="color:#5b6fa0;margin-bottom:20px;font-size:.9rem;">
+      Загрузите фото, выберите текстуру рейки и обведите красным зону облицовки.
+    </p>
+    <div style="max-width:900px;display:flex;flex-direction:column;gap:20px;">
+
+      <!-- Step 1: Photo -->
+      <div class="card">
+        <div class="step-title" style="margin-bottom:12px;">1. Фото здания</div>
+        <div class="photo-uploader" id="reikaDrop">
+          <input type="file" id="reikaFile" accept="image/*" style="display:none">
+          <div class="photo-uploader-empty">
+            <button type="button" class="photo-add-btn" onclick="document.getElementById('reikaFile').click()">📷 Добавить фото</button>
+            <span class="photo-uploader-hint">или перетащите файл · JPG, PNG</span>
+          </div>
+          <div class="photo-uploader-filled" style="display:none;">
+            <img class="photo-uploader-thumb" src="" alt="">
+            <div class="photo-uploader-info">
+              <div class="photo-uploader-name"></div>
+              <button type="button" class="photo-change-btn" onclick="document.getElementById('reikaFile').click()">Изменить фото</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Texture selection -->
+      <div class="card">
+        <div class="step-title" style="margin-bottom:12px;">2. Текстура рейки</div>
+        <!-- Supplier chips (only "Рейка" initially) -->
+        <div id="reikaSupplierChips" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+          <span style="color:#9aadcc;font-size:.82rem;">Загрузка…</span>
+        </div>
+        <!-- Texture grid -->
+        <div class="zone-tex-grid" id="reikaTexGrid">
+          <div style="color:#9aadcc;font-size:.82rem;padding:8px;">Выберите поставщика</div>
+        </div>
+      </div>
+
+      <!-- Step 3: Canvas (shown after photo loaded) -->
+      <div class="card" id="reikaCanvasCard" style="display:none;">
+        <div class="step-title" style="margin-bottom:8px;">3. Обозначьте зону <span style="color:#e53935">красным</span></div>
+        <div class="brush-ctrl">
+          <label>Кисть</label>
+          <input type="range" id="reikaBrush" min="4" max="50" value="14">
+          <button onclick="reikaDrawer&&reikaDrawer.reset()">Очистить</button>
+        </div>
+        <div class="canvas-wrap" id="reikaCanvasWrap"><canvas id="reikaCanvas"></canvas></div>
+      </div>
+
+      <button class="zone-gen-btn" id="reikaGenBtn" onclick="generateReika()">Сгенерировать →</button>
+
+      <!-- Result thumbnail -->
+      <div id="reikaResult" class="zone-result-panel"></div>
     </div>
   </section>
 
@@ -988,6 +1056,7 @@ function showPage(id) {
     }
     if (id === 'belt')   initBeltPage();
     if (id === 'plinth') initPlinthPage();
+    if (id === 'reika')  initReikaPage();
 }
 
 // ============================================================
@@ -1743,7 +1812,13 @@ function createDrawer(canvasId) {
 // ============================================================
 //  BELT (Пояса) — без выбора текстуры
 // ============================================================
-let beltDrawer = null, beltInited = false;
+let beltDrawer = null, beltInited = false, beltMode = 'soldier';
+
+function setBeltMode(mode, btn) {
+    beltMode = mode;
+    document.querySelectorAll('#beltModeBtns .mat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
 
 function initBeltPage() {
     if (beltInited) return;
@@ -1762,6 +1837,7 @@ async function generateBelt() {
     const fd = new FormData();
     fd.append('annotated_photo', blob, 'belt.jpg');
     fd.append('category', document.getElementById('beltCategory').value);
+    fd.append('mode', beltMode);
     const resultDiv = document.getElementById('beltResult');
     resultDiv.className = 'zone-result-panel visible';
     resultDiv.innerHTML = '<div style="padding:24px;color:#9aadcc;text-align:center;">⏳ Генерация… (до 2 мин)</div>';
@@ -1842,6 +1918,7 @@ function selectZoneTex(prefix, name, url, mat, sup, el) {
     document.querySelectorAll(`#${prefix}TexGrid .zone-tex-card`).forEach(c => c.classList.remove('sel'));
     el.classList.add('sel');
     if (prefix === 'plinth') { plinthTex = { name, url, material_type: mat, supplier: sup }; }
+    if (prefix === 'reika')  { reikaTex  = { name, url, material_type: mat, supplier: sup }; }
 }
 
 async function generatePlinth() {
@@ -1900,6 +1977,77 @@ function pollZoneResult(requestId, divId) {
     }, 2000);
 }
 
+// ============================================================
+//  REIKA (Рейка)
+// ============================================================
+let reikaDrawer = null, reikaTex = null, reikaInited = false;
+
+function initReikaPage() {
+    if (reikaInited) return;
+    reikaInited = true;
+    setupZoneDrop('reikaDrop', 'reikaFile', file => {
+        if (!reikaDrawer) reikaDrawer = createDrawer('reikaCanvas');
+        reikaDrawer.loadImage(file);
+        document.getElementById('reikaCanvasCard').style.display = '';
+    });
+    document.getElementById('reikaBrush').addEventListener('input', e => reikaDrawer?.setBrush(+e.target.value));
+    loadReikaSupplierChips();
+}
+
+async function loadReikaSupplierChips() {
+    const container = document.getElementById('reikaSupplierChips');
+    container.innerHTML = '<span style="color:#9aadcc;font-size:.82rem;">Загрузка…</span>';
+    try {
+        const r = await fetch(`${API_BASE}/api/internal/suppliers?material_type=reika`, { credentials: 'include', headers: H() });
+        const list = await r.json();
+        if (!list.length) {
+            container.innerHTML = '<span style="color:#9aadcc;font-size:.82rem;">Нет поставщиков</span>';
+            return;
+        }
+        container.innerHTML = list.map(s =>
+            `<button class="supplier-chip" data-code="${s.code}" onclick="selectReikaSupplier('${s.code}',this)">${s.name}</button>`
+        ).join('');
+        // Auto-select if only one supplier
+        if (list.length === 1) {
+            const btn = container.querySelector('.supplier-chip');
+            selectReikaSupplier(list[0].code, btn);
+        }
+    } catch(e) { container.innerHTML = '<span style="color:#e53935;font-size:.82rem;">Ошибка загрузки</span>'; }
+}
+
+async function selectReikaSupplier(code, el) {
+    document.querySelectorAll('#reikaSupplierChips .supplier-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    const grid = document.getElementById('reikaTexGrid');
+    grid.innerHTML = '<div style="color:#9aadcc;font-size:.82rem;padding:8px;">Загрузка…</div>';
+    try {
+        const r = await fetch(`${API_BASE}/api/internal/textures?material_type=reika&supplier=${code}`, { credentials: 'include', headers: H() });
+        const list = await r.json();
+        renderZoneTextures('reika', list, 'reika', code);
+    } catch(e) { grid.innerHTML = '<div style="color:#e53935;font-size:.82rem;padding:8px;">Ошибка загрузки</div>'; }
+}
+
+async function generateReika() {
+    if (!reikaDrawer?.isReady()) return alert('Загрузите фото здания');
+    if (!reikaTex) return alert('Выберите текстуру рейки');
+    const blob = await reikaDrawer.getBlob();
+    const fd = new FormData();
+    fd.append('annotated_photo', blob, 'reika.jpg');
+    fd.append('texture', reikaTex.name);
+    fd.append('material_type', reikaTex.material_type);
+    fd.append('supplier', reikaTex.supplier);
+    const resultDiv = document.getElementById('reikaResult');
+    resultDiv.className = 'zone-result-panel visible';
+    resultDiv.innerHTML = '<div style="padding:24px;color:#9aadcc;text-align:center;">⏳ Генерация… (до 2 мин)</div>';
+    try {
+        const r = await fetch(`${API_BASE}/api/internal/reika/generate`, { method: 'POST', credentials: 'include', headers: H(), body: fd });
+        const d = await r.json();
+        if (d.request_id) pollZoneResult(d.request_id, 'reikaResult');
+        else resultDiv.innerHTML = `<div style="padding:16px;color:#e53935;">Ошибка: ${d.detail || 'неизвестная'}</div>`;
+    } catch(e) { resultDiv.innerHTML = `<div style="padding:16px;color:#e53935;">${e}</div>`; }
+}
+
+// ============================================================
 // Общая вспомогательная функция photo-uploader для зон
 function setupZoneDrop(dropId, fileId, onFile) {
     const drop  = document.getElementById(dropId);
