@@ -669,9 +669,12 @@ async def reika_generate(
     texture: str = Form(...),
     material_type: str = Form("reika"),
     supplier: str = Form("reika"),
+    orientation: str = Form("horizontal"),
     current_user = Depends(get_current_manager),
 ):
-    """Генерация рейки — пользователь обводит зону красным, выбирает текстуру рейки."""
+    """Генерация рейки — пользователь обводит зону красным, выбирает текстуру рейки.
+    orientation: 'horizontal' | 'vertical'
+    """
     request_id = str(uuid.uuid4())
     user_id    = str(current_user.get("id"))
 
@@ -697,7 +700,7 @@ async def reika_generate(
     base_url    = _resolve_base_url()
     photo_url   = f"{base_url}/temp/internal/{filename}"
     texture_url = f"{base_url}/textures/{material_type}/{supplier}/{quote(row['filename'])}"
-    prompt      = build_reika_prompt()
+    prompt      = build_reika_prompt(orientation)
 
     redis_client.setex(f"gen_status:{request_id}", 3600, "processing")
     asyncio.create_task(_run_zone_generation(

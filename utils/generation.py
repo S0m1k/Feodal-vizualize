@@ -91,13 +91,19 @@ def build_belt_prompt(category: str, mode: str = "soldier") -> str:
     )
 
 
-def build_reika_prompt() -> str:
-    """Промт для сервиса 'Рейка': красная зона → облицовка рейкой из каталога."""
+def build_reika_prompt(orientation: str = "horizontal") -> str:
+    """Промт для сервиса 'Рейка'.
+    orientation='horizontal' — горизонтальная укладка,
+    orientation='vertical'   — вертикальная укладка.
+    """
+    if orientation == "vertical":
+        direction = "vertically — slats running top-to-bottom, oriented upright"
+    else:
+        direction = "horizontally — slats running left-to-right, oriented level"
     return (
         "Preserve all original facade geometry, windows, doors, and environment EXACTLY. "
         "The red-highlighted zones indicate areas to be clad with the provided reika (slatted wood panel) texture. "
-        "In the red zones ONLY, apply the provided reika texture. "
-        "The slats should be oriented horizontally by default; follow the zone shape if it clearly suggests vertical. "
+        f"In the red zones ONLY, apply the provided reika texture with slats oriented {direction}. "
         "Maintain realistic material scale — the slats should look like full-size architectural cladding panels. "
         "Ensure seamless integration with the surrounding surfaces at zone edges. "
         "All areas outside the red zones must remain completely unchanged. "

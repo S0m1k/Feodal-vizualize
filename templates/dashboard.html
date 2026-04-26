@@ -968,7 +968,17 @@
         <div class="canvas-wrap" id="reikaCanvasWrap"><canvas id="reikaCanvas"></canvas></div>
       </div>
 
-      <button class="zone-gen-btn" id="reikaGenBtn" onclick="generateReika()">Сгенерировать →</button>
+      <!-- Orientation + Generate -->
+      <div class="card" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:.78rem;color:#9aadcc;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Направление рейки</label>
+          <div style="display:flex;gap:8px;" id="reikaOrientBtns">
+            <button type="button" class="mat-btn active" onclick="setReikaOrient('horizontal',this)">↔ Горизонтально</button>
+            <button type="button" class="mat-btn" onclick="setReikaOrient('vertical',this)">↕ Вертикально</button>
+          </div>
+        </div>
+        <button class="zone-gen-btn" id="reikaGenBtn" style="width:auto;flex:1;min-width:200px;margin:0;align-self:flex-end;" onclick="generateReika()">Сгенерировать →</button>
+      </div>
 
       <!-- Result thumbnail -->
       <div id="reikaResult" class="zone-result-panel"></div>
@@ -1984,7 +1994,13 @@ function pollZoneResult(requestId, divId) {
 // ============================================================
 //  REIKA (Рейка)
 // ============================================================
-let reikaDrawer = null, reikaTex = null, reikaInited = false;
+let reikaDrawer = null, reikaTex = null, reikaInited = false, reikaOrientation = 'horizontal';
+
+function setReikaOrient(orient, btn) {
+    reikaOrientation = orient;
+    document.querySelectorAll('#reikaOrientBtns .mat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
 
 function initReikaPage() {
     if (reikaInited) return;
@@ -2040,6 +2056,7 @@ async function generateReika() {
     fd.append('texture', reikaTex.name);
     fd.append('material_type', reikaTex.material_type);
     fd.append('supplier', reikaTex.supplier);
+    fd.append('orientation', reikaOrientation);
     const resultDiv = document.getElementById('reikaResult');
     resultDiv.className = 'zone-result-panel visible';
     resultDiv.innerHTML = '<div style="padding:24px;color:#9aadcc;text-align:center;">⏳ Генерация… (до 2 мин)</div>';
