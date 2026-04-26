@@ -34,34 +34,32 @@ def _extract_output_url(status_data: dict) -> str | None:
 
 def build_prompt(category: str, material_type: str, grout_color_hex: str = None) -> str:
     """Единый промт для клиентского и внутреннего роутеров."""
-    base = "Preserve house geometry, windows, doors, and environment EXACTLY."
+    base = "Preserve house geometry, windows, doors, and lighting EXACTLY."
 
     if material_type == "decorative_stone":
         prompt = (f"{base} Replace facade with the provided stone texture. "
-                  f"The source image shows a small sample area of stone masonry. "
-                  f"Tile this texture repeatedly across the walls so the stone blocks "
-                  f"maintain a realistic architectural scale relative to the house. "
-                  f"Each block should look like a medium-sized cladding panel. "
-                  f"Ensure the pitted porous texture and subtle color shifts are preserved.")
+                  f"Format: Ledgestone / Stacked stone. "
+                  f"The elements must be significantly smaller and thinner than original wall panels. "
+                  f"Create a dense, intricate pattern of narrow horizontal stone strips. "
+                  f"Tile the texture with high frequency to ensure a realistic architectural scale. "
+                  f"Preserve the rough, natural rock relief and color depth.")
     else:
         target = "house facade" if category == "facade" else "interior wall"
 
         if material_type == "standard":
             prompt = (f"{base} Replace {target} with the provided brick texture. "
-                      f"Apply as a high-density brickwork pattern. "
-                      f"The bricks must be small and frequent, matching a standard real-world brick scale. "
-                      f"Sharp repetition, clear horizontal courses.")
+                      f"Apply as high-density brickwork. Bricks must be small and frequent, "
+                      f"matching realistic standard brick dimensions. Tight alignment.")
         else:
-            # Ригель: пропорция 1:8, высокая горизонтальная плотность
+            # Ригель: пропорция 1:10, высокая горизонтальная плотность
             prompt = (f"{base} Replace {target} with EXACTLY the provided texture. "
-                      f"CRITICAL: Apply as Riegel-style bricks. Proportions: extremely long and thin. "
-                      f"Height-to-width ratio 1:10. High horizontal density. "
-                      f"Create a continuous linear aesthetic.")
+                      f"Format: Riegel brick (ultra-long, ultra-thin). Ratio 1:10. "
+                      f"Apply with maximum horizontal density and sharp linear courses.")
 
     if grout_color_hex and material_type != "decorative_stone":
-        prompt += f" Use grout color HEX {grout_color_hex} for mortar joints."
+        prompt += f" Mortar joints color: HEX {grout_color_hex}."
 
-    prompt += " Hyper-realistic architectural rendering, 8k, photorealistic sunlight."
+    prompt += " Hyper-realistic, 8k architectural visualization, sharp focus on masonry."
     return prompt
 
 
