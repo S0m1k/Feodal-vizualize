@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Панель сотрудника</title>
+  <title>Визуализатор</title>
   <link rel="icon" type="image/png" href="/static/favicon.svg">
   <link rel="apple-touch-icon" href="/static/icons/icon.svg">
   <meta name="theme-color" content="#ff3b3b">
@@ -591,7 +591,7 @@
 <header class="app-header">
   <div class="header-left">
     <button class="burger-btn" id="burgerBtn" aria-label="Открыть меню">☰</button>
-    <span class="header-title">Панель сотрудника</span>
+    <span class="header-title">Визуализатор</span>
   </div>
   <div style="display:flex;align-items:center;gap:10px;position:relative;">
     <button class="bell-btn" id="bellBtn" title="Уведомления">
@@ -731,11 +731,10 @@
         <select id="catMatType">
           <option value="standard">Кирпич</option>
           <option value="rigel">Ригель</option>
-          <option value="decorative_stone">Камень декоративный</option>
+          <option value="decorative_stone">Декоративный камень</option>
           <option value="cobblestone">Булыжник</option>
-          <option value="rubble_stone">Бут</option>
+          <option value="rubble_stone">Рваный камень</option>
           <option value="derbent_stone">Дербент</option>
-          <option value="reika">Рейка</option>
         </select>
       </div>
       <div class="filter-group">
@@ -794,9 +793,9 @@
         <select id="textureMaterialType">
           <option value="standard">Кирпич</option>
           <option value="rigel">Ригель</option>
-          <option value="decorative_stone">Камень декоративный</option>
+          <option value="decorative_stone">Декоративный камень</option>
           <option value="cobblestone">Булыжник</option>
-          <option value="rubble_stone">Бут</option>
+          <option value="rubble_stone">Рваный камень</option>
           <option value="derbent_stone">Дербент</option>
           <option value="reika">Рейка</option>
         </select>
@@ -932,7 +931,7 @@
         <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;" id="plinthMatBtns">
           <button class="mat-btn active" data-mat="decorative_stone" onclick="setPlinthMat(this,'decorative_stone')">Камень декор.</button>
           <button class="mat-btn" data-mat="cobblestone" onclick="setPlinthMat(this,'cobblestone')">Булыжник</button>
-          <button class="mat-btn" data-mat="rubble_stone" onclick="setPlinthMat(this,'rubble_stone')">Бут</button>
+          <button class="mat-btn" data-mat="rubble_stone" onclick="setPlinthMat(this,'rubble_stone')">Рваный камень</button>
           <button class="mat-btn" data-mat="derbent_stone" onclick="setPlinthMat(this,'derbent_stone')">Дербент</button>
           <button class="mat-btn" data-mat="standard" onclick="setPlinthMat(this,'standard')">Кирпич</button>
           <button class="mat-btn" data-mat="rigel" onclick="setPlinthMat(this,'rigel')">Ригель</button>
@@ -1046,11 +1045,10 @@
           <select id="modalMatType">
             <option value="standard">Кирпич</option>
             <option value="rigel">Ригель</option>
-            <option value="decorative_stone">Камень декоративный</option>
+            <option value="decorative_stone">Декоративный камень</option>
             <option value="cobblestone">Булыжник</option>
-            <option value="rubble_stone">Бут</option>
+            <option value="rubble_stone">Рваный камень</option>
             <option value="derbent_stone">Дербент</option>
-            <option value="reika">Рейка</option>
           </select>
         </div>
         <div class="filter-group">
@@ -1647,7 +1645,7 @@ async function loadAllTextures() {
         const textures = await r.json();
         const c = document.getElementById('texturesList');
         if (!textures.length) { c.innerHTML = '<div>Нет текстур</div>'; return; }
-        const tMap = { standard: 'Кирпич', rigel: 'Ригель', decorative_stone: 'Камень декор.', cobblestone: 'Булыжник', rubble_stone: 'Бут', derbent_stone: 'Дербент', reika: 'Рейка' };
+        const tMap = { standard: 'Кирпич', rigel: 'Ригель', decorative_stone: 'Декор. камень', cobblestone: 'Булыжник', rubble_stone: 'Рваный камень', derbent_stone: 'Дербент', reika: 'Рейка' };
         const sMap = { redstone: 'Redstone', redstone_premium: 'Redstone Premium', krasny_kamen: 'Красный Камень' };
         c.innerHTML = `<table>
             <thead><tr><th>ID</th><th>Название</th><th>Тип</th><th>Поставщик</th><th>Файл</th><th>Действие</th></tr></thead>
