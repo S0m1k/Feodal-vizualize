@@ -57,16 +57,16 @@ def build_prompt(category: str, material_type: str,
                   f"Stones should have soft, weathered edges and organic, non-linear placement. "
                   f"Emphasize the tactile, smooth surface and depth of mortar joints.")
     elif material_type == "derbent_stone":
-        prompt = (f"{base} {zone_instr}Replace {target} with a detailed pattern of small, rough-hewn rubble ashlar masonry. "
-                  f"CRITICAL DETAIL (Scale and Texture): The new stonework must consist of significantly smaller "
-                  f"and more numerous individual stones, mirroring the detailed texture of the provided reference. "
-                  f"These stones must have a rugged, textured, and irregular surface with natural imperfections — "
-                  f"not smooth or polished. "
-                  f"CRITICAL DETAIL (Coursing and Joints): The blocks must be laid in precise but non-linear "
-                  f"horizontal courses. Incorporate deeply recessed, shadowed mortar joints (raked joints) between "
-                  f"every stone block — this is crucial for creating a pronounced, tactile relief and avoiding "
-                  f"a flat tiled effect. "
-                  f"COLOR: Light beige/cream with natural color variation. "
+        prompt = (f"{base} {zone_instr}Replace {target} with a detailed pattern of very small, finely hand-tooled ashlar limestone masonry. "
+                  f"CRITICAL DETAIL (Scale and Texture): The new stonework must consist of very small and numerous "
+                  f"individual stones, mirroring the provided reference. "
+                  f"These stones must have a matte, finely hand-tooled surface with a clean, cut look. "
+                  f"The individual blocks must be flat and even — precise, hand-cut tiles rather than irregular rubble. "
+                  f"CRITICAL DETAIL (Coursing and Joints): Lay blocks in very clean, tight, regular horizontal courses. "
+                  f"Incorporate very deeply recessed and shadowed mortar joints (raked joints) between every stone block. "
+                  f"These deep, dark shadows between flat clean blocks must create the primary relief — "
+                  f"avoid any rugged or bumpy surface texture on the stone faces themselves. "
+                  f"COLOR: Light beige/cream with subtle natural variation. "
                   f"Ensure all multi-level geometry and building details are preserved.")
     elif material_type == "standard":
         prompt = (f"{base} {zone_instr}Replace {target} with the provided brick texture. "
@@ -86,17 +86,18 @@ def build_prompt(category: str, material_type: str,
 
 
 def _derbent_zone_detail() -> str:
-    """Детальное описание мелкомасштабного тесаного камня для зональных промтов."""
+    """Детальное описание мелкомасштабного чистого тесаного камня для зональных промтов."""
     return (
-        "Fill the entire red zone with a detailed pattern of small, rough-hewn rubble ashlar masonry "
+        "Fill the entire red zone with a detailed pattern of very small, finely hand-tooled ashlar limestone masonry "
         "matching the provided reference. "
-        "CRITICAL DETAIL (Scale and Texture): The stonework must consist of significantly smaller and more "
-        "numerous individual stones. Each stone must have a rugged, textured, irregular surface with natural "
-        "imperfections — not smooth or polished. "
-        "CRITICAL DETAIL (Coursing and Joints): Lay blocks in precise but non-linear horizontal courses with "
-        "deeply recessed, shadowed mortar joints (raked joints) between every stone — crucial for pronounced "
-        "tactile relief and avoiding a flat tiled effect. "
-        "Use light beige/cream color with natural variation. "
+        "CRITICAL DETAIL (Scale and Texture): The stonework must consist of very small and numerous individual stones. "
+        "Each stone must have a matte, finely hand-tooled surface with a clean, cut look — "
+        "flat and even, like precise hand-cut tiles rather than irregular rubble. "
+        "CRITICAL DETAIL (Coursing and Joints): Lay blocks in very clean, tight, regular horizontal courses with "
+        "very deeply recessed and shadowed mortar joints (raked joints) between every stone. "
+        "These deep dark shadows between flat clean blocks must create the primary relief — "
+        "avoid any rugged or bumpy texture on the stone faces themselves. "
+        "Use light beige/cream color with subtle natural variation. "
         "Blend seamlessly with surrounding surfaces at the zone edges. "
     )
 
