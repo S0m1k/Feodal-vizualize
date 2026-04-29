@@ -50,7 +50,7 @@ def init_db_sync():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             filename TEXT NOT NULL,
-            material_type TEXT NOT NULL CHECK(material_type IN ('standard', 'rigel', 'decorative_stone', 'cobblestone', 'rubble_stone', 'derbent_stone', 'reika')),
+            material_type TEXT NOT NULL CHECK(material_type IN ('standard', 'rigel', 'cobblestone', 'rubble_stone', 'derbent_stone', 'reika')),
             supplier TEXT NOT NULL CHECK(supplier IN ('redstone', 'redstone_premium', 'krasny_kamen', 'reika')),
             UNIQUE(name, material_type, supplier)
         );
@@ -80,7 +80,7 @@ def init_db_sync():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 filename TEXT NOT NULL,
-                material_type TEXT NOT NULL CHECK(material_type IN ('standard', 'rigel', 'decorative_stone', 'cobblestone', 'rubble_stone', 'derbent_stone', 'reika')),
+                material_type TEXT NOT NULL CHECK(material_type IN ('standard', 'rigel', 'cobblestone', 'rubble_stone', 'derbent_stone', 'reika')),
                 supplier TEXT NOT NULL CHECK(supplier IN ('redstone', 'redstone_premium', 'krasny_kamen', 'reika')),
                 UNIQUE(name, material_type, supplier)
             );
@@ -98,7 +98,26 @@ def init_db_sync():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 filename TEXT NOT NULL,
-                material_type TEXT NOT NULL CHECK(material_type IN ('standard', 'rigel', 'decorative_stone', 'cobblestone', 'rubble_stone', 'derbent_stone', 'reika')),
+                material_type TEXT NOT NULL CHECK(material_type IN ('standard', 'rigel', 'cobblestone', 'rubble_stone', 'derbent_stone', 'reika')),
+                supplier TEXT NOT NULL CHECK(supplier IN ('redstone', 'redstone_premium', 'krasny_kamen', 'reika')),
+                UNIQUE(name, material_type, supplier)
+            );
+            INSERT INTO materials SELECT * FROM materials_old;
+            DROP TABLE materials_old;
+        """)
+
+    # Миграция: убрать decorative_stone из CHECK и удалить такие записи
+    cur = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='materials'")
+    row = cur.fetchone()
+    if row and "'decorative_stone'" in row[0]:
+        conn.executescript("""
+            DELETE FROM materials WHERE material_type = 'decorative_stone';
+            ALTER TABLE materials RENAME TO materials_old;
+            CREATE TABLE materials (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                filename TEXT NOT NULL,
+                material_type TEXT NOT NULL CHECK(material_type IN ('standard', 'rigel', 'cobblestone', 'rubble_stone', 'derbent_stone', 'reika')),
                 supplier TEXT NOT NULL CHECK(supplier IN ('redstone', 'redstone_premium', 'krasny_kamen', 'reika')),
                 UNIQUE(name, material_type, supplier)
             );
@@ -130,8 +149,6 @@ def init_db_sync():
             ("Коричневый кирпич", "brown_kr.jpg", "standard", "krasny_kamen"),
             ("Серый ригель", "grey_rigel_prem.jpg", "rigel", "redstone_premium"),
             ("Коричневый ригель", "brown_rigel_prem.jpg", "rigel", "redstone_premium"),
-            ("Скала", "rock.jpg", "decorative_stone", "krasny_kamen"),
-            ("Сланец", "slate.jpg", "decorative_stone", "krasny_kamen"),
         ]
         for name, filename, mtype, supplier in materials:
             conn.execute("INSERT INTO materials (name, filename, material_type, supplier) VALUES (?, ?, ?, ?)",

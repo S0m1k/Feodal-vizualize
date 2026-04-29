@@ -103,7 +103,7 @@ async def internal_generate(
         filename = row["filename"]
         texture_url = f"{base_url}/textures/{material_type}/{supplier}/{quote(filename)}"
 
-        _STONE_TYPES = {"decorative_stone", "cobblestone", "rubble_stone", "derbent_stone"}
+        _STONE_TYPES = {"cobblestone", "rubble_stone", "derbent_stone"}
         grout_hex = None
         if grout_color_name and material_type not in _STONE_TYPES:
             db = await get_db()
@@ -428,7 +428,7 @@ async def add_texture(
     file: UploadFile = File(...),
     current_admin = Depends(get_current_admin),
 ):
-    if material_type not in ("standard", "rigel", "decorative_stone", "cobblestone", "rubble_stone", "derbent_stone", "reika"):
+    if material_type not in ("standard", "rigel", "cobblestone", "rubble_stone", "derbent_stone", "reika"):
         raise HTTPException(status_code=400, detail="Invalid material_type")
     if supplier not in ("redstone", "redstone_premium", "krasny_kamen", "reika"):
         raise HTTPException(status_code=400, detail="Invalid supplier")

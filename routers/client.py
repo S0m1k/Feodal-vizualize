@@ -178,7 +178,7 @@ async def client_generate(
     base_url = resolve_public_base_url(request)
     photo_url = f"{base_url}/temp/client/{temp_filename}"
     texture_url = f"{base_url}/textures/{material_type}/{supplier}/{quote(filename)}"
-    _STONE_TYPES = {"decorative_stone", "cobblestone", "rubble_stone", "derbent_stone"}
+    _STONE_TYPES = {"cobblestone", "rubble_stone", "derbent_stone"}
     grout_hex = None
     if grout_color_name and material_type not in _STONE_TYPES:
         db = await get_db()

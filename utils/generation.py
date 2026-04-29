@@ -32,7 +32,7 @@ def _extract_output_url(status_data: dict) -> str | None:
     return None
 
 
-_STONE_TYPES = {"decorative_stone", "cobblestone", "rubble_stone", "derbent_stone"}
+_STONE_TYPES = {"cobblestone", "rubble_stone", "derbent_stone"}
 
 
 def build_prompt(category: str, material_type: str,
@@ -46,14 +46,7 @@ def build_prompt(category: str, material_type: str,
         "Do NOT change anything outside the red zone. "
     ) if use_zone else ""
 
-    if material_type == "decorative_stone":
-        prompt = (f"{base} {zone_instr}Replace {target} with the provided stone texture. "
-                  f"Format: Ledgestone / Stacked stone. "
-                  f"The elements must be significantly smaller and thinner than original wall panels. "
-                  f"Create a dense, intricate pattern of narrow horizontal stone strips. "
-                  f"Tile the texture with high frequency to ensure a realistic architectural scale. "
-                  f"Preserve the rough, natural rock relief and color depth.")
-    elif material_type == "rubble_stone":
+    if material_type == "rubble_stone":
         prompt = (f"{base} {zone_instr}Replace {target} with the provided texture. "
                   f"Format: Wild rubble / irregular angular fieldstone. "
                   f"Stones must be tightly packed, varying in size and shape with sharp, jagged edges. "

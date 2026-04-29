@@ -729,7 +729,6 @@
         <select id="catMatType">
           <option value="standard">Кирпич</option>
           <option value="rigel">Ригель</option>
-          <option value="decorative_stone">Декоративный</option>
           <option value="cobblestone">Круглый камень</option>
           <option value="rubble_stone">Рваный камень</option>
           <option value="derbent_stone">Квадратный камень</option>
@@ -791,7 +790,6 @@
         <select id="textureMaterialType">
           <option value="standard">Кирпич</option>
           <option value="rigel">Ригель</option>
-          <option value="decorative_stone">Декоративный</option>
           <option value="cobblestone">Круглый камень</option>
           <option value="rubble_stone">Рваный камень</option>
           <option value="derbent_stone">Квадратный камень</option>
@@ -865,7 +863,6 @@
         <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;" id="accentMatBtns">
           <button class="mat-btn" data-mat="standard" onclick="setAccentMat(this,'standard')">Кирпич</button>
           <button class="mat-btn" data-mat="rigel" onclick="setAccentMat(this,'rigel')">Ригель</button>
-          <button class="mat-btn" data-mat="decorative_stone" onclick="setAccentMat(this,'decorative_stone')">Декоративный</button>
           <button class="mat-btn" data-mat="cobblestone" onclick="setAccentMat(this,'cobblestone')">Круглый камень</button>
           <button class="mat-btn" data-mat="rubble_stone" onclick="setAccentMat(this,'rubble_stone')">Рваный камень</button>
           <button class="mat-btn" data-mat="derbent_stone" onclick="setAccentMat(this,'derbent_stone')">Квадратный камень</button>
@@ -918,7 +915,6 @@
           <select id="modalMatType">
             <option value="standard">Кирпич</option>
             <option value="rigel">Ригель</option>
-            <option value="decorative_stone">Декоративный</option>
             <option value="cobblestone">Круглый камень</option>
             <option value="rubble_stone">Рваный камень</option>
             <option value="derbent_stone">Квадратный камень</option>
@@ -1516,7 +1512,7 @@ async function loadAllTextures() {
         const textures = await r.json();
         const c = document.getElementById('texturesList');
         if (!textures.length) { c.innerHTML = '<div>Нет текстур</div>'; return; }
-        const tMap = { standard: 'Кирпич', rigel: 'Ригель', decorative_stone: 'Декоративный', cobblestone: 'Круглый', rubble_stone: 'Рваный', derbent_stone: 'Квадратный', reika: 'Рейка' };
+        const tMap = { standard: 'Кирпич', rigel: 'Ригель', cobblestone: 'Круглый', rubble_stone: 'Рваный', derbent_stone: 'Квадратный', reika: 'Рейка' };
         const sMap = { redstone: 'Redstone', redstone_premium: 'Redstone Premium', krasny_kamen: 'Красный Камень' };
         c.innerHTML = `<table>
             <thead><tr><th>ID</th><th>Название</th><th>Тип</th><th>Поставщик</th><th>Файл</th><th>Действие</th></tr></thead>
@@ -1793,11 +1789,10 @@ function createDrawer(canvasId) {
 // ============================================================
 //  ACCENTS (Акценты) — unified tab (replaces Belt/Plinth/Reika)
 // ============================================================
-let accentDrawer = null, accentTex = null, accentMat = 'decorative_stone', accentInited = false;
+let accentDrawer = null, accentTex = null, accentMat = 'cobblestone', accentInited = false;
 
 // All material types available in Accents
 const ACCENT_MATERIALS = [
-    { code: 'decorative_stone', label: 'Декоративный' },
     { code: 'cobblestone',      label: 'Круглый камень' },
     { code: 'rubble_stone',     label: 'Рваный камень' },
     { code: 'derbent_stone',    label: 'Квадратный камень' },
