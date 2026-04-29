@@ -425,7 +425,7 @@ async def add_texture(
         raise HTTPException(status_code=400, detail="Invalid material_type")
     if supplier not in ("redstone", "redstone_premium", "krasny_kamen", "reika"):
         raise HTTPException(status_code=400, detail="Invalid supplier")
-    filename = file.filename
+    filename = os.path.basename(file.filename or "upload.jpg")
     save_path = os.path.join("textures", material_type, supplier, filename)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     with open(save_path, "wb") as f:

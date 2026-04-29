@@ -87,28 +87,33 @@ app.mount("/textures", StaticFiles(directory="textures"), name="textures")
 # Эндпоинты для отдачи временных и сгенерированных файлов
 @app.get("/temp/client/{filename}")
 def get_temp_client(filename: str):
-    filepath = os.path.join("temp/client", filename)
+    safe = os.path.basename(filename)
+    filepath = os.path.join("temp/client", safe)
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404)
     return FileResponse(filepath)
 
 @app.get("/temp/internal/{filename}")
 def get_temp_internal(filename: str):
-    filepath = os.path.join("temp/internal", filename)
+    safe = os.path.basename(filename)
+    filepath = os.path.join("temp/internal", safe)
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404)
     return FileResponse(filepath)
 
 @app.get("/generated/client/{filename}")
 def get_generated_client(filename: str):
-    filepath = os.path.join("data/generations/client", filename)
+    safe = os.path.basename(filename)
+    filepath = os.path.join("data/generations/client", safe)
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404)
     return FileResponse(filepath)
 
 @app.get("/generated/internal/{user_id}/{filename}")
 def get_generated_internal(user_id: str, filename: str):
-    filepath = os.path.join("data/generations/internal", user_id, filename)
+    safe_uid = os.path.basename(user_id)
+    safe_fn  = os.path.basename(filename)
+    filepath = os.path.join("data/generations/internal", safe_uid, safe_fn)
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404)
     return FileResponse(filepath)
@@ -116,14 +121,16 @@ def get_generated_internal(user_id: str, filename: str):
 # Эндпоинты для отдачи текстур без префикса /textures (для совместимости с фронтом)
 @app.get("/standard/{filename}")
 def standard_texture(filename: str):
-    filepath = os.path.join("textures", "standard", filename)
+    safe = os.path.basename(filename)
+    filepath = os.path.join("textures", "standard", safe)
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404)
     return FileResponse(filepath)
 
 @app.get("/rigel/{filename}")
 def rigel_texture(filename: str):
-    filepath = os.path.join("textures", "rigel", filename)
+    safe = os.path.basename(filename)
+    filepath = os.path.join("textures", "rigel", safe)
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404)
     return FileResponse(filepath)
