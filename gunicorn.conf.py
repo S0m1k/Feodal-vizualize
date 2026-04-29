@@ -11,7 +11,7 @@ graceful_timeout = 30
 keepalive = 5
 
 # Logging
-accesslog = "-"
-errorlog = "-"
+accesslog = "/var/www/your_project/logs/gunicorn-access.log"
+errorlog = "/var/www/your_project/logs/gunicorn-error.log"
 loglevel = "info"
 access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s" %(D)s'
