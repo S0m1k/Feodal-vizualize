@@ -166,13 +166,17 @@ def build_belt_prompt(has_texture: bool = True, material_type: str = None) -> st
         )
     else:
         return (
-            "ATTENTION: Change the EXISTING facade material ONLY within the red-highlighted zone. "
-            "Task: Rearrange the current bricks/material into a Vertical Soldier Course. "
+            "ATTENTION: Change the EXISTING facade material orientation ONLY within the red-highlighted zone. "
+            "TASK: Rearrange the current bricks into a Vertical Soldier Course. "
             "Bricks must stand upright on their ends, oriented vertically in a straight decorative row. "
-            "Constraint: Use the EXACT same color, tone, and weathering as the surrounding wall. "
-            "The only change is the orientation of the masonry pattern within the red zone. "
+            "CRITICAL ALIGNMENT: The decorative belt must be perfectly flush and level with the surrounding facade surfaces, "
+            "staying on the exact same plane. "
+            "Avoid any recession, offset, or 'sunken' effect. "
+            "Ensure there are no deep shadow gaps at the top or bottom edges of the belt. "
+            "MATERIAL MATCH: Use the EXACT same color, tone, and material as the surrounding wall. "
+            "The only change is the orientation of the pattern. "
             "Do NOT change anything outside the red zone. "
-            "Hyper-realistic architectural rendering, 8k."
+            "Hyper-realistic architectural rendering, 8k, photorealistic lighting."
         )
 
 
