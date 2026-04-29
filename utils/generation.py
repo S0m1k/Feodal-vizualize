@@ -53,13 +53,17 @@ def build_prompt(category: str, material_type: str,
                   f"Maintain a natural, rugged relief and organic placement.")
     elif material_type == "cobblestone":
         prompt = (f"{base} {zone_instr}"
-                  f"CRITICAL SCALE & DENSITY: Replace {target} with micro-scale, high-density rounded cobblestones. "
-                  f"The stones must be significantly smaller than the wall elements — each stone approximately the size of a human fist relative to the windows. "
-                  f"There must be many dozens of visible stones across the surface, appearing as a dense mosaic. "
-                  f"TEXTURE & RELIEF: Use smooth, weathered river stones with organic, non-linear placement. "
-                  f"Incorporate deeply recessed, shadowed mortar joints (raked joints) between every stone to create pronounced tactile 3D relief — avoid any flat or blurry look. "
-                  f"EXECUTION: Tile the texture with maximum frequency to maintain realistic architectural scale. "
-                  f"Blend the stonework seamlessly with the surrounding environment at zone edges.")
+                  f"TASK: Replace {target} with raw, natural weathered cobblestone. "
+                  f"CRITICAL ANTI-PLASTIC INSTRUCTIONS: "
+                  f"Surface Texture: The stone surface must be matte, coarse, and granular with visible mineral pores and natural imperfections. "
+                  f"Strictly avoid smooth, glossy, or plastic-like finishes. "
+                  f"Scale & Density: Maintain a high-density mosaic of many small-to-medium stones (fist-sized relative to windows). "
+                  f"Each stone must have a unique, organic shape — no identical or repetitive patterns. "
+                  f"3D Relief: Incorporate deep, dark, irregular mortar joints (raked joints) between stones. "
+                  f"This must create a strong ambient occlusion effect (soft shadows in the gaps), giving the wall real 3D tactile depth. "
+                  f"Color Variance: Stones must have natural earthy color variations (mix of grays, tans, and browns) "
+                  f"with subtle mineral staining to break the uniform sticker look. "
+                  f"GEOMETRY: Keep the cladding flush with surrounding wall surfaces, but ensure each stone protrudes slightly for a realistic rugged texture.")
     elif material_type == "derbent_stone":
         prompt = (f"{base} {zone_instr}Replace {target} with a detailed pattern of very small, finely hand-tooled ashlar limestone masonry. "
                   f"CRITICAL DETAIL (Scale and Texture): The new stonework must consist of very small and numerous "
