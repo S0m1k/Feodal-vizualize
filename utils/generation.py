@@ -68,17 +68,13 @@ def build_prompt(category: str, material_type: str,
                   f"with subtle mineral staining to break the uniform sticker look. "
                   f"GEOMETRY: Keep the cladding flush with surrounding wall surfaces, but ensure each stone protrudes slightly for a realistic rugged texture.")
     elif material_type == "derbent_stone":
-        prompt = (f"{base} {zone_instr}Replace {target} with a detailed pattern of very small, finely hand-tooled ashlar limestone masonry. "
-                  f"CRITICAL DETAIL (Scale and Texture): The new stonework must consist of very small and numerous "
-                  f"individual stones, mirroring the provided reference. "
-                  f"These stones must have a matte, finely hand-tooled surface with a clean, cut look. "
-                  f"The individual blocks must be flat and even — precise, hand-cut tiles rather than irregular rubble. "
-                  f"CRITICAL DETAIL (Coursing and Joints): Lay blocks in very clean, tight, regular horizontal courses. "
-                  f"Incorporate very deeply recessed and shadowed mortar joints (raked joints) between every stone block. "
-                  f"These deep, dark shadows between flat clean blocks must create the primary relief — "
-                  f"avoid any rugged or bumpy surface texture on the stone faces themselves. "
-                  f"COLOR: Light beige/cream with subtle natural variation. "
-                  f"Ensure all multi-level geometry and building details are preserved.")
+        prompt = (f"{base} {zone_instr}Replace {target} with a detailed pattern of Melen-style ashlar masonry. "
+                  f"CRITICAL GAPS & JOINTS (No Grout): Zero Grout Gap — The stones must be laid with zero-clearance joints (dry stack appearance). "
+                  f"Strictly avoid wide mortar lines or visible grout. Tight Fit — Individual blocks must be pressed tightly against each other, with only a hairline fracture visible between them. "
+                  f"SCALE & TEXTURE: Fine Scale — Use very small and numerous rectangular and square stone blocks (matching the hand-size scale relative to windows). "
+                  f"Heavy Relief — Each stone must have a deeply rugged, hand-chipped surface (rock-face texture). The primary shadow must come from the stone's own relief, not from the grout. "
+                  f"GEOMETRY: Keep the blocks in clean, tight horizontal courses. Surface must be matte with natural mineral variance. "
+                  f"Preserve all original house geometry and lighting EXACTLY. Hyper-realistic, 8k architectural visualization, sharp focus on masonry.")
     elif material_type == "standard":
         prompt = (f"{base} {zone_instr}Replace {target} with the provided brick texture. "
                   f"Apply as high-density brickwork. Bricks must be small and frequent, "
@@ -97,18 +93,14 @@ def build_prompt(category: str, material_type: str,
 
 
 def _derbent_zone_detail() -> str:
-    """Детальное описание мелкомасштабного чистого тесаного камня для зональных промтов."""
+    """Детальное описание Melen-style сухой кладки для зональных промтов."""
     return (
-        "Fill the entire red zone with a detailed pattern of very small, finely hand-tooled ashlar limestone masonry "
-        "matching the provided reference. "
-        "CRITICAL DETAIL (Scale and Texture): The stonework must consist of very small and numerous individual stones. "
-        "Each stone must have a matte, finely hand-tooled surface with a clean, cut look — "
-        "flat and even, like precise hand-cut tiles rather than irregular rubble. "
-        "CRITICAL DETAIL (Coursing and Joints): Lay blocks in very clean, tight, regular horizontal courses with "
-        "very deeply recessed and shadowed mortar joints (raked joints) between every stone. "
-        "These deep dark shadows between flat clean blocks must create the primary relief — "
-        "avoid any rugged or bumpy texture on the stone faces themselves. "
-        "Use light beige/cream color with subtle natural variation. "
+        "Fill the entire red zone with a detailed pattern of Melen-style ashlar masonry matching the provided reference. "
+        "CRITICAL GAPS & JOINTS (No Grout): Zero Grout Gap — The stones must be laid with zero-clearance joints (dry stack appearance). "
+        "Strictly avoid wide mortar lines or visible grout. Tight Fit — Individual blocks must be pressed tightly against each other, with only a hairline fracture visible between them. "
+        "SCALE & TEXTURE: Fine Scale — Use very small and numerous rectangular and square stone blocks (matching the hand-size scale relative to windows). "
+        "Heavy Relief — Each stone must have a deeply rugged, hand-chipped surface (rock-face texture). The primary shadow must come from the stone's own relief, not from the grout. "
+        "GEOMETRY: Keep the blocks in clean, tight horizontal courses. Surface must be matte with natural mineral variance. "
         "Blend seamlessly with surrounding surfaces at the zone edges. "
     )
 
