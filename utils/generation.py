@@ -68,14 +68,15 @@ def build_prompt(category: str, material_type: str,
                   f"with subtle mineral staining to break the uniform sticker look. "
                   f"GEOMETRY: Keep the cladding flush with surrounding wall surfaces, but ensure each stone protrudes slightly for a realistic rugged texture.")
     elif material_type == "derbent_stone":
-        prompt = (f"{base} {zone_instr}Replace {target} with Melen-style heavy-relief ashlar masonry. "
-                  f"3D VOLUME & SHADOWS (Critical): Extreme Ruggedness — Each stone must have a deeply craggy, rock-face texture with sharp protrusions and jagged recesses. "
-                  f"Directional Lighting — The stone surface must catch the light realistically, creating high-contrast highlights and deep shadows on its own rugged peaks and valleys. "
-                  f"3D Protrusion — Stones must look like they physically protrude from the wall at different depths (3-5cm variation). Strictly avoid flat or smooth 'wallpaper' looks. "
-                  f"JOINTS & SPACING: Tight Dry-Stack — Lay stones with zero-gap, dry-stack joints. No visible grout or cement lines. The only 'lines' should be the deep natural shadows where the rugged stone edges meet. "
-                  f"SCALE: Use small-to-medium hand-sized blocks relative to windows to maintain architectural realism. "
-                  f"STRICTLY FORBIDDEN: Smooth surfaces, glossy finishes, wide grout lines, repetitive flat patterns. "
-                  f"Preserve original geometry and lighting. Hyper-realistic 8k architectural masonry focus.")
+        prompt = (f"{base} {zone_instr}Replace {target} with raw, hand-chipped Melen rockface masonry. "
+                  f"FORBIDDEN: Do NOT use bricks, do NOT use tiles, do NOT use smooth blocks. Strictly avoid any regular grid pattern. "
+                  f"SURFACE GEOMETRY (The 'Melen' Effect): Rugged 3D Relief — Every stone must have an extreme rock-face texture with sharp, jagged protrusions and deep natural crevices. "
+                  f"Heavy Shadowing — The surface must be highly irregular, creating deep shadows and bright highlights on the stone's own texture under the sunlight. "
+                  f"Raw Mineral Look — The finish must be ultra-matte, coarse, and stony, like freshly quarried limestone. No gloss, no flat planes. "
+                  f"JOINTS & DENSITY: Invisible Dry-Stack — Lay stones with zero-gap dry-stacking. There should be NO mortar, NO grout, and NO visible cement lines. "
+                  f"Natural Fractures — The only separation between stones should be thin, irregular shadow-cracks, not straight lines. "
+                  f"SCALE: Use small-to-medium hand-sized blocks relative to the windows to ensure architectural realism. "
+                  f"VISUAL STYLE: Hyper-realistic 8k architectural rendering, emphasis on 3D stone relief and natural masonry.")
     elif material_type == "standard":
         prompt = (f"{base} {zone_instr}Replace {target} with the provided brick texture. "
                   f"Apply as high-density brickwork. Bricks must be small and frequent, "
@@ -94,15 +95,16 @@ def build_prompt(category: str, material_type: str,
 
 
 def _derbent_zone_detail() -> str:
-    """Детальное описание Melen-style heavy-relief dry-stack кладки для зональных промтов."""
+    """Детальное описание Melen Brutal Rockface — для зональных промтов (plinth, belt)."""
     return (
-        "Fill the entire red zone with Melen-style heavy-relief ashlar masonry matching the provided reference. "
-        "3D VOLUME & SHADOWS (Critical): Extreme Ruggedness — Each stone must have a deeply craggy, rock-face texture with sharp protrusions and jagged recesses. "
-        "Directional Lighting — The stone surface must catch the light realistically, creating high-contrast highlights and deep shadows on its own rugged peaks and valleys. "
-        "3D Protrusion — Stones must look like they physically protrude from the wall at different depths (3-5cm variation). Strictly avoid flat or smooth 'wallpaper' looks. "
-        "JOINTS & SPACING: Tight Dry-Stack — Lay stones with zero-gap, dry-stack joints. No visible grout or cement lines. The only 'lines' should be the deep natural shadows where the rugged stone edges meet. "
-        "SCALE: Use small-to-medium hand-sized blocks relative to windows to maintain architectural realism. "
-        "STRICTLY FORBIDDEN: Smooth surfaces, glossy finishes, wide grout lines, repetitive flat patterns. "
+        "Fill the entire red zone with raw, hand-chipped Melen rockface masonry matching the provided reference. "
+        "FORBIDDEN: Do NOT use bricks, do NOT use tiles, do NOT use smooth blocks. Strictly avoid any regular grid pattern. "
+        "SURFACE GEOMETRY (The 'Melen' Effect): Rugged 3D Relief — Every stone must have an extreme rock-face texture with sharp, jagged protrusions and deep natural crevices. "
+        "Heavy Shadowing — The surface must be highly irregular, creating deep shadows and bright highlights on the stone's own texture under the sunlight. "
+        "Raw Mineral Look — The finish must be ultra-matte, coarse, and stony, like freshly quarried limestone. No gloss, no flat planes. "
+        "JOINTS & DENSITY: Invisible Dry-Stack — Lay stones with zero-gap dry-stacking. There should be NO mortar, NO grout, and NO visible cement lines. "
+        "Natural Fractures — The only separation between stones should be thin, irregular shadow-cracks, not straight lines. "
+        "SCALE: Use small-to-medium hand-sized blocks relative to the windows to ensure architectural realism. "
         "Blend seamlessly with surrounding surfaces at the zone edges. "
     )
 
