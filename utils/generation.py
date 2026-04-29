@@ -52,10 +52,14 @@ def build_prompt(category: str, material_type: str,
                   f"Stones must be tightly packed, varying in size and shape with sharp, jagged edges. "
                   f"Maintain a natural, rugged relief and organic placement.")
     elif material_type == "cobblestone":
-        prompt = (f"{base} {zone_instr}Replace {target} with the provided texture. "
-                  f"Format: Rounded river stones / smooth cobblestones. "
-                  f"Stones should have soft, weathered edges and organic, non-linear placement. "
-                  f"Emphasize the tactile, smooth surface and depth of mortar joints.")
+        prompt = (f"{base} {zone_instr}"
+                  f"CRITICAL SCALE & DENSITY: Replace {target} with micro-scale, high-density rounded cobblestones. "
+                  f"The stones must be significantly smaller than the wall elements — each stone approximately the size of a human fist relative to the windows. "
+                  f"There must be many dozens of visible stones across the surface, appearing as a dense mosaic. "
+                  f"TEXTURE & RELIEF: Use smooth, weathered river stones with organic, non-linear placement. "
+                  f"Incorporate deeply recessed, shadowed mortar joints (raked joints) between every stone to create pronounced tactile 3D relief — avoid any flat or blurry look. "
+                  f"EXECUTION: Tile the texture with maximum frequency to maintain realistic architectural scale. "
+                  f"Blend the stonework seamlessly with the surrounding environment at zone edges.")
     elif material_type == "derbent_stone":
         prompt = (f"{base} {zone_instr}Replace {target} with a detailed pattern of very small, finely hand-tooled ashlar limestone masonry. "
                   f"CRITICAL DETAIL (Scale and Texture): The new stonework must consist of very small and numerous "
