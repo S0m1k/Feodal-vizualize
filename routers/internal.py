@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, Form, File, Q
 from database import get_db
 from middleware import get_current_manager, get_current_user, get_current_admin
 import asyncio
-from utils.generation import generate_image, build_prompt, build_accent_prompt
+from utils.generation import generate_image, build_prompt, build_plinth_prompt, build_reika_prompt, build_belt_prompt
 from utils.notifications import create_notification
 from rauth import get_password_hash
 from pydantic import BaseModel
@@ -606,14 +606,16 @@ async def _run_zone_generation(
 @router.post("/accent/generate")
 async def accent_generate(
     annotated_photo: UploadFile = File(...),
-    texture: str = Form(None),
+    accent_type: str = Form("plinth"),        # plinth | reika | belt
+    orientation: str = Form("horizontal"),    # для reika: horizontal | vertical
+    texture: str = Form(None),               # опционально для belt
     material_type: str = Form(None),
     supplier: str = Form(None),
     current_user = Depends(get_current_manager),
 ):
-    """Универсальная генерация акцентов (бывш. Пояса / Цоколь / Рейка).
-    Текстура опциональна: если не выбрана — работаем только с аннотированным фото.
-    """
+    """Генерация акцентов: Цоколь / Рейка / Пояса."""
+    if accent_type not in ("plinth", "reika", "belt"):
+        raise HTTPException(status_code=400, detail="accent_type must be plinth, reika or belt")
     if not (annotated_photo.content_type or "").startswith("image/"):
         raise HTTPException(status_code=400, detail="Ожидается изображение")
 
@@ -630,12 +632,11 @@ async def accent_generate(
 
     base_url  = _resolve_base_url()
     photo_url = f"{base_url}/temp/internal/{filename}"
-    prompt    = build_accent_prompt()
 
     image_urls   = [photo_url]
     texture_name = ""
 
-    # Если передана текстура — добавляем URL текстуры
+    # Добавляем текстуру если передана (обязательна для plinth/reika, опциональна для belt)
     if texture and material_type and supplier:
         db = await get_db()
         try:
@@ -652,10 +653,23 @@ async def accent_generate(
         image_urls.append(texture_url)
         texture_name = texture
 
+    # Выбираем промт по типу подвкладки
+    has_texture = len(image_urls) > 1
+    if accent_type == "plinth":
+        if not has_texture:
+            raise HTTPException(status_code=400, detail="Для Цоколя необходимо выбрать текстуру")
+        prompt = build_plinth_prompt()
+    elif accent_type == "reika":
+        if not has_texture:
+            raise HTTPException(status_code=400, detail="Для Рейки необходимо выбрать текстуру")
+        prompt = build_reika_prompt(orientation)
+    else:  # belt
+        prompt = build_belt_prompt(has_texture)
+
     redis_client.setex(f"gen_status:{request_id}", 3600, "processing")
     asyncio.create_task(_run_zone_generation(
         request_id, image_urls, prompt,
-        user_id, "accent", texture_name, temp_path,
+        user_id, accent_type, texture_name, temp_path,
         material_type or "", supplier or "",
     ))
     return {"request_id": request_id}

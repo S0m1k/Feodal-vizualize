@@ -79,20 +79,60 @@ def build_prompt(category: str, material_type: str,
     return prompt
 
 
-def build_accent_prompt() -> str:
-    """Универсальный промт для Акцентов (бывш. Пояса / Цоколь / Рейка).
-    Текстура уже повёрнута на клиенте — нейросеть копирует ориентацию из референса.
-    """
+def build_plinth_prompt() -> str:
+    """Промт для подвкладки Цоколь."""
     return (
-        "Preserve all original house geometry, windows, doors, and surrounding environment EXACTLY. "
-        "The red-highlighted zone marks the area for the new architectural element. "
-        "STRICT INSTRUCTION: Apply the provided texture EXACTLY as shown in the reference image, "
-        "matching its orientation, scale, and direction (horizontal/vertical) precisely within the red zone. "
-        "Do NOT change the texture angle. "
-        "The element must blend seamlessly with the surrounding environment at its edges. "
-        "All areas outside the red zone must remain completely unchanged. "
-        "Hyper-realistic architectural rendering, 8k, photorealistic lighting."
+        "Preserve all original house geometry, windows, and environment EXACTLY. "
+        "The red-highlighted zone indicates the plinth. "
+        "Replace the texture STRICTLY within the red zone with the provided texture. "
+        "Ensure the new material (stone/brick) aligns with the perspective of the building. "
+        "The cladding must look heavy and structural. "
+        "Do NOT change anything outside the red zone. "
+        "Hyper-realistic, 8k architectural visualization."
     )
+
+
+def build_reika_prompt(orientation: str = "horizontal") -> str:
+    """Промт для подвкладки Рейка."""
+    orient_word = "Horizontal" if orientation == "horizontal" else "Vertical"
+    return (
+        "Preserve all original house geometry and lighting EXACTLY. "
+        "The red-highlighted zone marks the area for decorative slats. "
+        "Apply the provided reika (slatted) texture STRICTLY within this zone. "
+        f"Orientation: {orient_word}. "
+        "Slats must be perfectly straight, evenly spaced, and match the architectural scale of the building. "
+        "Follow the orientation of the provided texture sample exactly. "
+        "Ensure clean edges where the slats meet other materials. "
+        "Do NOT change anything outside the red zone. "
+        "8k, sharp focus on timber/metal texture."
+    )
+
+
+def build_belt_prompt(has_texture: bool = True) -> str:
+    """Промт для подвкладки Пояса.
+    Сценарий А (has_texture=True): заменить зону на выбранную текстуру.
+    Сценарий Б (has_texture=False): перекомпоновать существующую кладку в солдатский ряд.
+    """
+    if has_texture:
+        return (
+            "Preserve all original facade geometry. "
+            "The red-highlighted horizontal zone is a decorative belt. "
+            "Replace the texture STRICTLY within the red zone with the provided texture. "
+            "Match the orientation and scale of the sample. "
+            "The belt must look integrated into the facade with realistic depth and shadows at the seams. "
+            "Do NOT change anything outside the red zone. "
+            "8k, photorealistic."
+        )
+    else:
+        return (
+            "ATTENTION: Change the EXISTING facade material ONLY within the red-highlighted zone. "
+            "Task: Rearrange the current bricks/material into a Vertical Soldier Course. "
+            "Bricks must stand upright on their ends, oriented vertically in a straight decorative row. "
+            "Constraint: Use the EXACT same color, tone, and weathering as the surrounding wall. "
+            "The only change is the orientation of the masonry pattern within the red zone. "
+            "Do NOT change anything outside the red zone. "
+            "Hyper-realistic architectural rendering, 8k."
+        )
 
 
 async def generate_image(image_urls: list, prompt: str) -> dict:
