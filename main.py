@@ -18,7 +18,10 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s [%(name)s] %(message)s"
 )
 app = FastAPI()
-redis_client = Redis(host='localhost', port=6379, decode_responses=True)
+redis_client = Redis(
+    host='localhost', port=6379, decode_responses=True,
+    password=os.getenv("REDIS_PASSWORD") or None,
+)
 
 # Публичные клиентские пути — разрешаем любой Origin (без credentials)
 _PUBLIC_CLIENT_PATHS = (

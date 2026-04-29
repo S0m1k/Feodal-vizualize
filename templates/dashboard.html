@@ -174,7 +174,7 @@
       color: #fff; box-shadow: 0 2px 8px rgba(192,57,43,.25);
     }
 
-    /* ===== PHOTO UPLOADER (belt / plinth) ===== */
+    /* ===== PHOTO UPLOADER (accent zones) ===== */
     .photo-uploader { padding: 2px 0; }
     .photo-uploader.drag-over .photo-uploader-empty { outline: 2px dashed #e53935; outline-offset: 4px; border-radius: 12px; }
     .photo-uploader-empty { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
@@ -617,9 +617,7 @@
   </div>
   <ul class="sidebar-nav">
     <li><span class="nav-link active" data-page="visualizer"><span class="nav-icon">🎨</span> Облицовка</span></li>
-    <li><span class="nav-link" data-page="belt"><span class="nav-icon">🏗</span> Пояса</span></li>
-    <li><span class="nav-link" data-page="plinth"><span class="nav-icon">🧱</span> Цоколь</span></li>
-    <li><span class="nav-link" data-page="reika"><span class="nav-icon">🪵</span> Рейка</span></li>
+    <li><span class="nav-link" data-page="accent"><span class="nav-icon">✦</span> Акценты</span></li>
     <li><span class="nav-link" data-page="catalog"><span class="nav-icon">📚</span> Каталог</span></li>
     <li><span class="nav-link" data-page="history"><span class="nav-icon">📜</span> История</span></li>
     <li id="adminNavItem" style="display:none;"><span class="nav-link" data-page="admin"><span class="nav-icon">⚙️</span> Администрирование</span></li>
@@ -731,10 +729,10 @@
         <select id="catMatType">
           <option value="standard">Кирпич</option>
           <option value="rigel">Ригель</option>
-          <option value="decorative_stone">Декоративный камень</option>
-          <option value="cobblestone">Булыжник</option>
+          <option value="decorative_stone">Декоративный</option>
+          <option value="cobblestone">Круглый камень</option>
           <option value="rubble_stone">Рваный камень</option>
-          <option value="derbent_stone">Дербент</option>
+          <option value="derbent_stone">Квадратный камень</option>
         </select>
       </div>
       <div class="filter-group">
@@ -793,10 +791,10 @@
         <select id="textureMaterialType">
           <option value="standard">Кирпич</option>
           <option value="rigel">Ригель</option>
-          <option value="decorative_stone">Декоративный камень</option>
-          <option value="cobblestone">Булыжник</option>
+          <option value="decorative_stone">Декоративный</option>
+          <option value="cobblestone">Круглый камень</option>
           <option value="rubble_stone">Рваный камень</option>
-          <option value="derbent_stone">Дербент</option>
+          <option value="derbent_stone">Квадратный камень</option>
           <option value="reika">Рейка</option>
         </select>
         <select id="textureSupplier">
@@ -834,198 +832,73 @@
     </div>
   </section>
 
-  <!-- ====== BELT (Пояса) ====== -->
-  <section class="page" id="page-belt">
-    <h1 class="page-title">🏗 Пояса</h1>
+  <!-- ====== ACCENT (Акценты — бывш. Пояса/Цоколь/Рейка) ====== -->
+  <section class="page" id="page-accent">
+    <h1 class="page-title">✦ Акценты</h1>
     <p style="color:#5b6fa0;margin-bottom:20px;font-size:.9rem;">
-      Загрузите фото здания, обозначьте красным зоны горизонтального декоративного пояса и нажмите «Сгенерировать».
+      Загрузите фото, при необходимости выберите текстуру, обозначьте красным зону декора и нажмите «Сгенерировать».
     </p>
     <div style="max-width:900px;display:flex;flex-direction:column;gap:20px;">
 
       <!-- Step 1: Photo -->
       <div class="card">
         <div class="step-title" style="margin-bottom:12px;">1. Фото здания</div>
-        <div class="photo-uploader" id="beltDrop">
-          <input type="file" id="beltFile" accept="image/*" style="display:none">
+        <div class="photo-uploader" id="accentDrop">
+          <input type="file" id="accentFile" accept="image/*" style="display:none">
           <div class="photo-uploader-empty">
-            <button type="button" class="photo-add-btn" onclick="document.getElementById('beltFile').click()">📷 Добавить фото</button>
+            <button type="button" class="photo-add-btn" onclick="document.getElementById('accentFile').click()">📷 Добавить фото</button>
             <span class="photo-uploader-hint">или перетащите файл · JPG, PNG</span>
           </div>
           <div class="photo-uploader-filled" style="display:none;">
             <img class="photo-uploader-thumb" src="" alt="">
             <div class="photo-uploader-info">
               <div class="photo-uploader-name"></div>
-              <button type="button" class="photo-change-btn" onclick="document.getElementById('beltFile').click()">Изменить фото</button>
+              <button type="button" class="photo-change-btn" onclick="document.getElementById('accentFile').click()">Изменить фото</button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Step 2: Canvas (shown after photo loaded) -->
-      <div class="card" id="beltCanvasCard" style="display:none;">
-        <div class="step-title" style="margin-bottom:8px;">2. Обозначьте зоны пояса <span style="color:#e53935">красным</span></div>
-        <div class="brush-ctrl">
-          <label>Кисть</label>
-          <input type="range" id="beltBrush" min="4" max="50" value="14">
-          <button onclick="beltDrawer&&beltDrawer.reset()">Очистить</button>
-        </div>
-        <div class="canvas-wrap" id="beltCanvasWrap"><canvas id="beltCanvas"></canvas></div>
-      </div>
-
-      <!-- Mode + Category + Generate -->
-      <div class="card" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-        <div style="display:flex;flex-direction:column;gap:6px;">
-          <label style="font-size:.78rem;color:#9aadcc;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Режим кладки</label>
-          <div style="display:flex;gap:8px;" id="beltModeBtns">
-            <button type="button" class="mat-btn active" onclick="setBeltMode('soldier',this)">🧱 Солдатик</button>
-            <button type="button" class="mat-btn" onclick="setBeltMode('checker',this)">♟ Шахматный</button>
-            <button type="button" class="mat-btn" onclick="setBeltMode('random_bond',this)">🎲 Хаотичная</button>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:6px;">
-          <label style="font-size:.78rem;color:#9aadcc;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Категория</label>
-          <select id="beltCategory" style="padding:7px 10px;border-radius:8px;border:1.5px solid #dde4f0;">
-            <option value="facade">Фасад</option>
-            <option value="interior">Интерьер</option>
-          </select>
-        </div>
-        <button class="zone-gen-btn" id="beltGenBtn" style="width:auto;flex:1;min-width:200px;margin:0;align-self:flex-end;" onclick="generateBelt()">Сгенерировать →</button>
-      </div>
-
-      <!-- Result thumbnail -->
-      <div id="beltResult" class="zone-result-panel"></div>
-    </div>
-  </section>
-
-  <!-- ====== PLINTH (Цоколь) ====== -->
-  <section class="page" id="page-plinth">
-    <h1 class="page-title">🧱 Цоколь</h1>
-    <p style="color:#5b6fa0;margin-bottom:20px;font-size:.9rem;">
-      Загрузите фото, выберите текстуру цоколя и обведите красным нижнюю зону фасада.
-    </p>
-    <div style="max-width:900px;display:flex;flex-direction:column;gap:20px;">
-
-      <!-- Step 1: Photo -->
+      <!-- Step 2: Texture (optional) -->
       <div class="card">
-        <div class="step-title" style="margin-bottom:12px;">1. Фото здания</div>
-        <div class="photo-uploader" id="plinthDrop">
-          <input type="file" id="plinthFile" accept="image/*" style="display:none">
-          <div class="photo-uploader-empty">
-            <button type="button" class="photo-add-btn" onclick="document.getElementById('plinthFile').click()">📷 Добавить фото</button>
-            <span class="photo-uploader-hint">или перетащите файл · JPG, PNG</span>
-          </div>
-          <div class="photo-uploader-filled" style="display:none;">
-            <img class="photo-uploader-thumb" src="" alt="">
-            <div class="photo-uploader-info">
-              <div class="photo-uploader-name"></div>
-              <button type="button" class="photo-change-btn" onclick="document.getElementById('plinthFile').click()">Изменить фото</button>
-            </div>
-          </div>
+        <div class="step-title" style="margin-bottom:12px;">2. Текстура <span style="color:#9aadcc;font-weight:400;font-size:.82rem;">(опционально — без текстуры ИИ перекомпонует существующую кладку)</span></div>
+        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;" id="accentMatBtns">
+          <button class="mat-btn" data-mat="standard" onclick="setAccentMat(this,'standard')">Кирпич</button>
+          <button class="mat-btn" data-mat="rigel" onclick="setAccentMat(this,'rigel')">Ригель</button>
+          <button class="mat-btn" data-mat="decorative_stone" onclick="setAccentMat(this,'decorative_stone')">Декоративный</button>
+          <button class="mat-btn" data-mat="cobblestone" onclick="setAccentMat(this,'cobblestone')">Круглый камень</button>
+          <button class="mat-btn" data-mat="rubble_stone" onclick="setAccentMat(this,'rubble_stone')">Рваный камень</button>
+          <button class="mat-btn" data-mat="derbent_stone" onclick="setAccentMat(this,'derbent_stone')">Квадратный камень</button>
+          <button class="mat-btn" data-mat="reika" onclick="setAccentMat(this,'reika')">Рейка</button>
         </div>
-      </div>
-
-      <!-- Step 2: Texture selection (visualizer-style) -->
-      <div class="card">
-        <div class="step-title" style="margin-bottom:12px;">2. Текстура цоколя</div>
-        <!-- Material type tabs -->
-        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;" id="plinthMatBtns">
-          <button class="mat-btn active" data-mat="decorative_stone" onclick="setPlinthMat(this,'decorative_stone')">Камень декор.</button>
-          <button class="mat-btn" data-mat="cobblestone" onclick="setPlinthMat(this,'cobblestone')">Булыжник</button>
-          <button class="mat-btn" data-mat="rubble_stone" onclick="setPlinthMat(this,'rubble_stone')">Рваный камень</button>
-          <button class="mat-btn" data-mat="derbent_stone" onclick="setPlinthMat(this,'derbent_stone')">Дербент</button>
-          <button class="mat-btn" data-mat="standard" onclick="setPlinthMat(this,'standard')">Кирпич</button>
-          <button class="mat-btn" data-mat="rigel" onclick="setPlinthMat(this,'rigel')">Ригель</button>
+        <div id="accentSupplierChips" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+          <span style="color:#9aadcc;font-size:.82rem;">Выберите тип материала</span>
         </div>
-        <!-- Supplier chips -->
-        <div id="plinthSupplierChips" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
-          <span style="color:#9aadcc;font-size:.82rem;">Загрузка поставщиков…</span>
-        </div>
-        <!-- Texture grid -->
-        <div class="zone-tex-grid" id="plinthTexGrid">
+        <div class="zone-tex-grid" id="accentTexGrid">
           <div style="color:#9aadcc;font-size:.82rem;padding:8px;">Выберите поставщика</div>
+        </div>
+        <div id="accentSelectedTex" style="display:none;margin-top:10px;padding:10px;background:#f4f7fc;border-radius:10px;display:none;align-items:center;gap:10px;">
+          <img id="accentTexThumb" src="" alt="" style="width:48px;height:48px;object-fit:cover;border-radius:6px;">
+          <span id="accentTexName" style="font-weight:600;font-size:.9rem;"></span>
+          <button style="margin-left:auto;background:none;border:none;color:#ff3b3b;cursor:pointer;font-weight:600;" onclick="clearAccentTexture()">✕ Убрать</button>
         </div>
       </div>
 
       <!-- Step 3: Canvas (shown after photo loaded) -->
-      <div class="card" id="plinthCanvasCard" style="display:none;">
-        <div class="step-title" style="margin-bottom:8px;">3. Обозначьте зону цоколя <span style="color:#e53935">красным</span></div>
+      <div class="card" id="accentCanvasCard" style="display:none;">
+        <div class="step-title" style="margin-bottom:8px;">3. Обозначьте зону <span style="color:#e53935">красным</span></div>
         <div class="brush-ctrl">
           <label>Кисть</label>
-          <input type="range" id="plinthBrush" min="4" max="50" value="14">
-          <button onclick="plinthDrawer&&plinthDrawer.reset()">Очистить</button>
+          <input type="range" id="accentBrush" min="4" max="60" value="14">
+          <button onclick="accentDrawer&&accentDrawer.reset()">Очистить</button>
         </div>
-        <div class="canvas-wrap" id="plinthCanvasWrap"><canvas id="plinthCanvas"></canvas></div>
+        <div class="canvas-wrap" id="accentCanvasWrap"><canvas id="accentCanvas"></canvas></div>
       </div>
 
-      <button class="zone-gen-btn" id="plinthGenBtn" onclick="generatePlinth()">Сгенерировать →</button>
+      <button class="zone-gen-btn" id="accentGenBtn" onclick="generateAccent()">Сгенерировать →</button>
 
       <!-- Result thumbnail -->
-      <div id="plinthResult" class="zone-result-panel"></div>
-    </div>
-  </section>
-
-  <!-- ====== REIKA (Рейка) ====== -->
-  <section class="page" id="page-reika">
-    <h1 class="page-title">🪵 Рейка</h1>
-    <p style="color:#5b6fa0;margin-bottom:20px;font-size:.9rem;">
-      Загрузите фото, выберите текстуру рейки и обведите красным зону облицовки.
-    </p>
-    <div style="max-width:900px;display:flex;flex-direction:column;gap:20px;">
-
-      <!-- Step 1: Photo -->
-      <div class="card">
-        <div class="step-title" style="margin-bottom:12px;">1. Фото здания</div>
-        <div class="photo-uploader" id="reikaDrop">
-          <input type="file" id="reikaFile" accept="image/*" style="display:none">
-          <div class="photo-uploader-empty">
-            <button type="button" class="photo-add-btn" onclick="document.getElementById('reikaFile').click()">📷 Добавить фото</button>
-            <span class="photo-uploader-hint">или перетащите файл · JPG, PNG</span>
-          </div>
-          <div class="photo-uploader-filled" style="display:none;">
-            <img class="photo-uploader-thumb" src="" alt="">
-            <div class="photo-uploader-info">
-              <div class="photo-uploader-name"></div>
-              <button type="button" class="photo-change-btn" onclick="document.getElementById('reikaFile').click()">Изменить фото</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 2: Orientation -->
-      <div class="card">
-        <div class="step-title" style="margin-bottom:10px;">2. Направление рейки</div>
-        <div style="display:flex;gap:10px;" id="reikaOrientBtns">
-          <button type="button" class="mat-btn active" onclick="setReikaOrient('horizontal',this)">↔ Горизонтально</button>
-          <button type="button" class="mat-btn" onclick="setReikaOrient('vertical',this)">↕ Вертикально</button>
-        </div>
-      </div>
-
-      <!-- Step 3: Texture selection -->
-      <div class="card">
-        <div class="step-title" style="margin-bottom:12px;">3. Текстура рейки</div>
-        <div id="reikaSupplierChips" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
-          <span style="color:#9aadcc;font-size:.82rem;">Загрузка…</span>
-        </div>
-        <div class="zone-tex-grid" id="reikaTexGrid">
-          <div style="color:#9aadcc;font-size:.82rem;padding:8px;">Выберите поставщика</div>
-        </div>
-      </div>
-
-      <!-- Step 4: Canvas (shown after photo loaded) -->
-      <div class="card" id="reikaCanvasCard" style="display:none;">
-        <div class="step-title" style="margin-bottom:8px;">4. Обозначьте зону <span style="color:#e53935">красным</span></div>
-        <div class="brush-ctrl">
-          <label>Кисть</label>
-          <input type="range" id="reikaBrush" min="4" max="50" value="14">
-          <button onclick="reikaDrawer&&reikaDrawer.reset()">Очистить</button>
-        </div>
-        <div class="canvas-wrap" id="reikaCanvasWrap"><canvas id="reikaCanvas"></canvas></div>
-      </div>
-
-      <button class="zone-gen-btn" id="reikaGenBtn" onclick="generateReika()">Сгенерировать →</button>
-
-      <!-- Result thumbnail -->
-      <div id="reikaResult" class="zone-result-panel"></div>
+      <div id="accentResult" class="zone-result-panel"></div>
     </div>
   </section>
 
@@ -1045,10 +918,10 @@
           <select id="modalMatType">
             <option value="standard">Кирпич</option>
             <option value="rigel">Ригель</option>
-            <option value="decorative_stone">Декоративный камень</option>
-            <option value="cobblestone">Булыжник</option>
+            <option value="decorative_stone">Декоративный</option>
+            <option value="cobblestone">Круглый камень</option>
             <option value="rubble_stone">Рваный камень</option>
-            <option value="derbent_stone">Дербент</option>
+            <option value="derbent_stone">Квадратный камень</option>
           </select>
         </div>
         <div class="filter-group">
@@ -1114,9 +987,7 @@ function showPage(id) {
     if (id === 'admin' && currentUser?.role === 'admin') {
         loadUsers(); loadGroutColorsAdmin(); loadAllTextures(); loadAllGenerations(1); loadLeads(1);
     }
-    if (id === 'belt')   initBeltPage();
-    if (id === 'plinth') initPlinthPage();
-    if (id === 'reika')  initReikaPage();
+    if (id === 'accent') initAccentPage();
 }
 
 // ============================================================
@@ -1645,7 +1516,7 @@ async function loadAllTextures() {
         const textures = await r.json();
         const c = document.getElementById('texturesList');
         if (!textures.length) { c.innerHTML = '<div>Нет текстур</div>'; return; }
-        const tMap = { standard: 'Кирпич', rigel: 'Ригель', decorative_stone: 'Декор. камень', cobblestone: 'Булыжник', rubble_stone: 'Рваный камень', derbent_stone: 'Дербент', reika: 'Рейка' };
+        const tMap = { standard: 'Кирпич', rigel: 'Ригель', decorative_stone: 'Декоративный', cobblestone: 'Круглый', rubble_stone: 'Рваный', derbent_stone: 'Квадратный', reika: 'Рейка' };
         const sMap = { redstone: 'Redstone', redstone_premium: 'Redstone Premium', krasny_kamen: 'Красный Камень' };
         c.innerHTML = `<table>
             <thead><tr><th>ID</th><th>Название</th><th>Тип</th><th>Поставщик</th><th>Файл</th><th>Действие</th></tr></thead>
@@ -1920,133 +1791,123 @@ function createDrawer(canvasId) {
 }
 
 // ============================================================
-//  BELT (Пояса) — без выбора текстуры
+//  ACCENTS (Акценты) — unified tab (replaces Belt/Plinth/Reika)
 // ============================================================
-let beltDrawer = null, beltInited = false, beltMode = 'soldier';
+let accentDrawer = null, accentTex = null, accentMat = 'decorative_stone', accentInited = false;
 
-function setBeltMode(mode, btn) {
-    beltMode = mode;
-    document.querySelectorAll('#beltModeBtns .mat-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-}
+// All material types available in Accents
+const ACCENT_MATERIALS = [
+    { code: 'decorative_stone', label: 'Декоративный' },
+    { code: 'cobblestone',      label: 'Круглый камень' },
+    { code: 'rubble_stone',     label: 'Рваный камень' },
+    { code: 'derbent_stone',    label: 'Квадратный камень' },
+    { code: 'standard',         label: 'Кирпич' },
+    { code: 'rigel',            label: 'Ригель' },
+    { code: 'reika',            label: 'Рейка' },
+];
 
-function initBeltPage() {
-    if (beltInited) return;
-    beltInited = true;
-    setupZoneDrop('beltDrop', 'beltFile', file => {
-        if (!beltDrawer) beltDrawer = createDrawer('beltCanvas');
-        beltDrawer.loadImage(file);
-        document.getElementById('beltCanvasCard').style.display = '';
+function initAccentPage() {
+    if (accentInited) return;
+    accentInited = true;
+
+    // Build material chips
+    const matContainer = document.getElementById('accentMatBtns');
+    if (matContainer && !matContainer.children.length) {
+        matContainer.innerHTML = ACCENT_MATERIALS.map((m, i) =>
+            `<button class="mat-btn${i === 0 ? ' active' : ''}" onclick="setAccentMat(this,'${m.code}')">${m.label}</button>`
+        ).join('');
+    }
+
+    setupZoneDrop('accentDrop', 'accentFile', file => {
+        if (!accentDrawer) accentDrawer = createDrawer('accentCanvas');
+        accentDrawer.loadImage(file);
+        document.getElementById('accentCanvasCard').style.display = '';
     });
-    document.getElementById('beltBrush').addEventListener('input', e => beltDrawer?.setBrush(+e.target.value));
+    document.getElementById('accentBrush').addEventListener('input', e => accentDrawer?.setBrush(+e.target.value));
+    loadAccentSupplierChips(accentMat);
 }
 
-async function generateBelt() {
-    if (!beltDrawer?.isReady()) return alert('Загрузите фото здания');
-    const blob = await beltDrawer.getBlob();
-    const fd = new FormData();
-    fd.append('annotated_photo', blob, 'belt.jpg');
-    fd.append('category', document.getElementById('beltCategory').value);
-    fd.append('mode', beltMode);
-    const resultDiv = document.getElementById('beltResult');
-    resultDiv.className = 'zone-result-panel visible';
-    resultDiv.innerHTML = '<div style="padding:24px;color:#9aadcc;text-align:center;">⏳ Генерация… (до 2 мин)</div>';
-    try {
-        const r = await fetch(`${API_BASE}/api/internal/belt/generate`, { method: 'POST', credentials: 'include', headers: H(), body: fd });
-        const d = await r.json();
-        if (d.request_id) pollZoneResult(d.request_id, 'beltResult');
-        else resultDiv.innerHTML = `<div style="padding:16px;color:#e53935;">Ошибка: ${d.detail || 'неизвестная'}</div>`;
-    } catch(e) { resultDiv.innerHTML = `<div style="padding:16px;color:#e53935;">${e}</div>`; }
-}
-
-// ============================================================
-//  PLINTH (Цоколь) — выбор текстуры как в визуализаторе
-// ============================================================
-let plinthDrawer = null, plinthTex = null, plinthMat = 'decorative_stone', plinthInited = false;
-
-function initPlinthPage() {
-    if (plinthInited) return;
-    plinthInited = true;
-    setupZoneDrop('plinthDrop', 'plinthFile', file => {
-        if (!plinthDrawer) plinthDrawer = createDrawer('plinthCanvas');
-        plinthDrawer.loadImage(file);
-        document.getElementById('plinthCanvasCard').style.display = '';
-    });
-    document.getElementById('plinthBrush').addEventListener('input', e => plinthDrawer?.setBrush(+e.target.value));
-    loadPlinthSupplierChips(plinthMat);
-}
-
-function setPlinthMat(btn, mat) {
-    plinthMat = mat;
-    plinthTex = null;
-    document.querySelectorAll('#plinthMatBtns .mat-btn').forEach(b => b.classList.remove('active'));
+function setAccentMat(btn, mat) {
+    accentMat = mat;
+    accentTex = null;
+    clearAccentTexture();
+    document.querySelectorAll('#accentMatBtns .mat-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    document.getElementById('plinthTexGrid').innerHTML = '<div style="color:#9aadcc;font-size:.82rem;padding:8px;">Выберите поставщика</div>';
-    loadPlinthSupplierChips(mat);
+    document.getElementById('accentTexGrid').innerHTML = '<div style="color:#9aadcc;font-size:.82rem;padding:8px;">Выберите поставщика</div>';
+    loadAccentSupplierChips(mat);
 }
 
-async function loadPlinthSupplierChips(mat) {
-    const container = document.getElementById('plinthSupplierChips');
+function clearAccentTexture() {
+    accentTex = null;
+    const preview = document.getElementById('accentTexPreview');
+    if (preview) preview.style.display = 'none';
+}
+
+async function loadAccentSupplierChips(mat) {
+    const container = document.getElementById('accentSupplierChips');
     container.innerHTML = '<span style="color:#9aadcc;font-size:.82rem;">Загрузка…</span>';
     try {
         const r = await fetch(`${API_BASE}/api/internal/suppliers?material_type=${mat}`, { credentials: 'include', headers: H() });
         const list = await r.json();
         if (!list.length) { container.innerHTML = '<span style="color:#9aadcc;font-size:.82rem;">Нет поставщиков</span>'; return; }
         container.innerHTML = list.map(s =>
-            `<button class="supplier-chip" data-code="${s.code}" onclick="selectPlinthSupplier('${s.code}',this)">${s.name}</button>`
+            `<button class="supplier-chip" data-code="${s.code}" onclick="selectAccentSupplier('${s.code}',this)">${s.name}</button>`
         ).join('');
+        if (list.length === 1) {
+            const btn = container.querySelector('.supplier-chip');
+            selectAccentSupplier(list[0].code, btn);
+        }
     } catch(e) { container.innerHTML = '<span style="color:#e53935;font-size:.82rem;">Ошибка загрузки</span>'; }
 }
 
-async function selectPlinthSupplier(code, el) {
-    document.querySelectorAll('#plinthSupplierChips .supplier-chip').forEach(c => c.classList.remove('active'));
+async function selectAccentSupplier(code, el) {
+    document.querySelectorAll('#accentSupplierChips .supplier-chip').forEach(c => c.classList.remove('active'));
     el.classList.add('active');
-    const grid = document.getElementById('plinthTexGrid');
+    const grid = document.getElementById('accentTexGrid');
     grid.innerHTML = '<div style="color:#9aadcc;font-size:.82rem;padding:8px;">Загрузка…</div>';
     try {
-        const r = await fetch(`${API_BASE}/api/internal/textures?material_type=${plinthMat}&supplier=${code}`, { credentials: 'include', headers: H() });
+        const r = await fetch(`${API_BASE}/api/internal/textures?material_type=${accentMat}&supplier=${code}`, { credentials: 'include', headers: H() });
         const list = await r.json();
-        renderZoneTextures('plinth', list, plinthMat, code);
+        renderAccentTextures(list, accentMat, code);
     } catch(e) { grid.innerHTML = '<div style="color:#e53935;font-size:.82rem;padding:8px;">Ошибка загрузки</div>'; }
 }
 
-function renderZoneTextures(prefix, list, mat, sup) {
-    const grid = document.getElementById(`${prefix}TexGrid`);
+function renderAccentTextures(list, mat, sup) {
+    const grid = document.getElementById('accentTexGrid');
     if (!list.length) { grid.innerHTML = '<div style="color:#9aadcc;font-size:.82rem;padding:8px;">Нет текстур</div>'; return; }
     grid.innerHTML = list.map(t => {
         const url = t.url.startsWith('http') ? t.url : `${API_BASE}${t.url}`;
         const safeN = t.name.replace(/'/g, "\\'");
         const safeU = url.replace(/'/g, "\\'");
-        return `<div class="zone-tex-card" onclick="selectZoneTex('${prefix}','${safeN}','${safeU}','${mat}','${sup}',this)">
+        return `<div class="zone-tex-card" onclick="selectAccentTex('${safeN}','${safeU}','${mat}','${sup}',this)">
             <img src="${url}" alt="${t.name}">
             <div class="zone-tex-name" title="${t.name}">${t.name}</div>
         </div>`;
     }).join('');
 }
 
-function selectZoneTex(prefix, name, url, mat, sup, el) {
-    document.querySelectorAll(`#${prefix}TexGrid .zone-tex-card`).forEach(c => c.classList.remove('sel'));
+function selectAccentTex(name, url, mat, sup, el) {
+    document.querySelectorAll('#accentTexGrid .zone-tex-card').forEach(c => c.classList.remove('sel'));
     el.classList.add('sel');
-    if (prefix === 'plinth') { plinthTex = { name, url, material_type: mat, supplier: sup }; }
-    if (prefix === 'reika')  { reikaTex  = { name, url, material_type: mat, supplier: sup }; }
+    accentTex = { name, url, material_type: mat, supplier: sup };
 }
 
-async function generatePlinth() {
-    if (!plinthDrawer?.isReady()) return alert('Загрузите фото здания');
-    if (!plinthTex) return alert('Выберите текстуру цоколя');
-    const blob = await plinthDrawer.getBlob();
+async function generateAccent() {
+    if (!accentDrawer?.isReady()) return alert('Загрузите фото здания');
+    if (!accentTex) return alert('Выберите текстуру');
+    const blob = await accentDrawer.getBlob();
     const fd = new FormData();
-    fd.append('annotated_photo', blob, 'plinth.jpg');
-    fd.append('texture', plinthTex.name);
-    fd.append('material_type', plinthTex.material_type);
-    fd.append('supplier', plinthTex.supplier);
-    const resultDiv = document.getElementById('plinthResult');
+    fd.append('annotated_photo', blob, 'accent.jpg');
+    fd.append('texture', accentTex.name);
+    fd.append('material_type', accentTex.material_type);
+    fd.append('supplier', accentTex.supplier);
+    const resultDiv = document.getElementById('accentResult');
     resultDiv.className = 'zone-result-panel visible';
     resultDiv.innerHTML = '<div style="padding:24px;color:#9aadcc;text-align:center;">⏳ Генерация… (до 2 мин)</div>';
     try {
-        const r = await fetch(`${API_BASE}/api/internal/plinth/generate`, { method: 'POST', credentials: 'include', headers: H(), body: fd });
+        const r = await fetch(`${API_BASE}/api/internal/accent/generate`, { method: 'POST', credentials: 'include', headers: H(), body: fd });
         const d = await r.json();
-        if (d.request_id) pollZoneResult(d.request_id, 'plinthResult');
+        if (d.request_id) pollZoneResult(d.request_id, 'accentResult');
         else resultDiv.innerHTML = `<div style="padding:16px;color:#e53935;">Ошибка: ${d.detail || 'неизвестная'}</div>`;
     } catch(e) { resultDiv.innerHTML = `<div style="padding:16px;color:#e53935;">${e}</div>`; }
 }
@@ -2085,83 +1946,6 @@ function pollZoneResult(requestId, divId) {
             }
         } catch {}
     }, 2000);
-}
-
-// ============================================================
-//  REIKA (Рейка)
-// ============================================================
-let reikaDrawer = null, reikaTex = null, reikaInited = false, reikaOrientation = 'horizontal';
-
-function setReikaOrient(orient, btn) {
-    reikaOrientation = orient;
-    document.querySelectorAll('#reikaOrientBtns .mat-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-}
-
-function initReikaPage() {
-    if (reikaInited) return;
-    reikaInited = true;
-    setupZoneDrop('reikaDrop', 'reikaFile', file => {
-        if (!reikaDrawer) reikaDrawer = createDrawer('reikaCanvas');
-        reikaDrawer.loadImage(file);
-        document.getElementById('reikaCanvasCard').style.display = '';
-    });
-    document.getElementById('reikaBrush').addEventListener('input', e => reikaDrawer?.setBrush(+e.target.value));
-    loadReikaSupplierChips();
-}
-
-async function loadReikaSupplierChips() {
-    const container = document.getElementById('reikaSupplierChips');
-    container.innerHTML = '<span style="color:#9aadcc;font-size:.82rem;">Загрузка…</span>';
-    try {
-        const r = await fetch(`${API_BASE}/api/internal/suppliers?material_type=reika`, { credentials: 'include', headers: H() });
-        const list = await r.json();
-        if (!list.length) {
-            container.innerHTML = '<span style="color:#9aadcc;font-size:.82rem;">Нет поставщиков</span>';
-            return;
-        }
-        container.innerHTML = list.map(s =>
-            `<button class="supplier-chip" data-code="${s.code}" onclick="selectReikaSupplier('${s.code}',this)">${s.name}</button>`
-        ).join('');
-        // Auto-select if only one supplier
-        if (list.length === 1) {
-            const btn = container.querySelector('.supplier-chip');
-            selectReikaSupplier(list[0].code, btn);
-        }
-    } catch(e) { container.innerHTML = '<span style="color:#e53935;font-size:.82rem;">Ошибка загрузки</span>'; }
-}
-
-async function selectReikaSupplier(code, el) {
-    document.querySelectorAll('#reikaSupplierChips .supplier-chip').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
-    const grid = document.getElementById('reikaTexGrid');
-    grid.innerHTML = '<div style="color:#9aadcc;font-size:.82rem;padding:8px;">Загрузка…</div>';
-    try {
-        const r = await fetch(`${API_BASE}/api/internal/textures?material_type=reika&supplier=${code}`, { credentials: 'include', headers: H() });
-        const list = await r.json();
-        renderZoneTextures('reika', list, 'reika', code);
-    } catch(e) { grid.innerHTML = '<div style="color:#e53935;font-size:.82rem;padding:8px;">Ошибка загрузки</div>'; }
-}
-
-async function generateReika() {
-    if (!reikaDrawer?.isReady()) return alert('Загрузите фото здания');
-    if (!reikaTex) return alert('Выберите текстуру рейки');
-    const blob = await reikaDrawer.getBlob();
-    const fd = new FormData();
-    fd.append('annotated_photo', blob, 'reika.jpg');
-    fd.append('texture', reikaTex.name);
-    fd.append('material_type', reikaTex.material_type);
-    fd.append('supplier', reikaTex.supplier);
-    fd.append('orientation', reikaOrientation);
-    const resultDiv = document.getElementById('reikaResult');
-    resultDiv.className = 'zone-result-panel visible';
-    resultDiv.innerHTML = '<div style="padding:24px;color:#9aadcc;text-align:center;">⏳ Генерация… (до 2 мин)</div>';
-    try {
-        const r = await fetch(`${API_BASE}/api/internal/reika/generate`, { method: 'POST', credentials: 'include', headers: H(), body: fd });
-        const d = await r.json();
-        if (d.request_id) pollZoneResult(d.request_id, 'reikaResult');
-        else resultDiv.innerHTML = `<div style="padding:16px;color:#e53935;">Ошибка: ${d.detail || 'неизвестная'}</div>`;
-    } catch(e) { resultDiv.innerHTML = `<div style="padding:16px;color:#e53935;">${e}</div>`; }
 }
 
 // ============================================================

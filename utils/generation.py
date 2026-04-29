@@ -37,8 +37,9 @@ _STONE_TYPES = {"decorative_stone", "cobblestone", "rubble_stone", "derbent_ston
 
 def build_prompt(category: str, material_type: str,
                  grout_color_hex: str = None, use_zone: bool = False) -> str:
-    """Единый промт для клиентского и внутреннего роутеров."""
+    """Промт для Облицовки (клиент + внутренний)."""
     base = "Preserve house geometry, windows, doors, and lighting EXACTLY."
+    target = "house facade" if category == "facade" else "interior wall"
     zone_instr = (
         "The red-highlighted zone marks the area to be retextured. "
         "Apply the new texture STRICTLY within the red zone ONLY. "
@@ -46,45 +47,37 @@ def build_prompt(category: str, material_type: str,
     ) if use_zone else ""
 
     if material_type == "decorative_stone":
-        prompt = (f"{base} {zone_instr}Replace facade with the provided stone texture. "
+        prompt = (f"{base} {zone_instr}Replace {target} with the provided stone texture. "
                   f"Format: Ledgestone / Stacked stone. "
                   f"The elements must be significantly smaller and thinner than original wall panels. "
                   f"Create a dense, intricate pattern of narrow horizontal stone strips. "
                   f"Tile the texture with high frequency to ensure a realistic architectural scale. "
                   f"Preserve the rough, natural rock relief and color depth.")
-    elif material_type == "cobblestone":
-        target = "house facade" if category == "facade" else "interior wall"
-        prompt = (f"{base} {zone_instr}Replace {target} with the provided cobblestone texture. "
-                  f"Format: Irregular rounded cobblestones set in mortar. "
-                  f"Vary stone sizes naturally — mix small, medium, and occasional large stones. "
-                  f"Mortar joints are wide and slightly recessed. "
-                  f"Preserve the rough, tactile, medieval stone street character.")
     elif material_type == "rubble_stone":
-        target = "house facade" if category == "facade" else "interior wall"
-        prompt = (f"{base} {zone_instr}Replace {target} with the provided rubble stone texture. "
-                  f"Format: Wild rubble / uncoursed fieldstone masonry. "
-                  f"Stones are irregular, angular, and randomly shaped — no coursing lines. "
-                  f"Tightly packed with minimal mortar visible. "
-                  f"Emphasise the raw, natural, dry-stone wall aesthetic.")
+        prompt = (f"{base} {zone_instr}Replace {target} with the provided texture. "
+                  f"Format: Wild rubble / irregular angular fieldstone. "
+                  f"Stones must be tightly packed, varying in size and shape with sharp, jagged edges. "
+                  f"Maintain a natural, rugged relief and organic placement.")
+    elif material_type == "cobblestone":
+        prompt = (f"{base} {zone_instr}Replace {target} with the provided texture. "
+                  f"Format: Rounded river stones / smooth cobblestones. "
+                  f"Stones should have soft, weathered edges and organic, non-linear placement. "
+                  f"Emphasize the tactile, smooth surface and depth of mortar joints.")
     elif material_type == "derbent_stone":
-        target = "house facade" if category == "facade" else "interior wall"
-        prompt = (f"{base} {zone_instr}Replace {target} with the provided Derbent stone texture. "
-                  f"Format: Smooth-cut rectangular ashlar masonry in regular horizontal courses. "
-                  f"Stones are uniform in height, varying slightly in length, with tight hairline joints. "
-                  f"Surface is flat and refined, typical of Caucasian limestone cladding. "
-                  f"Maintain precise, clean coursing with sharp right-angle corners.")
+        prompt = (f"{base} {zone_instr}Replace {target} with the provided texture. "
+                  f"Format: Clean-cut rectangular ashlar masonry. "
+                  f"Stones are uniform in height or arranged in precise horizontal courses "
+                  f"with sharp right-angle corners. Surface is flat and refined. "
+                  f"Maintain clean, tight joints.")
+    elif material_type == "standard":
+        prompt = (f"{base} {zone_instr}Replace {target} with the provided brick texture. "
+                  f"Apply as high-density brickwork. Bricks must be small and frequent, "
+                  f"matching realistic standard brick dimensions. Tight alignment.")
     else:
-        target = "house facade" if category == "facade" else "interior wall"
-
-        if material_type == "standard":
-            prompt = (f"{base} {zone_instr}Replace {target} with the provided brick texture. "
-                      f"Apply as high-density brickwork. Bricks must be small and frequent, "
-                      f"matching realistic standard brick dimensions. Tight alignment.")
-        else:
-            # Ригель: пропорция 1:10, высокая горизонтальная плотность
-            prompt = (f"{base} {zone_instr}Replace {target} with EXACTLY the provided texture. "
-                      f"Format: Riegel brick (ultra-long, ultra-thin). Ratio 1:10. "
-                      f"Apply with maximum horizontal density and sharp linear courses.")
+        # Ригель: пропорция 1:10, высокая горизонтальная плотность
+        prompt = (f"{base} {zone_instr}Replace {target} with EXACTLY the provided texture. "
+                  f"Format: Riegel brick (ultra-long, ultra-thin). Ratio 1:10. "
+                  f"Apply with maximum horizontal density and sharp linear courses.")
 
     if grout_color_hex and material_type not in _STONE_TYPES:
         prompt += f" Mortar joints color: HEX {grout_color_hex}."
@@ -93,69 +86,19 @@ def build_prompt(category: str, material_type: str,
     return prompt
 
 
-def build_belt_prompt(category: str, mode: str = "soldier") -> str:
-    """Промт для сервиса 'Пояса'.
-    mode='soldier' — вертикальный солдатский ряд,
-    mode='checker' — шахматный (шахматная перевязка стоячих кирпичей).
+def build_accent_prompt() -> str:
+    """Универсальный промт для Акцентов (бывш. Пояса / Цоколь / Рейка).
+    Текстура уже повёрнута на клиенте — нейросеть копирует ориентацию из референса.
     """
-    target = "house facade" if category == "facade" else "interior wall"
-    if mode == "checker":
-        pattern = (
-            "a checkerboard soldier-course pattern — bricks standing upright on their ends, "
-            "arranged in alternating offset rows so every other brick is shifted by half a brick "
-            "creating a diagonal / staggered checker effect"
-        )
-    elif mode == "random_bond":
-        pattern = (
-            "a random / chaotic masonry bond — bricks of varying lengths placed without defined "
-            "coursing, mixing different orientations and offsets unpredictably, creating an "
-            "irregular, eclectic, free-form decorative belt texture"
-        )
-    else:  # soldier
-        pattern = (
-            "a vertical soldier-course pattern — bricks standing perfectly upright on their ends, "
-            "oriented vertically in straight, evenly-spaced rows"
-        )
     return (
-        f"Preserve all original {target} geometry, windows, doors, and surrounding environment EXACTLY. "
-        f"The red-highlighted zones mark decorative horizontal belt courses. "
-        f"In the red zones ONLY: rearrange the EXISTING bricks into {pattern}. "
-        f"Use the exact same brick color, tone, and material as the rest of the facade. "
-        f"The belt must blend seamlessly with the surrounding brickwork at its edges. "
-        f"Do NOT change anything outside the red zones. "
-        f"Hyper-realistic architectural rendering, 8k, photorealistic sunlight."
-    )
-
-
-def build_reika_prompt(orientation: str = "horizontal") -> str:
-    """Промт для сервиса 'Рейка'.
-    orientation='horizontal' — горизонтальная укладка,
-    orientation='vertical'   — вертикальная укладка.
-    """
-    if orientation == "vertical":
-        direction = "vertically — slats running top-to-bottom, oriented upright"
-    else:
-        direction = "horizontally — slats running left-to-right, oriented level"
-    return (
-        "Preserve all original facade geometry, windows, doors, and environment EXACTLY. "
-        "The red-highlighted zones indicate areas to be clad with the provided reika (slatted wood panel) texture. "
-        f"In the red zones ONLY, apply the provided reika texture with slats oriented {direction}. "
-        "Maintain realistic material scale — the slats should look like full-size architectural cladding panels. "
-        "Ensure seamless integration with the surrounding surfaces at zone edges. "
-        "All areas outside the red zones must remain completely unchanged. "
-        "Hyper-realistic architectural rendering, 8k, photorealistic sunlight."
-    )
-
-
-def build_plinth_prompt() -> str:
-    """Промт для сервиса 'Цоколь': красная зона внизу → облицовка цоколя."""
-    return (
-        f"Preserve all original facade geometry, windows, doors, and environment EXACTLY. "
-        f"The red-highlighted zone at the bottom of the image indicates the plinth area. "
-        f"In this red zone ONLY, apply the provided stone or brick texture as plinth cladding. "
-        f"The plinth cladding must blend naturally with the wall material above. "
-        f"All areas above the red zone must remain completely unchanged. "
-        f"Hyper-realistic architectural rendering, 8k, photorealistic sunlight."
+        "Preserve all original house geometry, windows, doors, and surrounding environment EXACTLY. "
+        "The red-highlighted zone marks the area for the new architectural element. "
+        "STRICT INSTRUCTION: Apply the provided texture EXACTLY as shown in the reference image, "
+        "matching its orientation, scale, and direction (horizontal/vertical) precisely within the red zone. "
+        "Do NOT change the texture angle. "
+        "The element must blend seamlessly with the surrounding environment at its edges. "
+        "All areas outside the red zone must remain completely unchanged. "
+        "Hyper-realistic architectural rendering, 8k, photorealistic lighting."
     )
 
 

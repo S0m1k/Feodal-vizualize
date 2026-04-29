@@ -12,7 +12,10 @@ import httpx
 import logging
 
 router = APIRouter(tags=["client"])
-redis_client = Redis(host='localhost', port=6379, decode_responses=True)
+redis_client = Redis(
+    host='localhost', port=6379, decode_responses=True,
+    password=os.getenv("REDIS_PASSWORD") or None,
+)
 logger = logging.getLogger("client_generate")
 
 DAILY_LIMIT = 2  # генераций с одного IP в день
@@ -143,15 +146,19 @@ async def client_generate(
     if not can_generate(client_ip):
         return JSONResponse(status_code=429, content={"error": "Лимит исчерпан"})
 
-    if not file.content_type.startswith("image/"):
+    if not (file.content_type or "").startswith("image/"):
         raise HTTPException(status_code=400, detail="Неверный формат файла")
+
+    contents = await file.read()
+    if len(contents) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="Файл превышает 10 МБ")
 
     temp_dir = "temp/client"
     os.makedirs(temp_dir, exist_ok=True)
     temp_filename = f"{uuid.uuid4().hex}.jpg"
     temp_path = os.path.join(temp_dir, temp_filename)
     with open(temp_path, "wb") as f:
-        f.write(await file.read())
+        f.write(contents)
 
     # Получаем filename текстуры из БД
     db = await get_db()

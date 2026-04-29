@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, Form, File, Q
 from database import get_db
 from middleware import get_current_manager, get_current_user, get_current_admin
 import asyncio
-from utils.generation import generate_image, build_prompt, build_belt_prompt, build_plinth_prompt, build_reika_prompt
+from utils.generation import generate_image, build_prompt, build_accent_prompt
 from utils.notifications import create_notification
 from rauth import get_password_hash
 from pydantic import BaseModel
@@ -22,7 +22,10 @@ TEMP_DIR = "temp/internal"
 GENERATED_DIR = "data/generations/internal"
 os.makedirs(TEMP_DIR, exist_ok=True)
 os.makedirs(GENERATED_DIR, exist_ok=True)
-redis_client = Redis(host='localhost', port=6379, decode_responses=True)
+redis_client = Redis(
+    host='localhost', port=6379, decode_responses=True,
+    password=os.getenv("REDIS_PASSWORD") or None,
+)
 
 
 def resolve_public_base_url(request: Request) -> str:
@@ -64,11 +67,15 @@ async def internal_generate(
         category,
         grout_color_name,
     )
+    if not (file.content_type or "").startswith("image/"):
+        raise HTTPException(status_code=400, detail="Неверный формат файла — ожидается изображение")
+    contents = await file.read()
+    if len(contents) > 15 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="Файл превышает 15 МБ")
     temp_filename = f"{uuid.uuid4().hex}.jpg"
     temp_path = os.path.join(TEMP_DIR, temp_filename)
-    print(">>> internal_generate called")
     with open(temp_path, "wb") as f:
-        f.write(await file.read())
+        f.write(contents)
 
     try:
         base_url = resolve_public_base_url(request)
@@ -425,11 +432,16 @@ async def add_texture(
         raise HTTPException(status_code=400, detail="Invalid material_type")
     if supplier not in ("redstone", "redstone_premium", "krasny_kamen", "reika"):
         raise HTTPException(status_code=400, detail="Invalid supplier")
+    if not (file.content_type or "").startswith("image/"):
+        raise HTTPException(status_code=400, detail="Ожидается изображение")
+    tex_bytes = await file.read()
+    if len(tex_bytes) > 15 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="Файл текстуры превышает 15 МБ")
     filename = os.path.basename(file.filename or "upload.jpg")
     save_path = os.path.join("textures", material_type, supplier, filename)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     with open(save_path, "wb") as f:
-        f.write(await file.read())
+        f.write(tex_bytes)
     db = await get_db()
     try:
         await db.execute(
@@ -591,122 +603,59 @@ async def _run_zone_generation(
         redis_client.setex(f"gen_status:{request_id}", 3600, "error")
 
 
-@router.post("/belt/generate")
-async def belt_generate(
+@router.post("/accent/generate")
+async def accent_generate(
     annotated_photo: UploadFile = File(...),
-    category: str = Form("facade"),
-    mode: str = Form("soldier"),
+    texture: str = Form(None),
+    material_type: str = Form(None),
+    supplier: str = Form(None),
     current_user = Depends(get_current_manager),
 ):
-    """Генерация пояса — текстура не нужна, работаем только с аннотированным фото.
-    mode: 'soldier' (вертикальный ряд) | 'checker' (шахматный порядок)
+    """Универсальная генерация акцентов (бывш. Пояса / Цоколь / Рейка).
+    Текстура опциональна: если не выбрана — работаем только с аннотированным фото.
     """
+    if not (annotated_photo.content_type or "").startswith("image/"):
+        raise HTTPException(status_code=400, detail="Ожидается изображение")
+
     request_id = str(uuid.uuid4())
     user_id    = str(current_user.get("id"))
 
     filename  = f"{uuid.uuid4()}.jpg"
     temp_path = os.path.join(TEMP_DIR, filename)
     content   = await annotated_photo.read()
+    if len(content) > 15 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="Файл превышает 15 МБ")
     with open(temp_path, "wb") as f:
         f.write(content)
 
     base_url  = _resolve_base_url()
     photo_url = f"{base_url}/temp/internal/{filename}"
-    prompt    = build_belt_prompt(category, mode)
+    prompt    = build_accent_prompt()
+
+    image_urls   = [photo_url]
+    texture_name = ""
+
+    # Если передана текстура — добавляем URL текстуры
+    if texture and material_type and supplier:
+        db = await get_db()
+        try:
+            cur = await db.execute(
+                "SELECT filename FROM materials WHERE name = ? AND material_type = ? AND supplier = ?",
+                (texture, material_type, supplier),
+            )
+            row = await cur.fetchone()
+        finally:
+            await db.close()
+        if not row:
+            raise HTTPException(status_code=404, detail=f"Текстура «{texture}» не найдена")
+        texture_url = f"{base_url}/textures/{material_type}/{supplier}/{quote(row['filename'])}"
+        image_urls.append(texture_url)
+        texture_name = texture
 
     redis_client.setex(f"gen_status:{request_id}", 3600, "processing")
     asyncio.create_task(_run_zone_generation(
-        request_id, [photo_url], prompt,
-        user_id, "belt", "", temp_path, "", "",
-    ))
-    return {"request_id": request_id}
-
-
-@router.post("/plinth/generate")
-async def plinth_generate(
-    annotated_photo: UploadFile = File(...),
-    texture: str = Form(...),
-    material_type: str = Form(...),
-    supplier: str = Form(...),
-    current_user = Depends(get_current_manager),
-):
-    request_id = str(uuid.uuid4())
-    user_id    = str(current_user.get("id"))
-
-    # Resolve the actual filename from DB (texture form field is the display name)
-    db = await get_db()
-    try:
-        cur = await db.execute(
-            "SELECT filename FROM materials WHERE name = ? AND material_type = ? AND supplier = ?",
-            (texture, material_type, supplier),
-        )
-        row = await cur.fetchone()
-    finally:
-        await db.close()
-    if not row:
-        raise HTTPException(status_code=404, detail=f"Текстура «{texture}» не найдена")
-
-    filename  = f"{uuid.uuid4()}.jpg"
-    temp_path = os.path.join(TEMP_DIR, filename)
-    content   = await annotated_photo.read()
-    with open(temp_path, "wb") as f:
-        f.write(content)
-
-    base_url    = _resolve_base_url()
-    photo_url   = f"{base_url}/temp/internal/{filename}"
-    texture_url = f"{base_url}/textures/{material_type}/{supplier}/{quote(row['filename'])}"
-    prompt      = build_plinth_prompt()
-
-    redis_client.setex(f"gen_status:{request_id}", 3600, "processing")
-    asyncio.create_task(_run_zone_generation(
-        request_id, [photo_url, texture_url], prompt,
-        user_id, "plinth", texture, temp_path, material_type, supplier,
-    ))
-    return {"request_id": request_id}
-
-
-@router.post("/reika/generate")
-async def reika_generate(
-    annotated_photo: UploadFile = File(...),
-    texture: str = Form(...),
-    material_type: str = Form("reika"),
-    supplier: str = Form("reika"),
-    orientation: str = Form("horizontal"),
-    current_user = Depends(get_current_manager),
-):
-    """Генерация рейки — пользователь обводит зону красным, выбирает текстуру рейки.
-    orientation: 'horizontal' | 'vertical'
-    """
-    request_id = str(uuid.uuid4())
-    user_id    = str(current_user.get("id"))
-
-    # Resolve actual filename from DB
-    db = await get_db()
-    try:
-        cur = await db.execute(
-            "SELECT filename FROM materials WHERE name = ? AND material_type = ? AND supplier = ?",
-            (texture, material_type, supplier),
-        )
-        row = await cur.fetchone()
-    finally:
-        await db.close()
-    if not row:
-        raise HTTPException(status_code=404, detail=f"Текстура «{texture}» не найдена")
-
-    filename  = f"{uuid.uuid4()}.jpg"
-    temp_path = os.path.join(TEMP_DIR, filename)
-    content   = await annotated_photo.read()
-    with open(temp_path, "wb") as f:
-        f.write(content)
-
-    base_url    = _resolve_base_url()
-    photo_url   = f"{base_url}/temp/internal/{filename}"
-    texture_url = f"{base_url}/textures/{material_type}/{supplier}/{quote(row['filename'])}"
-    prompt      = build_reika_prompt(orientation)
-
-    redis_client.setex(f"gen_status:{request_id}", 3600, "processing")
-    asyncio.create_task(_run_zone_generation(
-        request_id, [photo_url, texture_url], prompt,
-        user_id, "reika", texture, temp_path, material_type, supplier,
+        request_id, image_urls, prompt,
+        user_id, "accent", texture_name, temp_path,
+        material_type or "", supplier or "",
     ))
     return {"request_id": request_id}
