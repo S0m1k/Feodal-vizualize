@@ -658,13 +658,13 @@ async def accent_generate(
     if accent_type == "plinth":
         if not has_texture:
             raise HTTPException(status_code=400, detail="Для Цоколя необходимо выбрать текстуру")
-        prompt = build_plinth_prompt()
+        prompt = build_plinth_prompt(material_type)
     elif accent_type == "reika":
         if not has_texture:
             raise HTTPException(status_code=400, detail="Для Рейки необходимо выбрать текстуру")
         prompt = build_reika_prompt(orientation)
     else:  # belt
-        prompt = build_belt_prompt(has_texture)
+        prompt = build_belt_prompt(has_texture, material_type)
 
     redis_client.setex(f"gen_status:{request_id}", 3600, "processing")
     asyncio.create_task(_run_zone_generation(

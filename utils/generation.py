@@ -57,11 +57,15 @@ def build_prompt(category: str, material_type: str,
                   f"Stones should have soft, weathered edges and organic, non-linear placement. "
                   f"Emphasize the tactile, smooth surface and depth of mortar joints.")
     elif material_type == "derbent_stone":
-        prompt = (f"{base} {zone_instr}Replace {target} with the provided texture. "
-                  f"Format: Clean-cut rectangular ashlar masonry. "
-                  f"Stones are uniform in height or arranged in precise horizontal courses "
-                  f"with sharp right-angle corners. Surface is flat and refined. "
-                  f"Maintain clean, tight joints.")
+        prompt = (f"{base} {zone_instr}Replace {target} with fine-grained, small-scale ashlar limestone masonry "
+                  f"matching the detailed character, size, and texture of the provided reference. "
+                  f"The texture must consist of small, textured rectangular and square blocks applied in precise "
+                  f"regular horizontal courses — significantly smaller and more numerous than typical wall panels. "
+                  f"Feature distinct, deeply recessed, shadowed mortar joints (raked joints) between every block "
+                  f"to create a deep, tactile relief. "
+                  f"The stone surface should show natural imperfections and subtle color variation, "
+                  f"avoiding any glossy or perfectly uniform tiled look. "
+                  f"Ensure all multi-level geometry and building details are preserved.")
     elif material_type == "standard":
         prompt = (f"{base} {zone_instr}Replace {target} with the provided brick texture. "
                   f"Apply as high-density brickwork. Bricks must be small and frequent, "
@@ -79,14 +83,36 @@ def build_prompt(category: str, material_type: str,
     return prompt
 
 
-def build_plinth_prompt() -> str:
-    """Промт для подвкладки Цоколь."""
+def _derbent_zone_detail() -> str:
+    """Детальное описание мелкомасштабного тесаного камня для зональных промтов."""
     return (
+        "Fill the entire red zone with fine-grained, small-scale ashlar limestone masonry, "
+        "matching the detailed character, size, and texture of the provided reference. "
+        "This means tiny, textured rectangular and square blocks applied in precise horizontal courses "
+        "with deeply recessed, shadowed mortar joints (raked joints). "
+        "The individual stones must look like full-size, finely crafted masonry blocks — "
+        "significantly smaller than the original wall panels. "
+        "Show natural surface imperfections and subtle color variation; avoid any glossy or uniform tiled look. "
+        "Ensure the new detailed stonework blends seamlessly with surrounding surfaces at the zone edges. "
+    )
+
+
+def build_plinth_prompt(material_type: str = None) -> str:
+    """Промт для подвкладки Цоколь."""
+    base = (
         "Preserve all original house geometry, windows, and environment EXACTLY. "
         "The red-highlighted zone indicates the plinth. "
-        "Replace the texture STRICTLY within the red zone with the provided texture. "
-        "Ensure the new material (stone/brick) aligns with the perspective of the building. "
-        "The cladding must look heavy and structural. "
+    )
+    if material_type == "derbent_stone":
+        fill = _derbent_zone_detail()
+    else:
+        fill = (
+            "Replace the texture STRICTLY within the red zone with the provided texture. "
+            "Ensure the new material (stone/brick) aligns with the perspective of the building. "
+            "The cladding must look heavy and structural. "
+        )
+    return (
+        base + fill +
         "Do NOT change anything outside the red zone. "
         "Hyper-realistic, 8k architectural visualization."
     )
@@ -108,18 +134,24 @@ def build_reika_prompt(orientation: str = "horizontal") -> str:
     )
 
 
-def build_belt_prompt(has_texture: bool = True) -> str:
+def build_belt_prompt(has_texture: bool = True, material_type: str = None) -> str:
     """Промт для подвкладки Пояса.
     Сценарий А (has_texture=True): заменить зону на выбранную текстуру.
     Сценарий Б (has_texture=False): перекомпоновать существующую кладку в солдатский ряд.
     """
     if has_texture:
+        if material_type == "derbent_stone":
+            fill = _derbent_zone_detail()
+        else:
+            fill = (
+                "Replace the texture STRICTLY within the red zone with the provided texture. "
+                "Match the orientation and scale of the sample. "
+                "The belt must look integrated into the facade with realistic depth and shadows at the seams. "
+            )
         return (
             "Preserve all original facade geometry. "
-            "The red-highlighted horizontal zone is a decorative belt. "
-            "Replace the texture STRICTLY within the red zone with the provided texture. "
-            "Match the orientation and scale of the sample. "
-            "The belt must look integrated into the facade with realistic depth and shadows at the seams. "
+            "The red-highlighted horizontal zone is a decorative belt. " +
+            fill +
             "Do NOT change anything outside the red zone. "
             "8k, photorealistic."
         )
