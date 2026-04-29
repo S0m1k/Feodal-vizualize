@@ -1,7 +1,8 @@
 import os
+import hashlib
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
-from passlib.context import CryptContext
+import bcrypt
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -15,21 +16,16 @@ if not SECRET_KEY:
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 
-_pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 
 def get_password_hash(password: str) -> str:
-    return _pwd_ctx.hash(password)
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    # Обратная совместимость: если хэш — старый SHA-256 (64 hex-символа),
-    # проверяем по-старому и при успехе автоматически не обновляем
-    # (обновление хэша делается в auth.login при необходимости).
-    import hashlib
+    # Обратная совместимость: если хэш — старый SHA-256 (64 hex-символа)
     if len(hashed_password) == 64 and all(c in "0123456789abcdef" for c in hashed_password):
         return hashlib.sha256(plain_password.encode()).hexdigest() == hashed_password
-    return _pwd_ctx.verify(plain_password, hashed_password)
+    return bcrypt.checkpw(plain_password.encode(), hashed_password.encode())
 
 def create_access_token(data: dict, expires_delta: timedelta = None) -> str:
     to_encode = data.copy()
