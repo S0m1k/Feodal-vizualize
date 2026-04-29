@@ -32,7 +32,7 @@ def _extract_output_url(status_data: dict) -> str | None:
     return None
 
 
-_STONE_TYPES = {"cobblestone", "rubble_stone", "derbent_stone"}
+from utils.common import STONE_TYPES as _STONE_TYPES
 
 
 def build_prompt(category: str, material_type: str,

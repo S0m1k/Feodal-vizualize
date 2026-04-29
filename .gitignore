@@ -29,3 +29,7 @@ temp/
 # OS
 .DS_Store
 Thumbs.db
+
+test_api.py
+
+.claude/

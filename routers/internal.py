@@ -9,6 +9,7 @@ from middleware import get_current_manager, get_current_user, get_current_admin
 import asyncio
 from utils.generation import generate_image, build_prompt, build_plinth_prompt, build_reika_prompt, build_belt_prompt
 from utils.notifications import create_notification
+from utils.common import STONE_TYPES, resolve_public_base_url
 from rauth import get_password_hash
 from pydantic import BaseModel
 from typing import List
@@ -28,13 +29,6 @@ redis_client = Redis(
 )
 
 
-def resolve_public_base_url(request: Request) -> str:
-    configured = os.getenv("PUBLIC_BASE_URL")
-    if configured:
-        return configured.rstrip("/")
-    return str(request.base_url).rstrip("/")
-
-
 # ===== Модели =====
 class UserCreateModel(BaseModel):
     username: str
@@ -45,7 +39,68 @@ class GroutColorCreate(BaseModel):
     name: str
     hex_code: str
 
-# ========== Генерация для сотрудников ==========
+# ========== Фоновая генерация для сотрудников ==========
+async def _run_internal_generation(
+    request_id: str,
+    user_id: str,
+    photo_url: str,
+    texture_url: str,
+    temp_path: str,
+    prompt: str,
+    texture: str,
+    grout_color_name: str | None,
+    category: str,
+    material_type: str,
+    supplier: str,
+) -> None:
+    """Фоновая задача AI-генерации для сотрудников."""
+    try:
+        logger.info(
+            "internal_generate bg start request_id=%s user_id=%s", request_id, user_id
+        )
+        result_data = await generate_image([photo_url, texture_url], prompt)
+        output_url = result_data.get("output_url")
+        if not output_url:
+            raise ValueError("Пустой output_url от GenAPI")
+
+        async with httpx.AsyncClient(timeout=60.0) as dl_client:
+            img_resp = await dl_client.get(output_url)
+            img_resp.raise_for_status()
+            result_bytes = img_resp.content
+
+        user_output_dir = os.path.join(GENERATED_DIR, user_id)
+        os.makedirs(user_output_dir, exist_ok=True)
+        output_filename = f"{uuid.uuid4().hex}.jpg"
+        output_path = os.path.join(user_output_dir, output_filename)
+        with open(output_path, "wb") as f:
+            f.write(result_bytes)
+
+        db = await get_db()
+        try:
+            await db.execute(
+                "INSERT INTO generations (user_type, user_id, input_image_path, output_image_path, "
+                "prompt, texture_name, grout_color, category, material_type, supplier) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                ("internal", user_id, temp_path, output_path, prompt,
+                 texture, grout_color_name, category, material_type, supplier),
+            )
+            await db.commit()
+        finally:
+            await db.close()
+
+        result_url = f"/generated/internal/{user_id}/{output_filename}"
+        redis_client.setex(f"gen_status:{request_id}", 3600, f"success:{result_url}")
+        logger.info(
+            "internal_generate bg success request_id=%s result_url=%s", request_id, result_url
+        )
+    except Exception as e:
+        logger.error("internal_generate bg error request_id=%s: %s", request_id, e)
+        redis_client.setex(f"gen_status:{request_id}", 3600, "error")
+    finally:
+        if os.path.exists(temp_path):
+            os.unlink(temp_path)
+
+
 @router.post("/generate")
 async def internal_generate(
     request: Request,
@@ -58,118 +113,74 @@ async def internal_generate(
     use_zone: str = Form(None),
     current_user = Depends(get_current_manager),
 ):
+    user_id = str(current_user["id"])
     logger.info(
         "internal_generate start user_id=%s material_type=%s supplier=%s texture=%s category=%s grout=%s",
-        current_user.get("id"),
-        material_type,
-        supplier,
-        texture,
-        category,
-        grout_color_name,
+        user_id, material_type, supplier, texture, category, grout_color_name,
     )
     if not (file.content_type or "").startswith("image/"):
         raise HTTPException(status_code=400, detail="Неверный формат файла — ожидается изображение")
     contents = await file.read()
     if len(contents) > 15 * 1024 * 1024:
         raise HTTPException(status_code=413, detail="Файл превышает 15 МБ")
+
     temp_filename = f"{uuid.uuid4().hex}.jpg"
     temp_path = os.path.join(TEMP_DIR, temp_filename)
     with open(temp_path, "wb") as f:
         f.write(contents)
 
-    try:
-        base_url = resolve_public_base_url(request)
-        host = (request.url.hostname or "").lower()
-        if host in ("localhost", "127.0.0.1", "::1") and not os.getenv("PUBLIC_BASE_URL"):
-            logger.warning(
-                "internal_generate: GenAPI скачивает image_urls с вашего сервера. "
-                "С localhost это недоступно извне — задайте PUBLIC_BASE_URL (ngrok/cloudflare tunnel/VPS) "
-                "или генерация по ссылкам не сработает."
-            )
-        photo_url = f"{base_url}/temp/internal/{temp_filename}"
-
-        db = await get_db()
-        try:
-            cursor = await db.execute(
-                "SELECT filename FROM materials WHERE name = ? AND material_type = ? AND supplier = ?",
-                (texture, material_type, supplier)
-            )
-            row = await cursor.fetchone()
-        finally:
-            await db.close()
-
-        if not row:
-            raise HTTPException(status_code=404, detail="Текстура не найдена")
-        filename = row["filename"]
-        texture_url = f"{base_url}/textures/{material_type}/{supplier}/{quote(filename)}"
-
-        _STONE_TYPES = {"cobblestone", "rubble_stone", "derbent_stone"}
-        grout_hex = None
-        if grout_color_name and material_type not in _STONE_TYPES:
-            db = await get_db()
-            try:
-                grout_cursor = await db.execute(
-                    "SELECT hex_code FROM grout_colors WHERE name = ?",
-                    (grout_color_name,)
-                )
-                grout_row = await grout_cursor.fetchone()
-            finally:
-                await db.close()
-            if grout_row:
-                grout_hex = grout_row["hex_code"]
-
-        prompt = build_prompt(category, material_type, grout_hex, use_zone=bool(use_zone))
-
-        try:
-            result_data = await generate_image([photo_url, texture_url], prompt)
-        except Exception as e:
-            logger.error("internal_generate ai_error user_id=%s error=%s", current_user.get("id"), e)
-            raise HTTPException(status_code=502, detail=f"Ошибка AI API: {e}")
-
-        output_url = result_data.get("output_url")
-        if not output_url:
-            raise HTTPException(status_code=500, detail="Ошибка генерации: пустой output_url")
-
-        try:
-            async with httpx.AsyncClient(timeout=60.0) as dl_client:
-                img_resp = await dl_client.get(output_url)
-                img_resp.raise_for_status()
-                result_bytes = img_resp.content
-        except Exception as e:
-            logger.error("internal_generate download_error output_url=%s error=%s", output_url, e)
-            raise HTTPException(status_code=502, detail=f"Не удалось скачать результат: {e}")
-
-        user_id = str(current_user["id"])
-        user_output_dir = os.path.join(GENERATED_DIR, user_id)
-        os.makedirs(user_output_dir, exist_ok=True)
-        output_filename = f"{uuid.uuid4().hex}.jpg"
-        output_path = os.path.join(user_output_dir, output_filename)
-        with open(output_path, "wb") as f:
-            f.write(result_bytes)
-
-        db = await get_db()
-        try:
-            await db.execute(
-                "INSERT INTO generations (user_type, user_id, input_image_path, output_image_path, prompt, texture_name, grout_color, category, material_type, supplier) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                ("internal", user_id, temp_path, output_path, prompt, texture, grout_color_name, category, material_type, supplier)
-            )
-            await db.commit()
-        finally:
-            await db.close()
-
-        request_id = str(uuid.uuid4())
-        result_url = f"/generated/internal/{user_id}/{output_filename}"
-        redis_client.setex(f"gen_status:{request_id}", 300, f"success:{result_url}")
-        logger.info(
-            "internal_generate success user_id=%s request_id=%s result_url=%s",
-            user_id,
-            request_id,
-            result_url,
+    base_url = resolve_public_base_url(request)
+    host = (request.url.hostname or "").lower()
+    if host in ("localhost", "127.0.0.1", "::1") and not os.getenv("PUBLIC_BASE_URL"):
+        logger.warning(
+            "internal_generate: GenAPI скачивает image_urls с вашего сервера. "
+            "С localhost это недоступно извне — задайте PUBLIC_BASE_URL."
         )
-        return {"request_id": request_id, "result_url": result_url}
+    photo_url = f"{base_url}/temp/internal/{temp_filename}"
+
+    db = await get_db()
+    try:
+        cursor = await db.execute(
+            "SELECT filename FROM materials WHERE name = ? AND material_type = ? AND supplier = ?",
+            (texture, material_type, supplier),
+        )
+        row = await cursor.fetchone()
     finally:
-        if os.path.exists(temp_path):
-            os.unlink(temp_path)
+        await db.close()
+
+    if not row:
+        os.unlink(temp_path)
+        raise HTTPException(status_code=404, detail="Текстура не найдена")
+
+    texture_url = f"{base_url}/textures/{material_type}/{supplier}/{quote(row['filename'])}"
+
+    grout_hex = None
+    if grout_color_name and material_type not in STONE_TYPES:
+        db = await get_db()
+        try:
+            grout_cursor = await db.execute(
+                "SELECT hex_code FROM grout_colors WHERE name = ?", (grout_color_name,)
+            )
+            grout_row = await grout_cursor.fetchone()
+        finally:
+            await db.close()
+        if grout_row:
+            grout_hex = grout_row["hex_code"]
+
+    prompt = build_prompt(category, material_type, grout_hex, use_zone=bool(use_zone))
+
+    request_id = str(uuid.uuid4())
+    redis_client.setex(f"gen_status:{request_id}", 3600, "processing")
+
+    asyncio.create_task(_run_internal_generation(
+        request_id, user_id, photo_url, texture_url, temp_path,
+        prompt, texture, grout_color_name, category, material_type, supplier,
+    ))
+
+    logger.info(
+        "internal_generate accepted user_id=%s request_id=%s", user_id, request_id
+    )
+    return {"request_id": request_id}
 # ========== История ==========
 @router.get("/history")
 async def get_history(

@@ -25,5 +25,6 @@ class GenerationOut(BaseModel):
     texture_name: Optional[str]
     grout_color: Optional[str]
     category: Optional[str]
-    subcategory: Optional[str]
+    material_type: Optional[str]
+    supplier: Optional[str]
     created_at: str

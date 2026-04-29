@@ -10,12 +10,6 @@ async def get_db():
     db.row_factory = aiosqlite.Row
     return db
 
-async def get_db_connection():
-    """Возвращает новое соединение с БД (без автоматического закрытия)."""
-    db = await aiosqlite.connect(DATABASE_PATH)
-    db.row_factory = aiosqlite.Row
-    return db
-
 def init_db_sync():
     os.makedirs("data", exist_ok=True)
     conn = sqlite3.connect(DATABASE_PATH)
@@ -157,7 +151,14 @@ def init_db_sync():
     # Создаём администратора
     cur = conn.execute("SELECT id FROM users WHERE username = ?", ("admin",))
     if not cur.fetchone():
-        pwd_hash = get_password_hash("admin")
+        import os as _os
+        admin_password = _os.getenv("ADMIN_PASSWORD")
+        if not admin_password:
+            raise RuntimeError(
+                "ADMIN_PASSWORD не задан! Добавьте в .env строку вида: "
+                "ADMIN_PASSWORD=<сложный пароль минимум 12 символов>"
+            )
+        pwd_hash = get_password_hash(admin_password)
         conn.execute("INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)",
                      ("admin", pwd_hash, "admin"))
         conn.commit()

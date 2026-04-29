@@ -1,6 +1,6 @@
 from fastapi import Depends, HTTPException, Request
 from rauth import decode_access_token
-from database import get_db_connection
+from database import get_db
 
 async def get_current_user(request: Request):
     token = request.cookies.get("access_token")
@@ -13,7 +13,7 @@ async def get_current_user(request: Request):
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-    db = await get_db_connection()
+    db = await get_db()
     try:
         cursor = await db.execute("SELECT id, username, role FROM users WHERE id = ?", (user_id,))
         user = await cursor.fetchone()

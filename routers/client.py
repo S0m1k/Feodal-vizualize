@@ -1,3 +1,4 @@
+import asyncio
 import os
 import uuid
 from datetime import date, datetime, timedelta
@@ -8,6 +9,7 @@ from redis import Redis
 from database import get_db
 from utils.generation import generate_image, build_prompt
 from utils.notifications import send_email_sync, create_notification
+from utils.common import STONE_TYPES, resolve_public_base_url
 import httpx
 import logging
 
@@ -19,13 +21,6 @@ redis_client = Redis(
 logger = logging.getLogger("client_generate")
 
 DAILY_LIMIT = 2  # генераций с одного IP в день
-
-
-def resolve_public_base_url(request: Request) -> str:
-    configured = os.getenv("PUBLIC_BASE_URL")
-    if configured:
-        return configured.rstrip("/")
-    return str(request.base_url).rstrip("/")
 
 
 def get_client_ip(request: Request) -> str:
@@ -122,6 +117,65 @@ async def get_grout_colors():
         await db.close()
     return [{"name": row["name"], "hex_code": row["hex_code"]} for row in rows]
 
+async def _run_client_generation(
+    request_id: str,
+    client_ip: str,
+    photo_url: str,
+    texture_url: str,
+    temp_path: str,
+    prompt: str,
+    texture: str,
+    grout_color_name: str | None,
+    category: str,
+    material_type: str,
+    supplier: str,
+) -> None:
+    """Фоновая задача генерации для клиентского виджета."""
+    try:
+        logger.info("client_generate bg start request_id=%s ip=%s", request_id, client_ip)
+        result_data = await generate_image([photo_url, texture_url], prompt)
+        output_url = result_data.get("output_url")
+        if not output_url:
+            raise ValueError("Пустой output_url от GenAPI")
+
+        async with httpx.AsyncClient(timeout=60.0) as dl_client:
+            img_resp = await dl_client.get(output_url)
+            img_resp.raise_for_status()
+            img_bytes = img_resp.content
+
+        output_dir = "data/generations/client"
+        os.makedirs(output_dir, exist_ok=True)
+        output_filename = f"{uuid.uuid4().hex}.jpg"
+        output_path = os.path.join(output_dir, output_filename)
+        with open(output_path, "wb") as f:
+            f.write(img_bytes)
+
+        db = await get_db()
+        try:
+            await db.execute(
+                "INSERT INTO generations (user_type, user_id, input_image_path, output_image_path, "
+                "prompt, texture_name, grout_color, category, material_type, supplier) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                ("client", client_ip, temp_path, output_path, prompt,
+                 texture, grout_color_name, category, material_type, supplier),
+            )
+            await db.commit()
+        finally:
+            await db.close()
+
+        result_url = f"/generated/client/{output_filename}"
+        redis_client.setex(f"gen_status:{request_id}", 3600, f"success:{result_url}")
+        logger.info(
+            "client_generate bg success request_id=%s result_url=%s", request_id, result_url
+        )
+    except Exception as e:
+        logger.error("client_generate bg error request_id=%s: %s", request_id, e)
+        redis_client.setex(f"gen_status:{request_id}", 3600, "error")
+    finally:
+        if os.path.exists(temp_path):
+            os.unlink(temp_path)
+
+
 @router.post("/generate")
 async def client_generate(
     request: Request,
@@ -136,12 +190,7 @@ async def client_generate(
     client_ip = get_client_ip(request)
     logger.info(
         "client_generate start ip=%s material_type=%s supplier=%s texture=%s category=%s grout=%s",
-        client_ip,
-        material_type,
-        supplier,
-        texture,
-        category,
-        grout_color_name,
+        client_ip, material_type, supplier, texture, category, grout_color_name,
     )
     if not can_generate(client_ip):
         return JSONResponse(status_code=429, content={"error": "Лимит исчерпан"})
@@ -165,7 +214,7 @@ async def client_generate(
     try:
         cursor = await db.execute(
             "SELECT filename FROM materials WHERE name = ? AND material_type = ? AND supplier = ?",
-            (texture, material_type, supplier)
+            (texture, material_type, supplier),
         )
         row = await cursor.fetchone()
     finally:
@@ -173,19 +222,17 @@ async def client_generate(
     if not row:
         os.unlink(temp_path)
         raise HTTPException(status_code=404, detail="Texture not found")
-    filename = row["filename"]
 
     base_url = resolve_public_base_url(request)
     photo_url = f"{base_url}/temp/client/{temp_filename}"
-    texture_url = f"{base_url}/textures/{material_type}/{supplier}/{quote(filename)}"
-    _STONE_TYPES = {"cobblestone", "rubble_stone", "derbent_stone"}
+    texture_url = f"{base_url}/textures/{material_type}/{supplier}/{quote(row['filename'])}"
+
     grout_hex = None
-    if grout_color_name and material_type not in _STONE_TYPES:
+    if grout_color_name and material_type not in STONE_TYPES:
         db = await get_db()
         try:
             grout_cursor = await db.execute(
-                "SELECT hex_code FROM grout_colors WHERE name = ?",
-                (grout_color_name,)
+                "SELECT hex_code FROM grout_colors WHERE name = ?", (grout_color_name,)
             )
             grout_row = await grout_cursor.fetchone()
         finally:
@@ -195,55 +242,20 @@ async def client_generate(
 
     prompt = build_prompt(category, material_type, grout_hex, use_zone=bool(use_zone))
 
-    try:
-        result_data = await generate_image([photo_url, texture_url], prompt)
-    except Exception as e:
-        logger.error("client_generate ai_error client_ip=%s error=%s", client_ip, e)
-        raise HTTPException(status_code=502, detail=f"Ошибка AI API: {e}")
-    output_url = result_data.get("output_url")
-    if not output_url:
-        os.unlink(temp_path)
-        raise HTTPException(status_code=500, detail="Ошибка генерации: пустой output_url")
-
-    try:
-        async with httpx.AsyncClient(timeout=60.0) as dl_client:
-            img_resp = await dl_client.get(output_url)
-            img_resp.raise_for_status()
-            img_bytes = img_resp.content
-    except Exception as e:
-        os.unlink(temp_path)
-        logger.error("client_generate download_error output_url=%s error=%s", output_url, e)
-        raise HTTPException(status_code=502, detail=f"Не удалось скачать результат: {e}")
-
-    output_dir = "data/generations/client"
-    os.makedirs(output_dir, exist_ok=True)
-    output_filename = f"{uuid.uuid4().hex}.jpg"
-    output_path = os.path.join(output_dir, output_filename)
-    with open(output_path, "wb") as f:
-        f.write(img_bytes)
-
-    db = await get_db()
-    try:
-        await db.execute(
-            "INSERT INTO generations (user_type, user_id, input_image_path, output_image_path, prompt, texture_name, grout_color, category, material_type, supplier) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            ("client", client_ip, temp_path, output_path, prompt, texture, grout_color_name, category, material_type, supplier)
-        )
-        await db.commit()
-    finally:
-        await db.close()
-
+    # Списываем лимит до старта генерации (чтобы нельзя было запустить N параллельных)
     new_count = increment_count(client_ip)
-    remaining = DAILY_LIMIT - new_count
-    os.unlink(temp_path)
+    remaining = max(0, DAILY_LIMIT - new_count)
 
     request_id = str(uuid.uuid4())
-    result_url = f"/generated/client/{output_filename}"
-    redis_client.setex(f"gen_status:{request_id}", 300, f"success:{result_url}")
-    logger.info(
-        "client_generate success client_ip=%s request_id=%s result_url=%s",
-        client_ip,
-        request_id,
-        result_url,
-    )
+    redis_client.setex(f"gen_status:{request_id}", 3600, "processing")
 
-    return {"request_id": request_id, "result_url": result_url, "remaining": remaining}
+    asyncio.create_task(_run_client_generation(
+        request_id, client_ip, photo_url, texture_url, temp_path,
+        prompt, texture, grout_color_name, category, material_type, supplier,
+    ))
+
+    logger.info(
+        "client_generate accepted ip=%s request_id=%s remaining=%d",
+        client_ip, request_id, remaining,
+    )
+    return {"request_id": request_id, "remaining": remaining}
