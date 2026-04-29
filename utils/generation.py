@@ -4,7 +4,7 @@ import logging
 import time
 import httpx
 
-NANO_BANANA_ENDPOINT = "https://api.gen-api.ru/api/v1/networks/nano-banana-2"
+GPT_IMAGE_ENDPOINT = "https://api.gen-api.ru/api/v1/networks/gpt-image-2"
 STATUS_ENDPOINT = "https://api.gen-api.ru/api/v1/request/get/{request_id}"
 logger = logging.getLogger("generation")
 
@@ -202,12 +202,12 @@ async def generate_image(image_urls: list, prompt: str) -> dict:
     }
 
     payload = {
-        "is_sync": False,
+        "callback_url": None,
         "prompt": prompt,
         "image_urls": image_urls,
+        "quality": "high",
+        "image_size": "1536x1024",
         "num_images": 1,
-        "aspect_ratio": "16:9",
-        "resolution": "1K",
         "output_format": "jpeg",
     }
 
@@ -216,14 +216,14 @@ async def generate_image(image_urls: list, prompt: str) -> dict:
         request_id = None
         try:
             logger.info(
-                "GenAPI POST start endpoint=%s is_sync=%s num_images=%s num_image_urls=%s",
-                NANO_BANANA_ENDPOINT,
-                payload.get("is_sync"),
+                "GenAPI POST start endpoint=%s quality=%s num_images=%s num_image_urls=%s",
+                GPT_IMAGE_ENDPOINT,
+                payload.get("quality"),
                 payload.get("num_images"),
                 len(image_urls),
             )
             t0 = time.monotonic()
-            resp = await client.post(NANO_BANANA_ENDPOINT, json=payload, headers=headers)
+            resp = await client.post(GPT_IMAGE_ENDPOINT, json=payload, headers=headers)
             elapsed = round(time.monotonic() - t0, 2)
             if not resp.is_success:
                 body_preview = resp.text[:500]
