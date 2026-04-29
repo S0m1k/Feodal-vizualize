@@ -57,14 +57,16 @@ def build_prompt(category: str, material_type: str,
                   f"Stones should have soft, weathered edges and organic, non-linear placement. "
                   f"Emphasize the tactile, smooth surface and depth of mortar joints.")
     elif material_type == "derbent_stone":
-        prompt = (f"{base} {zone_instr}Replace {target} with fine-grained, small-scale ashlar limestone masonry "
-                  f"matching the detailed character, size, and texture of the provided reference. "
-                  f"The texture must consist of small, textured rectangular and square blocks applied in precise "
-                  f"regular horizontal courses — significantly smaller and more numerous than typical wall panels. "
-                  f"Feature distinct, deeply recessed, shadowed mortar joints (raked joints) between every block "
-                  f"to create a deep, tactile relief. "
-                  f"The stone surface should show natural imperfections and subtle color variation, "
-                  f"avoiding any glossy or perfectly uniform tiled look. "
+        prompt = (f"{base} {zone_instr}Replace {target} with a detailed pattern of small, rough-hewn rubble ashlar masonry. "
+                  f"CRITICAL DETAIL (Scale and Texture): The new stonework must consist of significantly smaller "
+                  f"and more numerous individual stones, mirroring the detailed texture of the provided reference. "
+                  f"These stones must have a rugged, textured, and irregular surface with natural imperfections — "
+                  f"not smooth or polished. "
+                  f"CRITICAL DETAIL (Coursing and Joints): The blocks must be laid in precise but non-linear "
+                  f"horizontal courses. Incorporate deeply recessed, shadowed mortar joints (raked joints) between "
+                  f"every stone block — this is crucial for creating a pronounced, tactile relief and avoiding "
+                  f"a flat tiled effect. "
+                  f"COLOR: Light beige/cream with natural color variation. "
                   f"Ensure all multi-level geometry and building details are preserved.")
     elif material_type == "standard":
         prompt = (f"{base} {zone_instr}Replace {target} with the provided brick texture. "
@@ -86,14 +88,16 @@ def build_prompt(category: str, material_type: str,
 def _derbent_zone_detail() -> str:
     """Детальное описание мелкомасштабного тесаного камня для зональных промтов."""
     return (
-        "Fill the entire red zone with fine-grained, small-scale ashlar limestone masonry, "
-        "matching the detailed character, size, and texture of the provided reference. "
-        "This means tiny, textured rectangular and square blocks applied in precise horizontal courses "
-        "with deeply recessed, shadowed mortar joints (raked joints). "
-        "The individual stones must look like full-size, finely crafted masonry blocks — "
-        "significantly smaller than the original wall panels. "
-        "Show natural surface imperfections and subtle color variation; avoid any glossy or uniform tiled look. "
-        "Ensure the new detailed stonework blends seamlessly with surrounding surfaces at the zone edges. "
+        "Fill the entire red zone with a detailed pattern of small, rough-hewn rubble ashlar masonry "
+        "matching the provided reference. "
+        "CRITICAL DETAIL (Scale and Texture): The stonework must consist of significantly smaller and more "
+        "numerous individual stones. Each stone must have a rugged, textured, irregular surface with natural "
+        "imperfections — not smooth or polished. "
+        "CRITICAL DETAIL (Coursing and Joints): Lay blocks in precise but non-linear horizontal courses with "
+        "deeply recessed, shadowed mortar joints (raked joints) between every stone — crucial for pronounced "
+        "tactile relief and avoiding a flat tiled effect. "
+        "Use light beige/cream color with natural variation. "
+        "Blend seamlessly with surrounding surfaces at the zone edges. "
     )
 
 
