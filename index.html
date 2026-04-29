@@ -172,7 +172,7 @@
       grid-template-columns: repeat(3, 1fr);
       gap: 8px;
       max-height: 230px; overflow-y: auto;
-      padding-right: 2px; /* thin scrollbar gap */
+      padding-right: 2px;
       margin-bottom: 10px;
     }
     .tex-grid::-webkit-scrollbar { width: 4px; }
@@ -320,6 +320,7 @@
     .toast.info { background: #1a2436; }
     .toast.warn { background: var(--acc); }
     .toast.err  { background: var(--red); }
+    .toast.ok   { background: var(--green); }
     @keyframes toastin { from { opacity:0; transform: translateY(-8px); } to { opacity:1; transform:none; } }
 
     /* ============================================================
@@ -369,7 +370,7 @@
       <div class="step-title"><span class="step-num">1</span> Загрузите фото дома</div>
       <div class="dropzone" id="dropzone">
         <input type="file" id="fileInput" accept="image/jpeg,image/jpg,image/png">
-        <div class="dz-icon">📤</div>
+        <div class="dz-icon">📷</div>
         <div class="dz-text">Перетащите фото дома<br>или нажмите для выбора</div>
         <div class="dz-hint">JPG, PNG до 10 МБ</div>
       </div>
@@ -387,7 +388,9 @@
       <div class="mat-tabs" id="matTabs">
         <button class="mat-btn active" data-mat="standard">🧱 Кирпич</button>
         <button class="mat-btn"        data-mat="rigel">📏 Ригель</button>
-        <button class="mat-btn"        data-mat="decorative_stone">🪨 Камень</button>
+        <button class="mat-btn"        data-mat="cobblestone">🪨 Булыжник</button>
+        <button class="mat-btn"        data-mat="rubble_stone">⛰ Рваный</button>
+        <button class="mat-btn"        data-mat="derbent_stone">🔲 Квадратный</button>
       </div>
 
       <!-- Suppliers -->
@@ -402,7 +405,7 @@
       <div class="sel-tex-badge" id="selTexBadge">— не выбрано —</div>
     </div>
 
-    <!-- Step 3 — Grout (hidden for decorative_stone) -->
+    <!-- Step 3 — Grout (скрыт для всех типов камня) -->
     <div class="step" id="groutStep">
       <div class="step-title"><span class="step-num">3</span> Цвет затирки <span style="font-weight:400;font-size:.78rem;color:var(--muted);">(необязательно)</span></div>
       <div class="grout-row" id="groutRow"></div>
@@ -443,7 +446,7 @@
 
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox">
-  <button class="lb-close" id="lbClose">&times;</button>
+  <button class="lb-close" id="lbClose">×</button>
   <img id="lbImg" src="" alt="">
 </div>
 
@@ -453,48 +456,61 @@
 <script>
 'use strict';
 // ================================================================
-//  CONFIG — установите ваш домен
+//  CONFIG
 // ================================================================
 const API_BASE = 'https://rstone.tech';
+
+// Типы камня — не используют затирку (должно совпадать с бэкендом)
+const STONE_TYPES = new Set(['cobblestone', 'rubble_stone', 'derbent_stone']);
 
 // ================================================================
 //  STATE
 // ================================================================
-let currentCat    = 'facade';
-let currentMat    = 'standard';
-let currentSup    = null;
-let selectedTex   = null;   // { name, url, material_type, supplier }
-let selectedGrout = null;
-let photoFile     = null;
-let pollingTimer  = null;
-let remaining     = null;
+let currentCat         = 'facade';
+let currentMat         = 'standard';
+let currentSup         = null;
+let selectedTex        = null;   // { name, url, material_type, supplier }
+let selectedGrout      = null;
+let photoFile          = null;
+let pollingTimer       = null;
+let remaining          = null;
+let leadModalScheduled = false;
 
-const MAT_TITLE = { standard: 'Выберите кирпич', rigel: 'Выберите ригель', decorative_stone: 'Выберите камень' };
-const CAT_HINT  = { facade: 'ИИ заменит фасад дома на выбранный материал', interior: 'ИИ заменит стену интерьера на выбранный материал' };
+const MAT_TITLE = {
+  standard:     'Выберите кирпич',
+  rigel:        'Выберите ригель',
+  cobblestone:  'Выберите булыжник',
+  rubble_stone: 'Выберите рваный камень',
+  derbent_stone:'Выберите квадратный камень',
+};
+const CAT_HINT = {
+  facade:   'ИИ заменит фасад дома на выбранный материал',
+  interior: 'ИИ заменит стену интерьера на выбранный материал',
+};
 
 // ================================================================
 //  DOM refs
 // ================================================================
 const $ = id => document.getElementById(id);
-const dropzone    = $('dropzone');
-const fileInput   = $('fileInput');
-const photoMini   = $('photoMini');
-const photoMiniBox= $('photoMiniBox');
-const supRow      = $('supRow');
-const texGrid     = $('texGrid');
-const selTexBadge = $('selTexBadge');
-const groutStep   = $('groutStep');
-const groutRow    = $('groutRow');
-const genBtn      = $('genBtn');
-const genInfo     = $('genInfo');
-const previewImg  = $('previewImg');
-const emptyState  = $('emptyState');
-const genOverlay  = $('genOverlay');
-const previewBadge= $('previewBadge');
-const zoomHint    = $('zoomHint');
+const dropzone     = $('dropzone');
+const fileInput    = $('fileInput');
+const photoMini    = $('photoMini');
+const photoMiniBox = $('photoMiniBox');
+const supRow       = $('supRow');
+const texGrid      = $('texGrid');
+const selTexBadge  = $('selTexBadge');
+const groutStep    = $('groutStep');
+const groutRow     = $('groutRow');
+const genBtn       = $('genBtn');
+const genInfo      = $('genInfo');
+const previewImg   = $('previewImg');
+const emptyState   = $('emptyState');
+const genOverlay   = $('genOverlay');
+const previewBadge = $('previewBadge');
+const zoomHint     = $('zoomHint');
 
 // ================================================================
-//  TOAST (вместо alert)
+//  TOAST
 // ================================================================
 let toastTimer = null;
 function toast(msg, type = 'info', ms = 4000) {
@@ -522,7 +538,7 @@ function loadPref() {
     if (t) selectedTex = JSON.parse(t);
     selectedGrout = localStorage.getItem('rsv_grout') || null;
     const m = localStorage.getItem('rsv_mat');
-    if (m) currentMat = m;
+    if (m && MAT_TITLE[m]) currentMat = m;
     const s = localStorage.getItem('rsv_sup');
     if (s) currentSup = s;
   } catch {}
@@ -583,6 +599,10 @@ function setRemaining(n) {
     genInfo.textContent = '⛔ Дневной лимит исчерпан (2/2). Попробуйте завтра.';
     genInfo.className = 'gen-info warn';
     genBtn.disabled = true; genBtn.classList.remove('ready');
+    if (!localStorage.getItem('rsv_lead_done') && !leadModalScheduled) {
+      leadModalScheduled = true;
+      setTimeout(showLeadModal, 3500);
+    }
   } else {
     genInfo.textContent = `Осталось генераций сегодня: ${n}`;
     genInfo.className = 'gen-info';
@@ -594,8 +614,8 @@ function setRemaining(n) {
 // ================================================================
 function handleFile(file) {
   if (!file) return;
-  if (!file.type.startsWith('image/'))    { toast('Нужен JPG или PNG', 'warn'); return; }
-  if (file.size > 10 * 1024 * 1024)       { toast('Файл слишком большой. Максимум 10 МБ', 'warn'); return; }
+  if (!file.type.startsWith('image/'))  { toast('Нужен JPG или PNG', 'warn'); return; }
+  if (file.size > 10 * 1024 * 1024)     { toast('Файл слишком большой. Максимум 10 МБ', 'warn'); return; }
   photoFile = file;
   const reader = new FileReader();
   reader.onload = e => {
@@ -646,10 +666,11 @@ document.querySelectorAll('.mat-btn').forEach(btn => {
     btn.classList.add('active');
     currentMat = btn.dataset.mat;
     $('stepTexTitle').textContent = MAT_TITLE[currentMat];
-    // Скрыть затирку для камня
-    groutStep.style.display = currentMat === 'decorative_stone' ? 'none' : '';
-    if (currentMat === 'decorative_stone') { selectedGrout = null; savePref(); }
-    selectedTex = null; selTexBadge.className = 'sel-tex-badge';
+    // Затирка скрыта для всех типов камня
+    groutStep.style.display = STONE_TYPES.has(currentMat) ? 'none' : '';
+    if (STONE_TYPES.has(currentMat)) { selectedGrout = null; savePref(); }
+    selectedTex = null;
+    selTexBadge.className = 'sel-tex-badge';
     refreshBtn();
     loadSuppliers();
   });
@@ -665,7 +686,11 @@ async function loadSuppliers() {
     const r = await fetch(`${API_BASE}/api/client/suppliers?material_type=${currentMat}`);
     if (!r.ok) throw new Error();
     const sups = await r.json();
-    if (!sups.length) { supRow.innerHTML = ''; texGrid.innerHTML = '<div style="grid-column:span 3;padding:16px 0;text-align:center;color:var(--muted);">Нет поставщиков</div>'; return; }
+    if (!sups.length) {
+      supRow.innerHTML = '';
+      texGrid.innerHTML = '<div style="grid-column:span 3;padding:16px 0;text-align:center;color:var(--muted);">Нет поставщиков</div>';
+      return;
+    }
 
     supRow.innerHTML = sups.map(s =>
       `<button class="sup-btn" data-code="${s.code}">${s.name}</button>`
@@ -734,7 +759,6 @@ function renderTextures(list) {
     });
   });
 
-  // Если текущая текстура выбрана — показываем badge
   if (selectedTex?.material_type === currentMat && selectedTex?.supplier === currentSup) {
     selTexBadge.textContent = selectedTex.name;
     selTexBadge.classList.add('on');
@@ -763,7 +787,7 @@ async function loadGroutColors() {
         el.classList.add('sel');
       });
     });
-  } catch { /* graceful — затирка не критична */ }
+  } catch { /* затирка не критична */ }
 }
 
 // ================================================================
@@ -777,11 +801,10 @@ function setGenerating(on) {
   } else {
     genBtn.disabled = on;
   }
-  genBtn.textContent = on ? '' : '✨ ВИЗУАЛИЗИРОВАТЬ';
   if (on) {
-    const s = document.createElement('span'); s.className = 'spinner';
-    genBtn.prepend(s);
-    genBtn.append(document.createTextNode(' ИИ в работе…'));
+    genBtn.innerHTML = '<span class="spinner"></span> ИИ в работе…';
+  } else {
+    genBtn.textContent = '✨ ВИЗУАЛИЗИРОВАТЬ';
   }
 }
 
@@ -802,10 +825,6 @@ function pollStatus(requestId) {
         setBadge('ok', '✅ Готово!');
         setTimeout(() => previewBadge.className = 'preview-badge', 5000);
         refreshBtn();
-        // Лид-форма: показываем когда лимит исчерпан (remaining === 0) и форма ещё не заполнялась
-        if (remaining !== null && remaining <= 0 && !localStorage.getItem('rsv_lead_done')) {
-          setTimeout(showLeadModal, 1200);
-        }
       } else if (d.status === 'error') {
         clearInterval(pollingTimer);
         setGenerating(false);
@@ -832,7 +851,7 @@ genBtn.addEventListener('click', async () => {
   setGenerating(true);
   previewBadge.className = 'preview-badge';
   if (pollingTimer) clearInterval(pollingTimer);
-  // Сохраняем фото в правой области во время генерации
+  // Показываем исходное фото во время генерации
   if (photoMini.src) showPreview(photoMini.src);
 
   const fd = new FormData();
@@ -841,14 +860,14 @@ genBtn.addEventListener('click', async () => {
   fd.append('category',      currentCat);
   fd.append('material_type', selectedTex.material_type);
   fd.append('supplier',      selectedTex.supplier);
-  if (selectedGrout && selectedTex.material_type !== 'decorative_stone')
+  if (selectedGrout && !STONE_TYPES.has(selectedTex.material_type))
     fd.append('grout_color_name', selectedGrout);
 
   try {
     const r = await fetch(`${API_BASE}/api/client/generate`, {
       method: 'POST', credentials: 'include',
       headers: { 'ngrok-skip-browser-warning': 'true' },
-      body: fd
+      body: fd,
     });
 
     if (r.status === 429) {
@@ -862,15 +881,9 @@ genBtn.addEventListener('click', async () => {
 
     if (d.remaining !== undefined) setRemaining(d.remaining);
 
+    // Сервер всегда возвращает request_id (background task)
     if (d.request_id) {
       pollStatus(d.request_id);
-    } else if (d.result_url) {
-      setGenerating(false);
-      const url = d.result_url.startsWith('http') ? d.result_url : `${API_BASE}${d.result_url}`;
-      showPreview(url);
-      setBadge('ok', '✅ Готово!');
-      setTimeout(() => previewBadge.className = 'preview-badge', 5000);
-      refreshBtn();
     } else {
       throw new Error('Неожиданный ответ сервера');
     }
@@ -888,12 +901,12 @@ genBtn.addEventListener('click', async () => {
 function init() {
   loadPref();
 
-  // Restore material tab
+  // Восстановить активную вкладку материала
   document.querySelectorAll('.mat-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.mat === currentMat);
   });
-  $('stepTexTitle').textContent = MAT_TITLE[currentMat];
-  groutStep.style.display = currentMat === 'decorative_stone' ? 'none' : '';
+  $('stepTexTitle').textContent = MAT_TITLE[currentMat] || 'Выберите материал';
+  groutStep.style.display = STONE_TYPES.has(currentMat) ? 'none' : '';
 
   loadSuppliers();
   loadGroutColors();
@@ -910,15 +923,15 @@ function updateLeadContact() {
   const inp  = document.getElementById('leadContact');
   inp.value  = '';
   if (type === 'phone') {
-    inp.type        = 'tel';
-    inp.inputMode   = 'tel';
+    inp.type         = 'tel';
+    inp.inputMode    = 'tel';
     inp.autocomplete = 'tel';
-    inp.placeholder = '+7 (___) ___-__-__';
+    inp.placeholder  = '+7 (___) ___-__-__';
   } else {
-    inp.type        = 'email';
-    inp.inputMode   = 'email';
+    inp.type         = 'email';
+    inp.inputMode    = 'email';
     inp.autocomplete = 'email';
-    inp.placeholder = 'you@example.com';
+    inp.placeholder  = 'you@example.com';
   }
   inp.focus();
 }
@@ -937,12 +950,14 @@ async function submitLead(e) {
   const contactType = document.getElementById('leadType').value;
   if (!name || !contact) return;
   const fd = new FormData();
-  fd.append('name', name); fd.append('contact', contact); fd.append('contact_type', contactType);
+  fd.append('name', name);
+  fd.append('contact', contact);
+  fd.append('contact_type', contactType);
   try {
     await fetch(`${API_BASE}/api/client/leads`, { method: 'POST', credentials: 'include', body: fd });
   } catch {}
   closeLeadModal();
-  toast('Спасибо! Мы свяжемся с вами в ближайшее время 😊', 'ok');
+  toast('Спасибо! Мы свяжемся с вами в ближайшее время 🙌', 'ok');
 }
 </script>
 
@@ -950,7 +965,7 @@ async function submitLead(e) {
 <div id="leadModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000;align-items:center;justify-content:center;padding:16px;">
   <div style="background:#fff;border-radius:20px;padding:32px 28px;max-width:380px;width:100%;position:relative;box-shadow:0 16px 48px rgba(0,0,0,.2);">
     <button onclick="closeLeadModal()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:1.3rem;cursor:pointer;color:#9aadcc;">✕</button>
-    <div style="font-size:1.8rem;margin-bottom:8px;">🎉</div>
+    <div style="font-size:1.8rem;margin-bottom:8px;">🏠</div>
     <h2 style="font-size:1.15rem;font-weight:700;color:#1a2436;margin-bottom:6px;">Понравился результат?</h2>
     <p style="font-size:.87rem;color:#5b6fa0;margin-bottom:20px;">Оставьте контакт — мы пришлём персональное предложение и рассчитаем стоимость материалов.</p>
     <form onsubmit="submitLead(event)" style="display:flex;flex-direction:column;gap:12px;">
