@@ -128,6 +128,7 @@ async def client_generate(
     material_type: str = Form(...),
     supplier: str = Form(...),
     grout_color_name: str = Form(None),
+    use_zone: str = Form(None),
 ):
     client_ip = get_client_ip(request)
     logger.info(
@@ -170,8 +171,9 @@ async def client_generate(
     base_url = resolve_public_base_url(request)
     photo_url = f"{base_url}/temp/client/{temp_filename}"
     texture_url = f"{base_url}/textures/{material_type}/{supplier}/{quote(filename)}"
+    _STONE_TYPES = {"decorative_stone", "cobblestone", "rubble_stone", "derbent_stone"}
     grout_hex = None
-    if grout_color_name and material_type != "decorative_stone":
+    if grout_color_name and material_type not in _STONE_TYPES:
         db = await get_db()
         try:
             grout_cursor = await db.execute(
@@ -184,7 +186,7 @@ async def client_generate(
         if grout_row:
             grout_hex = grout_row["hex_code"]
 
-    prompt = build_prompt(category, material_type, grout_hex)
+    prompt = build_prompt(category, material_type, grout_hex, use_zone=bool(use_zone))
 
     try:
         result_data = await generate_image([photo_url, texture_url], prompt)

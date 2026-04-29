@@ -1,0 +1,17 @@
+{
+  "name": "Визуализатор облицовки",
+  "short_name": "Визуализатор",
+  "description": "Инструмент визуализации фасадной облицовки Rstone",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ff3b3b",
+  "icons": [
+    {
+      "src": "/static/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

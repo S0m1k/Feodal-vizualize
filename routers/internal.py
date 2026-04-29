@@ -52,6 +52,7 @@ async def internal_generate(
     material_type: str = Form(...),
     supplier: str = Form(...),
     grout_color_name: str = Form(None),
+    use_zone: str = Form(None),
     current_user = Depends(get_current_manager),
 ):
     logger.info(
@@ -95,8 +96,9 @@ async def internal_generate(
         filename = row["filename"]
         texture_url = f"{base_url}/textures/{material_type}/{supplier}/{quote(filename)}"
 
+        _STONE_TYPES = {"decorative_stone", "cobblestone", "rubble_stone", "derbent_stone"}
         grout_hex = None
-        if grout_color_name and material_type != "decorative_stone":
+        if grout_color_name and material_type not in _STONE_TYPES:
             db = await get_db()
             try:
                 grout_cursor = await db.execute(
@@ -109,7 +111,7 @@ async def internal_generate(
             if grout_row:
                 grout_hex = grout_row["hex_code"]
 
-        prompt = build_prompt(category, material_type, grout_hex)
+        prompt = build_prompt(category, material_type, grout_hex, use_zone=bool(use_zone))
 
         try:
             result_data = await generate_image([photo_url, texture_url], prompt)
@@ -419,7 +421,7 @@ async def add_texture(
     file: UploadFile = File(...),
     current_admin = Depends(get_current_admin),
 ):
-    if material_type not in ("standard", "rigel", "decorative_stone", "reika"):
+    if material_type not in ("standard", "rigel", "decorative_stone", "cobblestone", "rubble_stone", "derbent_stone", "reika"):
         raise HTTPException(status_code=400, detail="Invalid material_type")
     if supplier not in ("redstone", "redstone_premium", "krasny_kamen", "reika"):
         raise HTTPException(status_code=400, detail="Invalid supplier")

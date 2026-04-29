@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Панель сотрудника</title>
   <link rel="icon" type="image/png" href="/static/favicon.svg">
-  <link rel="apple-touch-icon" href="/static/favicon.svg">
-  <meta name="theme-color" content="#c0392b">
+  <link rel="apple-touch-icon" href="/static/icons/icon.svg">
+  <meta name="theme-color" content="#ff3b3b">
+  <link rel="manifest" href="/static/manifest.json">
   <style>
     /* ===== RESET & BASE ===== */
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -615,7 +616,7 @@
     <button class="sidebar-close" id="sidebarClose">✕</button>
   </div>
   <ul class="sidebar-nav">
-    <li><span class="nav-link active" data-page="visualizer"><span class="nav-icon">🎨</span> Визуализатор</span></li>
+    <li><span class="nav-link active" data-page="visualizer"><span class="nav-icon">🎨</span> Облицовка</span></li>
     <li><span class="nav-link" data-page="belt"><span class="nav-icon">🏗</span> Пояса</span></li>
     <li><span class="nav-link" data-page="plinth"><span class="nav-icon">🧱</span> Цоколь</span></li>
     <li><span class="nav-link" data-page="reika"><span class="nav-icon">🪵</span> Рейка</span></li>
@@ -630,7 +631,7 @@
 
   <!-- ====== VISUALIZER ====== -->
   <section class="page active" id="page-visualizer">
-    <h1 class="page-title">🎨 Визуализатор</h1>
+    <h1 class="page-title">🎨 Облицовка</h1>
     <div class="vis-layout">
 
       <!-- Left: inputs -->
@@ -647,6 +648,30 @@
         <div class="photo-box" id="photoBox">
           <img class="photo-img" id="photoImg" src="" alt="" onclick="openLightbox(this.src)">
           <button class="photo-remove" id="photoRemoveBtn">✕ Удалить</button>
+        </div>
+
+        <!-- Canvas drawing overlay (shown only when zone mode is on) -->
+        <div id="vizCanvasWrap" class="canvas-wrap" style="display:none;">
+          <canvas id="vizCanvas"></canvas>
+        </div>
+
+        <!-- Zone brush controls -->
+        <div id="vizZoneControls" style="display:none;">
+          <div class="brush-ctrl">
+            <label>Кисть</label>
+            <input type="range" min="4" max="60" value="14" id="vizBrushSize"
+                   oninput="if(vizDrawer)vizDrawer.setBrush(+this.value)">
+            <button onclick="if(vizDrawer)vizDrawer.reset()">Очистить</button>
+          </div>
+        </div>
+
+        <!-- Zone toggle -->
+        <div style="display:none;align-items:center;gap:10px;margin-top:10px;" id="vizZoneToggleRow">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.9rem;color:#5b6fa0;font-weight:600;">
+            <input type="checkbox" id="vizZoneToggle" style="width:16px;height:16px;cursor:pointer;">
+            Рисовать зону обработки
+          </label>
+          <span style="font-size:.75rem;color:#9aadcc;">(закрасьте красным нужную область)</span>
         </div>
 
         <div class="vis-divider"></div>
@@ -706,7 +731,10 @@
         <select id="catMatType">
           <option value="standard">Кирпич</option>
           <option value="rigel">Ригель</option>
-          <option value="decorative_stone">Камень</option>
+          <option value="decorative_stone">Камень декоративный</option>
+          <option value="cobblestone">Булыжник</option>
+          <option value="rubble_stone">Бут</option>
+          <option value="derbent_stone">Дербент</option>
           <option value="reika">Рейка</option>
         </select>
       </div>
@@ -736,7 +764,7 @@
     <h1 class="page-title">⚙️ Администрирование</h1>
 
     <div class="admin-section">
-      <h3>👥 Пользователи</h3>
+      <h3>👤 Пользователь</h3>
       <div class="admin-form">
         <input type="text" id="newUsername" placeholder="Логин">
         <input type="password" id="newPassword" placeholder="Пароль">
@@ -750,7 +778,7 @@
     </div>
 
     <div class="admin-section">
-      <h3>🎨 Цвета затирки</h3>
+      <h3>🎨 Цвет затирки</h3>
       <div class="admin-form">
         <input type="text" id="groutName" placeholder="Название">
         <input type="text" id="groutHex" placeholder="#FFFFFF">
@@ -760,13 +788,16 @@
     </div>
 
     <div class="admin-section">
-      <h3>🧱 Текстуры</h3>
+      <h3>🧱 Текстура</h3>
       <div class="admin-form">
         <input type="text" id="textureName" placeholder="Название">
         <select id="textureMaterialType">
           <option value="standard">Кирпич</option>
           <option value="rigel">Ригель</option>
-          <option value="decorative_stone">Камень</option>
+          <option value="decorative_stone">Камень декоративный</option>
+          <option value="cobblestone">Булыжник</option>
+          <option value="rubble_stone">Бут</option>
+          <option value="derbent_stone">Дербент</option>
           <option value="reika">Рейка</option>
         </select>
         <select id="textureSupplier">
@@ -782,7 +813,7 @@
     </div>
 
     <div class="admin-section">
-      <h3>📊 Все генерации</h3>
+      <h3>📊 Генерация</h3>
       <div class="gen-filter">
         <select id="filterUserType">
           <option value="">Все типы</option>
@@ -849,6 +880,7 @@
           <div style="display:flex;gap:8px;" id="beltModeBtns">
             <button type="button" class="mat-btn active" onclick="setBeltMode('soldier',this)">🧱 Солдатик</button>
             <button type="button" class="mat-btn" onclick="setBeltMode('checker',this)">♟ Шахматный</button>
+            <button type="button" class="mat-btn" onclick="setBeltMode('random_bond',this)">🎲 Хаотичная</button>
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:6px;">
@@ -898,7 +930,10 @@
         <div class="step-title" style="margin-bottom:12px;">2. Текстура цоколя</div>
         <!-- Material type tabs -->
         <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;" id="plinthMatBtns">
-          <button class="mat-btn active" data-mat="decorative_stone" onclick="setPlinthMat(this,'decorative_stone')">Камень</button>
+          <button class="mat-btn active" data-mat="decorative_stone" onclick="setPlinthMat(this,'decorative_stone')">Камень декор.</button>
+          <button class="mat-btn" data-mat="cobblestone" onclick="setPlinthMat(this,'cobblestone')">Булыжник</button>
+          <button class="mat-btn" data-mat="rubble_stone" onclick="setPlinthMat(this,'rubble_stone')">Бут</button>
+          <button class="mat-btn" data-mat="derbent_stone" onclick="setPlinthMat(this,'derbent_stone')">Дербент</button>
           <button class="mat-btn" data-mat="standard" onclick="setPlinthMat(this,'standard')">Кирпич</button>
           <button class="mat-btn" data-mat="rigel" onclick="setPlinthMat(this,'rigel')">Ригель</button>
         </div>
@@ -1011,7 +1046,10 @@
           <select id="modalMatType">
             <option value="standard">Кирпич</option>
             <option value="rigel">Ригель</option>
-            <option value="decorative_stone">Камень</option>
+            <option value="decorative_stone">Камень декоративный</option>
+            <option value="cobblestone">Булыжник</option>
+            <option value="rubble_stone">Бут</option>
+            <option value="derbent_stone">Дербент</option>
             <option value="reika">Рейка</option>
           </select>
         </div>
@@ -1141,6 +1179,8 @@ document.getElementById('lightbox').addEventListener('click', e => {
 const dropzone  = document.getElementById('dropzone');
 const fileInput = document.getElementById('fileInput');
 
+let vizDrawer = null;
+
 function handleFile(file) {
     if (!file) return;
     if (!file.type.startsWith('image/'))         { alert('Неверный формат'); return; }
@@ -1148,9 +1188,18 @@ function handleFile(file) {
     currentPhotoFile = file;
     const reader = new FileReader();
     reader.onload = e => {
-        document.getElementById('photoImg').src = e.target.result;
+        const dataUrl = e.target.result;
+        document.getElementById('photoImg').src = dataUrl;
         document.getElementById('photoBox').classList.add('visible');
         dropzone.style.display = 'none';
+        document.getElementById('vizZoneToggleRow').style.display = '';
+
+        // Re-init drawer so it picks up the new image
+        vizDrawer = null;
+        const zoneOn = document.getElementById('vizZoneToggle').checked;
+        if (zoneOn) {
+            initVizDrawer(dataUrl);
+        }
         refreshGenBtn();
     };
     reader.readAsDataURL(file);
@@ -1158,9 +1207,34 @@ function handleFile(file) {
 document.getElementById('photoRemoveBtn').addEventListener('click', () => {
     currentPhotoFile = null;
     fileInput.value = '';
+    vizDrawer = null;
     document.getElementById('photoBox').classList.remove('visible');
+    document.getElementById('vizCanvasWrap').style.display = 'none';
+    document.getElementById('vizZoneControls').style.display = 'none';
+    document.getElementById('vizZoneToggleRow').style.display = 'none';
+    document.getElementById('vizZoneToggle').checked = false;
     dropzone.style.display = '';
     refreshGenBtn();
+});
+
+function initVizDrawer(dataUrl) {
+    document.getElementById('photoBox').classList.remove('visible');
+    document.getElementById('vizCanvasWrap').style.display = '';
+    document.getElementById('vizZoneControls').style.display = '';
+    if (!vizDrawer) vizDrawer = createDrawer('vizCanvas');
+    vizDrawer.loadImage(dataUrl || document.getElementById('photoImg').src);
+}
+
+document.getElementById('vizZoneToggle').addEventListener('change', function() {
+    if (!currentPhotoFile) return;
+    if (this.checked) {
+        initVizDrawer(document.getElementById('photoImg').src);
+    } else {
+        vizDrawer = null;
+        document.getElementById('vizCanvasWrap').style.display = 'none';
+        document.getElementById('vizZoneControls').style.display = 'none';
+        document.getElementById('photoBox').classList.add('visible');
+    }
 });
 dropzone.addEventListener('click', () => fileInput.click());
 fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
@@ -1396,13 +1470,27 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
     if (pollingInterval) clearInterval(pollingInterval);
     document.getElementById('statusBanner').className = 'status-banner';
 
+    const useZone = document.getElementById('vizZoneToggle').checked && vizDrawer;
+
+    let fileToSend = currentPhotoFile;
+    if (useZone) {
+        try {
+            fileToSend = await vizDrawer.getBlob();
+        } catch(e) {
+            setGenerating(false);
+            showStatus('error', '❌ Не удалось экспортировать маску');
+            return;
+        }
+    }
+
     const fd = new FormData();
-    fd.append('file',            currentPhotoFile);
+    fd.append('file',            fileToSend);
     fd.append('texture',         selectedTexture.name);
     fd.append('category',        currentCategory);
     fd.append('material_type',   selectedTexture.material_type);
     fd.append('supplier',        selectedTexture.supplier);
     if (selectedGroutName) fd.append('grout_color_name', selectedGroutName);
+    if (useZone) fd.append('use_zone', '1');
 
     try {
         const r = await fetch(`${API_BASE}/api/internal/generate`, {
@@ -1559,7 +1647,7 @@ async function loadAllTextures() {
         const textures = await r.json();
         const c = document.getElementById('texturesList');
         if (!textures.length) { c.innerHTML = '<div>Нет текстур</div>'; return; }
-        const tMap = { standard: 'Кирпич', rigel: 'Ригель', decorative_stone: 'Камень' };
+        const tMap = { standard: 'Кирпич', rigel: 'Ригель', decorative_stone: 'Камень декор.', cobblestone: 'Булыжник', rubble_stone: 'Бут', derbent_stone: 'Дербент', reika: 'Рейка' };
         const sMap = { redstone: 'Redstone', redstone_premium: 'Redstone Premium', krasny_kamen: 'Красный Камень' };
         c.innerHTML = `<table>
             <thead><tr><th>ID</th><th>Название</th><th>Тип</th><th>Поставщик</th><th>Файл</th><th>Действие</th></tr></thead>
@@ -1789,7 +1877,7 @@ function createDrawer(canvasId) {
     const ctx    = canvas.getContext('2d');
     let isDrawing = false, lastX = 0, lastY = 0, brushSize = 14, snapshot = null;
 
-    function loadImage(file) {
+    function loadImage(fileOrUrl) {
         const img = new Image();
         img.onload = () => {
             canvas.width  = img.width;
@@ -1801,7 +1889,7 @@ function createDrawer(canvasId) {
             ctx.drawImage(img, 0, 0);
             snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
         };
-        img.src = URL.createObjectURL(file);
+        img.src = (typeof fileOrUrl === 'string') ? fileOrUrl : URL.createObjectURL(fileOrUrl);
     }
     function pos(e) {
         const r = canvas.getBoundingClientRect();

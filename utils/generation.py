@@ -32,31 +32,61 @@ def _extract_output_url(status_data: dict) -> str | None:
     return None
 
 
-def build_prompt(category: str, material_type: str, grout_color_hex: str = None) -> str:
+_STONE_TYPES = {"decorative_stone", "cobblestone", "rubble_stone", "derbent_stone"}
+
+
+def build_prompt(category: str, material_type: str,
+                 grout_color_hex: str = None, use_zone: bool = False) -> str:
     """Единый промт для клиентского и внутреннего роутеров."""
     base = "Preserve house geometry, windows, doors, and lighting EXACTLY."
+    zone_instr = (
+        "The red-highlighted zone marks the area to be retextured. "
+        "Apply the new texture STRICTLY within the red zone ONLY. "
+        "Do NOT change anything outside the red zone. "
+    ) if use_zone else ""
 
     if material_type == "decorative_stone":
-        prompt = (f"{base} Replace facade with the provided stone texture. "
+        prompt = (f"{base} {zone_instr}Replace facade with the provided stone texture. "
                   f"Format: Ledgestone / Stacked stone. "
                   f"The elements must be significantly smaller and thinner than original wall panels. "
                   f"Create a dense, intricate pattern of narrow horizontal stone strips. "
                   f"Tile the texture with high frequency to ensure a realistic architectural scale. "
                   f"Preserve the rough, natural rock relief and color depth.")
+    elif material_type == "cobblestone":
+        target = "house facade" if category == "facade" else "interior wall"
+        prompt = (f"{base} {zone_instr}Replace {target} with the provided cobblestone texture. "
+                  f"Format: Irregular rounded cobblestones set in mortar. "
+                  f"Vary stone sizes naturally — mix small, medium, and occasional large stones. "
+                  f"Mortar joints are wide and slightly recessed. "
+                  f"Preserve the rough, tactile, medieval stone street character.")
+    elif material_type == "rubble_stone":
+        target = "house facade" if category == "facade" else "interior wall"
+        prompt = (f"{base} {zone_instr}Replace {target} with the provided rubble stone texture. "
+                  f"Format: Wild rubble / uncoursed fieldstone masonry. "
+                  f"Stones are irregular, angular, and randomly shaped — no coursing lines. "
+                  f"Tightly packed with minimal mortar visible. "
+                  f"Emphasise the raw, natural, dry-stone wall aesthetic.")
+    elif material_type == "derbent_stone":
+        target = "house facade" if category == "facade" else "interior wall"
+        prompt = (f"{base} {zone_instr}Replace {target} with the provided Derbent stone texture. "
+                  f"Format: Smooth-cut rectangular ashlar masonry in regular horizontal courses. "
+                  f"Stones are uniform in height, varying slightly in length, with tight hairline joints. "
+                  f"Surface is flat and refined, typical of Caucasian limestone cladding. "
+                  f"Maintain precise, clean coursing with sharp right-angle corners.")
     else:
         target = "house facade" if category == "facade" else "interior wall"
 
         if material_type == "standard":
-            prompt = (f"{base} Replace {target} with the provided brick texture. "
+            prompt = (f"{base} {zone_instr}Replace {target} with the provided brick texture. "
                       f"Apply as high-density brickwork. Bricks must be small and frequent, "
                       f"matching realistic standard brick dimensions. Tight alignment.")
         else:
             # Ригель: пропорция 1:10, высокая горизонтальная плотность
-            prompt = (f"{base} Replace {target} with EXACTLY the provided texture. "
+            prompt = (f"{base} {zone_instr}Replace {target} with EXACTLY the provided texture. "
                       f"Format: Riegel brick (ultra-long, ultra-thin). Ratio 1:10. "
                       f"Apply with maximum horizontal density and sharp linear courses.")
 
-    if grout_color_hex and material_type != "decorative_stone":
+    if grout_color_hex and material_type not in _STONE_TYPES:
         prompt += f" Mortar joints color: HEX {grout_color_hex}."
 
     prompt += " Hyper-realistic, 8k architectural visualization, sharp focus on masonry."
@@ -74,6 +104,12 @@ def build_belt_prompt(category: str, mode: str = "soldier") -> str:
             "a checkerboard soldier-course pattern — bricks standing upright on their ends, "
             "arranged in alternating offset rows so every other brick is shifted by half a brick "
             "creating a diagonal / staggered checker effect"
+        )
+    elif mode == "random_bond":
+        pattern = (
+            "a random / chaotic masonry bond — bricks of varying lengths placed without defined "
+            "coursing, mixing different orientations and offsets unpredictably, creating an "
+            "irregular, eclectic, free-form decorative belt texture"
         )
     else:  # soldier
         pattern = (
