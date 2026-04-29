@@ -48,9 +48,12 @@ def build_prompt(category: str, material_type: str,
 
     if material_type == "rubble_stone":
         prompt = (f"{base} {zone_instr}Replace {target} with the provided texture. "
-                  f"Format: Wild rubble / irregular angular fieldstone. "
-                  f"Stones must be tightly packed, varying in size and shape with sharp, jagged edges. "
-                  f"Maintain a natural, rugged relief and organic placement.")
+                  f"FORMAT: Wild rubble / irregular angular fieldstone. "
+                  f"CRITICAL SCALE & DENSITY: The new stonework must consist of a high-density mosaic of small-to-medium stones (hand-sized relative to windows). "
+                  f"Avoid oversized boulders or large stone slabs. Stones must be tightly packed with minimal visible gaps, creating a fine-grained architectural texture. "
+                  f"TEXTURE & RELIEF: Each stone must have sharp, jagged edges and a matte, rugged surface. Maintain a natural, three-dimensional relief where individual stones protrude slightly. "
+                  f"Strictly avoid smooth or glossy 'plastic-like' finishes. "
+                  f"JOINTS: Incorporate deep, dark, recessed mortar joints to create realistic ambient occlusion and shadow depth between the small stones.")
     elif material_type == "cobblestone":
         prompt = (f"{base} {zone_instr}"
                   f"TASK: Replace {target} with raw, natural weathered cobblestone. "
