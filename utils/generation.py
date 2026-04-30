@@ -155,13 +155,15 @@ def build_reika_prompt(orientation: str = "horizontal") -> str:
     )
 
 
-def build_belt_prompt(has_texture: bool = True, material_type: str = None) -> str:
+def build_belt_prompt(has_texture: bool = True, material_type: str = None,
+                      belt_mode: str = "soldier") -> str:
     """Промт для подвкладки Пояса.
     Сценарий А (has_texture=True): заменить зону на выбранную текстуру.
-    Сценарий Б (has_texture=False): перекомпоновать существующую кладку в солдатский ряд.
+    Сценарий Б (has_texture=False, belt_mode='soldier'): солдатский ряд.
+    Сценарий В (has_texture=False, belt_mode='chess'): шахматная вертикальная кладка.
     """
     if has_texture:
-        if material_type == "derbent_stone":
+        if material_type in ("textured_stone", "derbent_stone"):
             fill = _derbent_zone_detail()
         else:
             fill = (
@@ -175,6 +177,23 @@ def build_belt_prompt(has_texture: bool = True, material_type: str = None) -> st
             fill +
             "Do NOT change anything outside the red zone. "
             "8k, photorealistic."
+        )
+    elif belt_mode == "chess":
+        return (
+            "ATTENTION: Change the EXISTING facade material orientation ONLY within the red-highlighted zone. "
+            "TASK: Rearrange the current bricks into a Vertical Staggered (Running Bond) pattern. "
+            "Bricks must stand upright on their ends, oriented vertically. "
+            "STAGGER RULE (CRITICAL): Adjacent vertical columns must be offset by exactly half a brick height — "
+            "like a standard horizontal running bond pattern, but rotated 90 degrees. "
+            "The result is a chess-like diagonal rhythm: one column starts at the top of the zone, "
+            "the next column starts half a brick lower, alternating across the entire belt. "
+            "CRITICAL ALIGNMENT: The belt must be perfectly flush with the surrounding facade surfaces, "
+            "staying on the exact same plane. No recession, no 'sunken' effect. "
+            "No deep shadow gaps at the top or bottom edges. "
+            "MATERIAL MATCH: Use the EXACT same color, tone, and material as the surrounding wall. "
+            "The only change is the pattern and orientation. "
+            "Do NOT change anything outside the red zone. "
+            "Hyper-realistic architectural rendering, 8k, photorealistic lighting."
         )
     else:
         return (

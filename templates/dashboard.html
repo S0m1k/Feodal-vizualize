@@ -971,6 +971,11 @@
           <span id="beltTexLabel" style="font-weight:600;font-size:.9rem;"></span>
           <button style="margin-left:auto;background:none;border:none;color:#ff3b3b;cursor:pointer;font-weight:600;" onclick="clearSubTex('belt')">✕ Убрать текстуру → режим перекомпоновки</button>
         </div>
+        <div id="beltModeRow" style="display:flex;gap:8px;margin-top:10px;align-items:center;">
+          <span style="font-size:.82rem;color:#9aadcc;margin-right:4px;">Режим перекомпоновки:</span>
+          <button id="beltModeSoldier" class="mat-btn active" onclick="setBeltMode('soldier',this)">⬛ Солдатская</button>
+          <button id="beltModeChess"   class="mat-btn"        onclick="setBeltMode('chess',this)">♟ Шахматная</button>
+        </div>
       </div>
       <div class="card" id="beltCanvasCard" style="display:none;">
         <div class="step-title" style="margin-bottom:8px;">3. Обозначьте зону <span style="color:#e53935">красным</span></div>
@@ -1880,6 +1885,12 @@ function createDrawer(canvasId) {
 
 // ── Состояние подвкладок ──
 let plinthDrawer = null, plinthTex = null, plinthMat = 'standard';
+let beltMode = 'soldier';
+function setBeltMode(mode, btn) {
+    beltMode = mode;
+    document.querySelectorAll('#beltModeRow .mat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
 let reikaDrawer  = null, reikaTex  = null, reikaOrientation = 'horizontal';
 let beltDrawer   = null, beltTex   = null, beltMat = 'standard';
 let accentInited = false, currentAccentTab = 'plinth';
@@ -2021,6 +2032,7 @@ async function generateSubAccent(type) {
     fd.append('annotated_photo', blob, `${type}.jpg`);
     fd.append('accent_type', type);
     if (type === 'reika') fd.append('orientation', reikaOrientation);
+    if (type === 'belt') fd.append('belt_mode', beltMode);
     if (tex) {
         fd.append('texture',       tex.name);
         fd.append('material_type', tex.material_type);
