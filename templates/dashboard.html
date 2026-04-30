@@ -734,7 +734,8 @@
           <option value="rigel">Ригель</option>
           <option value="cobblestone">Круглый камень</option>
           <option value="rubble_stone">Рваный камень</option>
-          <option value="derbent_stone">Квадратный камень</option>
+          <option value="flat_stone">Плоский камень</option>
+          <option value="textured_stone">Фактурный камень</option>
         </select>
       </div>
       <div class="filter-group">
@@ -795,7 +796,8 @@
           <option value="rigel">Ригель</option>
           <option value="cobblestone">Круглый камень</option>
           <option value="rubble_stone">Рваный камень</option>
-          <option value="derbent_stone">Квадратный камень</option>
+          <option value="flat_stone">Плоский камень</option>
+          <option value="textured_stone">Фактурный камень</option>
           <option value="reika">Рейка</option>
         </select>
         <select id="textureSupplier">
@@ -871,7 +873,8 @@
           <button class="mat-btn" onclick="setSubMat('plinth',this,'rigel')">Ригель</button>
           <button class="mat-btn" onclick="setSubMat('plinth',this,'cobblestone')">Круглый камень</button>
           <button class="mat-btn" onclick="setSubMat('plinth',this,'rubble_stone')">Рваный камень</button>
-          <button class="mat-btn" onclick="setSubMat('plinth',this,'derbent_stone')">Квадратный камень</button>
+          <button class="mat-btn" onclick="setSubMat('plinth',this,'flat_stone')">Плоский камень</button>
+          <button class="mat-btn" onclick="setSubMat('plinth',this,'textured_stone')">Фактурный камень</button>
         </div>
         <div id="plinthSupplierChips" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;"><span style="color:#9aadcc;font-size:.82rem;">Выберите тип материала</span></div>
         <div class="zone-tex-grid" id="plinthTexGrid"><div style="color:#9aadcc;font-size:.82rem;padding:8px;">Выберите поставщика</div></div>
@@ -959,7 +962,8 @@
           <button class="mat-btn" onclick="setSubMat('belt',this,'rigel')">Ригель</button>
           <button class="mat-btn" onclick="setSubMat('belt',this,'cobblestone')">Круглый камень</button>
           <button class="mat-btn" onclick="setSubMat('belt',this,'rubble_stone')">Рваный камень</button>
-          <button class="mat-btn" onclick="setSubMat('belt',this,'derbent_stone')">Квадратный камень</button>
+          <button class="mat-btn" onclick="setSubMat('belt',this,'flat_stone')">Плоский камень</button>
+          <button class="mat-btn" onclick="setSubMat('belt',this,'textured_stone')">Фактурный камень</button>
         </div>
         <div id="beltSupplierChips" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;"><span style="color:#9aadcc;font-size:.82rem;">Выберите тип материала</span></div>
         <div class="zone-tex-grid" id="beltTexGrid"><div style="color:#9aadcc;font-size:.82rem;padding:8px;">Выберите поставщика</div></div>
@@ -1000,7 +1004,8 @@
             <option value="rigel">Ригель</option>
             <option value="cobblestone">Круглый камень</option>
             <option value="rubble_stone">Рваный камень</option>
-            <option value="derbent_stone">Квадратный камень</option>
+            <option value="flat_stone">Плоский камень</option>
+            <option value="textured_stone">Фактурный камень</option>
           </select>
         </div>
         <div class="filter-group">
@@ -1595,7 +1600,7 @@ async function loadAllTextures() {
         const textures = await r.json();
         const c = document.getElementById('texturesList');
         if (!textures.length) { c.innerHTML = '<div>Нет текстур</div>'; return; }
-        const tMap = { standard: 'Кирпич', rigel: 'Ригель', cobblestone: 'Круглый', rubble_stone: 'Рваный', derbent_stone: 'Квадратный', reika: 'Рейка' };
+        const tMap = { standard: 'Кирпич', rigel: 'Ригель', cobblestone: 'Круглый', rubble_stone: 'Рваный', flat_stone: 'Плоский', textured_stone: 'Фактурный', reika: 'Рейка' };
         const sMap = { redstone: 'Redstone', redstone_premium: 'Redstone Premium', krasny_kamen: 'Красный Камень' };
         c.innerHTML = `<table>
             <thead><tr><th>ID</th><th>Название</th><th>Тип</th><th>Поставщик</th><th>Файл</th><th>Действие</th></tr></thead>
