@@ -390,7 +390,8 @@
         <button class="mat-btn"        data-mat="rigel">📏 Ригель</button>
         <button class="mat-btn"        data-mat="cobblestone">🪨 Булыжник</button>
         <button class="mat-btn"        data-mat="rubble_stone">⛰ Рваный</button>
-        <button class="mat-btn"        data-mat="derbent_stone">🔲 Квадратный</button>
+        <button class="mat-btn"        data-mat="flat_stone">🔲 Плоский</button>
+        <button class="mat-btn"        data-mat="textured_stone">🪨 Фактурный</button>
       </div>
 
       <!-- Suppliers -->
@@ -461,7 +462,7 @@
 const API_BASE = 'https://rstone.tech';
 
 // Типы камня — не используют затирку (должно совпадать с бэкендом)
-const STONE_TYPES = new Set(['cobblestone', 'rubble_stone', 'derbent_stone']);
+const STONE_TYPES = new Set(['cobblestone', 'rubble_stone', 'derbent_stone', 'flat_stone', 'textured_stone']);
 
 // ================================================================
 //  STATE
@@ -477,11 +478,12 @@ let remaining          = null;
 let leadModalScheduled = false;
 
 const MAT_TITLE = {
-  standard:     'Выберите кирпич',
-  rigel:        'Выберите ригель',
-  cobblestone:  'Выберите булыжник',
-  rubble_stone: 'Выберите рваный камень',
-  derbent_stone:'Выберите квадратный камень',
+  standard:      'Выберите кирпич',
+  rigel:         'Выберите ригель',
+  cobblestone:   'Выберите булыжник',
+  rubble_stone:  'Выберите рваный камень',
+  flat_stone:    'Выберите плоский камень',
+  textured_stone:'Выберите фактурный камень',
 };
 const CAT_HINT = {
   facade:   'ИИ заменит фасад дома на выбранный материал',

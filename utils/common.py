@@ -3,7 +3,7 @@ import os
 from fastapi import Request
 
 # Типы камня — не используют цвет затирки
-STONE_TYPES: frozenset[str] = frozenset({"cobblestone", "rubble_stone", "derbent_stone"})
+STONE_TYPES: frozenset[str] = frozenset({"cobblestone", "rubble_stone", "derbent_stone", "flat_stone", "textured_stone"})
 
 
 def resolve_public_base_url(request: Request) -> str:

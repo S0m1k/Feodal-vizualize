@@ -57,27 +57,33 @@ def build_prompt(category: str, material_type: str,
     elif material_type == "cobblestone":
         prompt = (f"{base} {zone_instr}"
                   f"TASK: Replace {target} with raw, natural weathered cobblestone. "
-                  f"CRITICAL ANTI-PLASTIC INSTRUCTIONS: "
-                  f"Surface Texture: The stone surface must be matte, coarse, and granular with visible mineral pores and natural imperfections. "
-                  f"Strictly avoid smooth, glossy, or plastic-like finishes. "
-                  f"Scale & Density: Maintain a high-density mosaic of many small-to-medium stones (fist-sized relative to windows). "
-                  f"Each stone must have a unique, organic shape — no identical or repetitive patterns. "
-                  f"3D Relief: Incorporate deep, dark, irregular mortar joints (raked joints) between stones. "
-                  f"This must create a strong ambient occlusion effect (soft shadows in the gaps), giving the wall real 3D tactile depth. "
-                  f"Color Variance: Stones must have natural earthy color variations (mix of grays, tans, and browns) "
-                  f"with subtle mineral staining to break the uniform sticker look. "
-                  f"GEOMETRY: Keep the cladding flush with surrounding wall surfaces, but ensure each stone protrudes slightly for a realistic rugged texture.")
-    elif material_type == "derbent_stone":
-        prompt = (f"{base} {zone_instr}Completely replace {target} with ultra-rugged, heavy-relief Melen stone masonry. "
-                  f"GEOMETRY DESTRUCTION (The 'No-Flat' Rule): Extreme 3D Protrusion — Each individual stone must physically protrude from the wall at various depths (3-6cm). Strictly forbid flat surfaces or smooth planes. "
-                  f"Jagged Rock-Face — Use an extreme rock-face texture with sharp, jagged protrusions and deep, dark natural crevices. The surface must look like raw, unpolished mountain rock. "
-                  f"Broken Edges — The edges of each stone must be irregular and chipped, not straight lines. "
-                  f"LIGHTING & SHADOWS: High-Contrast Relief — The sunlight must create harsh, deep shadows within the stone's own texture. "
-                  f"Ambient Occlusion — Every stone block must cast a physical shadow onto the stones below it. "
-                  f"JOINTS: Seamless Dry-Stack — Stones are tightly packed with zero grout gaps. The only 'lines' allowed are the deep, irregular shadow-cracks between the rugged stone faces. Strictly avoid any regular grid or mortar lines. "
-                  f"FORBIDDEN: NO bricks, NO tiles, NO flat masonry, NO smooth surfaces. "
-                  f"SCALE: Small-to-medium stones relative to windows for realism. "
-                  f"Hyper-realistic 8k architectural visualization, emphasis on sculptural masonry relief.")
+                  f"CRITICAL 3D VOLUME (most important rule): Every single stone must read as a fully three-dimensional rounded boulder. "
+                  f"Each stone is a convex sphere or ovoid — the center of its visible face protrudes outward, and the edges curve away from the viewer into the dark gaps. "
+                  f"Strong directional highlight on the topmost/facing surface of each stone; deep cast shadow on the lower/side edges. "
+                  f"The overall wall surface must have dramatic high-relief depth — NOT a flat appliqué of stone shapes. "
+                  f"GAPS: Gaps between stones must be deep, dark, and recessed — strong ambient occlusion creating the impression of real physical depth between rounded boulders. "
+                  f"SURFACE TEXTURE: Matte, coarse, granular mineral surface with visible pores and natural imperfections. Strictly avoid smooth, glossy, or plastic-like finishes. "
+                  f"SCALE & DENSITY: High-density mosaic of many small-to-medium stones (fist-sized relative to windows). Each stone has a unique organic shape — no identical or repetitive patterns. "
+                  f"COLOR VARIANCE: Natural earthy variations (grays, tans, browns) with subtle mineral staining. "
+                  f"FORBIDDEN: Flat stone faces. Silhouette-like 2D stone shapes. Uniform, identical stones.")
+    elif material_type in ("textured_stone", "derbent_stone"):
+        prompt = (f"{base} {zone_instr}Replace {target} with the provided textured square stone cladding. "
+                  f"BLOCK GEOMETRY: Regular square or rectangular stone blocks with clearly defined, sharp block boundaries. "
+                  f"Uniform block sizes matching the provided texture reference. Consistent coursing and alignment. "
+                  f"SURFACE TEXTURE (CRITICAL): Each stone face has a pronounced rough, split-face texture — visible peaks, valleys, and natural mineral roughness across the entire face. NOT flat, NOT smooth. "
+                  f"3D RELIEF: Each block face protrudes from the wall plane with moderate relief (1-3 cm). "
+                  f"Strong self-shadowing within each block's textured face; dark recessed shadow at every joint line. "
+                  f"JOINTS: Deep, dark recessed mortar lines between all blocks — consistent width and depth. "
+                  f"FORBIDDEN: Smooth or flat block faces. Irregular stone shapes or non-square geometry. Plastic or glossy surface.")
+    elif material_type == "flat_stone":
+        prompt = (f"{base} {zone_instr}Replace {target} with the provided flat square stone cladding. "
+                  f"BLOCK GEOMETRY: Regular square or rectangular blocks with sharp, precise, clean-cut edges. "
+                  f"Uniform block sizes matching the provided texture reference. Perfectly straight courses and grid alignment. "
+                  f"SURFACE (CRITICAL): Each stone face is completely flat and smooth — no chipping, no roughness, no bumps, no rock-face texture. "
+                  f"The face must be planar and calibrated, like precision-cut architectural stone panels. "
+                  f"JOINTS: Thin, uniform recessed mortar lines creating a clean regular grid. Consistent joint width and depth throughout. "
+                  f"SHADOWS: Subtle shadow only at the joint lines due to joint depth — no surface relief shadows. "
+                  f"FORBIDDEN: Any rough, split-face, or rock-face texture on block surfaces. Irregular edges or shapes. Protruding bumps or mineral roughness on the face.")
     elif material_type == "standard":
         prompt = (f"{base} {zone_instr}Replace {target} with the provided brick texture. "
                   f"Apply as high-density brickwork. Bricks must be small and frequent, "
