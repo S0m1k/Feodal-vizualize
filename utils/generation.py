@@ -68,13 +68,14 @@ def build_prompt(category: str, material_type: str,
                   f"FORBIDDEN: Flat stone faces. Silhouette-like 2D stone shapes. Uniform, identical stones.")
     elif material_type in ("textured_stone", "derbent_stone"):
         prompt = (f"{base} {zone_instr}Replace {target} with the provided textured square stone cladding. "
-                  f"BLOCK GEOMETRY: Regular square or rectangular stone blocks with clearly defined, sharp block boundaries. "
-                  f"Uniform block sizes matching the provided texture reference. Consistent coursing and alignment. "
-                  f"SURFACE TEXTURE (CRITICAL): Each stone face has a pronounced rough, split-face texture — visible peaks, valleys, and natural mineral roughness across the entire face. NOT flat, NOT smooth. "
+                  f"BLOCK SCALE (CRITICAL): Blocks must be SMALL — each block should be roughly fist-sized relative to windows and doors. "
+                  f"High density of blocks across the entire surface. Do NOT use large slabs or oversized stones. "
+                  f"BLOCK GEOMETRY: Regular square or rectangular blocks with clearly defined, sharp block boundaries. Consistent coursing and alignment. "
+                  f"SURFACE TEXTURE: Each stone face has a pronounced rough, split-face texture — visible peaks, valleys, and natural mineral roughness. NOT flat, NOT smooth. "
                   f"3D RELIEF: Each block face protrudes from the wall plane with moderate relief (1-3 cm). "
                   f"Strong self-shadowing within each block's textured face; dark recessed shadow at every joint line. "
                   f"JOINTS: Deep, dark recessed mortar lines between all blocks — consistent width and depth. "
-                  f"FORBIDDEN: Smooth or flat block faces. Irregular stone shapes or non-square geometry. Plastic or glossy surface.")
+                  f"FORBIDDEN: Large blocks or slabs. Smooth or flat block faces. Irregular stone shapes. Plastic or glossy surface.")
     elif material_type == "flat_stone":
         prompt = (f"{base} {zone_instr}Replace {target} with the provided flat square stone cladding. "
                   f"BLOCK GEOMETRY: Regular square or rectangular blocks with sharp, precise, clean-cut edges. "

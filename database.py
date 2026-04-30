@@ -123,6 +123,7 @@ def init_db_sync():
     cur = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='materials'")
     row = cur.fetchone()
     if row and "'flat_stone'" not in row[0]:
+        # Пересоздаём таблицу с новым CHECK-ограничением
         conn.executescript("""
             ALTER TABLE materials RENAME TO materials_old;
             CREATE TABLE materials (
@@ -135,8 +136,12 @@ def init_db_sync():
             );
             INSERT INTO materials SELECT * FROM materials_old;
             DROP TABLE materials_old;
-            UPDATE materials SET material_type = 'textured_stone' WHERE material_type = 'derbent_stone';
         """)
+        conn.commit()
+
+    # Отдельная миграция: derbent_stone → textured_stone (идемпотентна, можно запускать повторно)
+    conn.execute("UPDATE materials SET material_type = 'textured_stone' WHERE material_type = 'derbent_stone'")
+    conn.commit()
 
     # Добавляем начальные цвета затирки
     cur = conn.execute("SELECT COUNT(*) FROM grout_colors")
