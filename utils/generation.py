@@ -202,7 +202,6 @@ async def generate_image(image_urls: list, prompt: str) -> dict:
     }
 
     payload = {
-        "callback_url": None,
         "prompt": prompt,
         "image_urls": image_urls,
         "quality": "high",
