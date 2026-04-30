@@ -6,7 +6,7 @@ import multiprocessing
 bind = "127.0.0.1:8001"
 workers = 4
 worker_class = "uvicorn.workers.UvicornWorker"
-timeout = 300          # AI generation can take up to 3 min
+timeout = 400          # AI generation can take up to 5 min
 graceful_timeout = 30
 keepalive = 5
 

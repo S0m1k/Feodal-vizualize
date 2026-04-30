@@ -204,10 +204,10 @@ async def generate_image(image_urls: list, prompt: str) -> dict:
     payload = {
         "prompt": prompt,
         "image_urls": image_urls,
-        "quality": "high",
-        "image_size": "1536x1024",
+        "quality": "medium",
+        "image_size": "1024x1536",
         "num_images": 1,
-        "output_format": "jpeg",
+        "output_format": "png",
     }
 
     async with httpx.AsyncClient(timeout=httpx.Timeout(connect=30.0, read=300.0, write=30.0, pool=5.0)) as client:
@@ -251,7 +251,7 @@ async def generate_image(image_urls: list, prompt: str) -> dict:
         poll_client = httpx.AsyncClient(timeout=30.0)
         async with poll_client:
             logger.info("GenAPI polling start request_id=%s", request_id)
-            for attempt in range(90):  # до 3 минут
+            for attempt in range(150):  # до 5 минут
                 await asyncio.sleep(2)
                 try:
                     status_resp = await poll_client.get(status_url, headers=headers)
