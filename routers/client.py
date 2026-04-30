@@ -14,6 +14,13 @@ import httpx
 import logging
 
 router = APIRouter(tags=["client"])
+
+# Алиасы новых типов на старые имена в БД (backward compat)
+_MATERIAL_ALIASES: dict[str, str] = {
+    "flat_stone": "derbent_stone",
+    "textured_stone": "derbent_stone",
+}
+
 redis_client = Redis(
     host='localhost', port=6379, decode_responses=True,
     password=os.getenv("REDIS_PASSWORD") or None,
@@ -52,9 +59,10 @@ def increment_count(client_ip: str) -> int:
 
 @router.get("/suppliers")
 async def get_suppliers(material_type: str):
+    db_type = _MATERIAL_ALIASES.get(material_type, material_type)
     db = await get_db()
     try:
-        cursor = await db.execute("SELECT DISTINCT supplier FROM materials WHERE material_type = ?", (material_type,))
+        cursor = await db.execute("SELECT DISTINCT supplier FROM materials WHERE material_type = ?", (db_type,))
         rows = await cursor.fetchall()
     finally:
         await db.close()
@@ -63,16 +71,18 @@ async def get_suppliers(material_type: str):
 
 @router.get("/textures")
 async def get_textures(material_type: str, supplier: str):
+    db_type = _MATERIAL_ALIASES.get(material_type, material_type)
     db = await get_db()
     try:
         cursor = await db.execute(
             "SELECT name, filename FROM materials WHERE material_type = ? AND supplier = ?",
-            (material_type, supplier)
+            (db_type, supplier)
         )
         rows = await cursor.fetchall()
     finally:
         await db.close()
-    return [{"name": row["name"], "url": f"/textures/{material_type}/{supplier}/{row['filename']}"} for row in rows]
+    # URL указывает на реальный путь файла (db_type), а не на alias
+    return [{"name": row["name"], "url": f"/textures/{db_type}/{supplier}/{row['filename']}"} for row in rows]
 
 @router.post("/leads")
 async def submit_lead(

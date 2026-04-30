@@ -460,6 +460,10 @@
       padding: 9px 12px; font-weight: 500; font-size: .88rem;
       border-top: 1px solid #f0f4f8; text-align: center; color: #1e2a3b;
     }
+    .tex-card-badge {
+      padding: 2px 10px 6px; font-size: .72rem; text-align: center;
+      color: #9aadcc; font-weight: 500;
+    }
 
     /* ===== CATALOG MODAL ===== */
     .modal-backdrop {
@@ -730,6 +734,7 @@
       <div class="filter-group">
         <label>Тип материала</label>
         <select id="catMatType">
+          <option value="">Все типы</option>
           <option value="standard">Кирпич</option>
           <option value="rigel">Ригель</option>
           <option value="cobblestone">Круглый камень</option>
@@ -740,7 +745,9 @@
       </div>
       <div class="filter-group">
         <label>Поставщик</label>
-        <select id="catSupplier"></select>
+        <select id="catSupplier">
+          <option value="">Все поставщики</option>
+        </select>
       </div>
       <div class="filter-group">
         <label>Поиск</label>
@@ -788,7 +795,7 @@
     </div>
 
     <div class="admin-section">
-      <h3>🧱 Текстура</h3>
+      <h3>🧱 Добавить текстуру</h3>
       <div class="admin-form">
         <input type="text" id="textureName" placeholder="Название">
         <select id="textureMaterialType">
@@ -798,6 +805,7 @@
           <option value="rubble_stone">Рваный камень</option>
           <option value="flat_stone">Плоский камень</option>
           <option value="textured_stone">Фактурный камень</option>
+          <option value="derbent_stone">Дербент (старый)</option>
           <option value="reika">Рейка</option>
         </select>
         <select id="textureSupplier">
@@ -808,6 +816,31 @@
         </select>
         <input type="file" id="textureFile" accept="image/jpeg,image/jpg,image/png">
         <button id="addTextureBtn">Добавить</button>
+      </div>
+    </div>
+
+    <div class="admin-section">
+      <h3>📋 Список текстур</h3>
+      <div class="gen-filter" style="margin-bottom:12px;">
+        <input type="text" id="texFilterName" placeholder="Поиск по названию…" style="flex:2;">
+        <select id="texFilterType">
+          <option value="">Все типы</option>
+          <option value="standard">Кирпич</option>
+          <option value="rigel">Ригель</option>
+          <option value="cobblestone">Круглый камень</option>
+          <option value="rubble_stone">Рваный камень</option>
+          <option value="flat_stone">Плоский камень</option>
+          <option value="textured_stone">Фактурный камень</option>
+          <option value="derbent_stone">Дербент (старый)</option>
+          <option value="reika">Рейка</option>
+        </select>
+        <select id="texFilterSupplier">
+          <option value="">Все поставщики</option>
+          <option value="redstone">Redstone</option>
+          <option value="redstone_premium">Redstone Premium</option>
+          <option value="krasny_kamen">Красный Камень</option>
+          <option value="reika">Рейка</option>
+        </select>
       </div>
       <div id="texturesList"></div>
     </div>
@@ -1055,8 +1088,8 @@ let modalSupplierVal    = null;
 let modalTexList        = [];
 
 // Catalog page state
-let catMatTypeVal       = 'standard';
-let catSupplierVal      = null;
+let catMatTypeVal       = '';
+let catSupplierVal      = '';
 let catTexList          = [];
 let usersMap            = {};  // id → username, populated by loadUsers()
 
@@ -1322,47 +1355,89 @@ document.getElementById('modalSearch').addEventListener('input', () => renderMod
 // ============================================================
 //  CATALOG PAGE
 // ============================================================
+let _catAllTextures = [];  // полный список для клиентской фильтрации
+
 async function initCatalogPage() {
     catMatTypeVal = document.getElementById('catMatType').value;
-    try {
-        const r = await fetch(`${API_BASE}/api/internal/suppliers?material_type=${catMatTypeVal}`, { credentials: 'include', headers: H() });
-        const sups = await r.json();
-        const sel = document.getElementById('catSupplier');
-        sel.innerHTML = sups.map(s => `<option value="${s.code}">${s.name}</option>`).join('');
-        if (sups.length) { catSupplierVal = sups[0].code; await loadCatTextures(); }
-    } catch(e) { console.error(e); }
+    // Обновляем список поставщиков (только если тип выбран)
+    const supSel = document.getElementById('catSupplier');
+    if (catMatTypeVal) {
+        try {
+            const r = await fetch(`${API_BASE}/api/internal/suppliers?material_type=${catMatTypeVal}`, { credentials: 'include', headers: H() });
+            const sups = await r.json();
+            supSel.innerHTML = '<option value="">Все поставщики</option>' +
+                sups.map(s => `<option value="${s.code}">${s.name}</option>`).join('');
+        } catch(e) { console.error(e); }
+    } else {
+        supSel.innerHTML = '<option value="">Все поставщики</option>';
+    }
+    catSupplierVal = supSel.value; // всегда "" если "Все"
+    await loadCatTextures();
 }
+
 async function loadCatTextures() {
-    if (!catMatTypeVal || !catSupplierVal) return;
+    const grid = document.getElementById('catGrid');
+    grid.innerHTML = '<div style="padding:16px;color:#9aadcc;">Загрузка…</div>';
     try {
-        const r = await fetch(`${API_BASE}/api/internal/textures?material_type=${catMatTypeVal}&supplier=${catSupplierVal}`, { credentials: 'include', headers: H() });
-        catTexList = await r.json();
-        renderCatGrid(catTexList);
-    } catch(e) { console.error(e); }
+        let list;
+        if (!catMatTypeVal && !catSupplierVal) {
+            // Все типы, все поставщики — получаем полный список
+            const r = await fetch(`${API_BASE}/api/internal/textures/all`, { credentials: 'include', headers: H() });
+            const raw = await r.json();
+            // Добавляем url для каждой текстуры
+            list = raw.map(t => ({
+                ...t,
+                url: `/textures/${t.material_type}/${t.supplier}/${t.filename}`
+            }));
+        } else if (catMatTypeVal && !catSupplierVal) {
+            // Тип выбран, поставщик — все: грузим по всем поставщикам этого типа
+            const rs = await fetch(`${API_BASE}/api/internal/suppliers?material_type=${catMatTypeVal}`, { credentials: 'include', headers: H() });
+            const sups = await rs.json();
+            const lists = await Promise.all(sups.map(s =>
+                fetch(`${API_BASE}/api/internal/textures?material_type=${catMatTypeVal}&supplier=${s.code}`, { credentials: 'include', headers: H() })
+                    .then(r => r.json())
+                    .then(rows => rows.map(t => ({ ...t, material_type: catMatTypeVal, supplier: s.code })))
+            ));
+            list = lists.flat();
+        } else {
+            // Тип + поставщик выбраны
+            const r = await fetch(`${API_BASE}/api/internal/textures?material_type=${catMatTypeVal}&supplier=${catSupplierVal}`, { credentials: 'include', headers: H() });
+            const rows = await r.json();
+            list = rows.map(t => ({ ...t, material_type: catMatTypeVal, supplier: catSupplierVal }));
+        }
+        _catAllTextures = list;
+        catTexList = list;
+        renderCatGrid(list);
+    } catch(e) { console.error(e); document.getElementById('catGrid').innerHTML = '<div style="padding:16px;color:#e53935;">Ошибка загрузки</div>'; }
 }
+
 function renderCatGrid(list) {
     const q = document.getElementById('catSearch').value.toLowerCase();
     const filtered = list.filter(t => t.name.toLowerCase().includes(q));
     const grid = document.getElementById('catGrid');
     if (!filtered.length) { grid.innerHTML = '<div style="padding:16px;color:#9aadcc;">Нет текстур</div>'; return; }
+    const tMap = { standard: 'Кирпич', rigel: 'Ригель', cobblestone: 'Круглый', rubble_stone: 'Рваный', flat_stone: 'Плоский', textured_stone: 'Фактурный', derbent_stone: 'Дербент', reika: 'Рейка' };
     grid.innerHTML = filtered.map((tex, i) => {
         const url = tex.url.startsWith('http') ? tex.url : `${API_BASE}${tex.url}`;
         const sel = selectedTexture?.name === tex.name
-                 && selectedTexture?.material_type === catMatTypeVal
-                 && selectedTexture?.supplier === catSupplierVal;
+                 && selectedTexture?.material_type === tex.material_type
+                 && selectedTexture?.supplier === tex.supplier;
+        const badge = (!catMatTypeVal || !catSupplierVal) ? `<div class="tex-card-badge">${tMap[tex.material_type] || tex.material_type}</div>` : '';
         return `<div class="tex-card ${sel ? 'selected' : ''}" data-i="${i}">
             <div class="tex-card-img" style="background-image:url('${url}')"></div>
             <div class="tex-card-name">${tex.name}</div>
+            ${badge}
         </div>`;
     }).join('');
     grid.querySelectorAll('.tex-card').forEach(card => {
         card.addEventListener('click', () => {
             const idx = +card.dataset.i;
-            applyTexture({ ...filtered[idx], material_type: catMatTypeVal, supplier: catSupplierVal });
+            applyTexture(filtered[idx]);
             showPage('visualizer');
         });
     });
 }
+
 document.getElementById('catMatType').addEventListener('change', () => {
     catMatTypeVal = document.getElementById('catMatType').value;
     initCatalogPage();
@@ -1371,7 +1446,7 @@ document.getElementById('catSupplier').addEventListener('change', () => {
     catSupplierVal = document.getElementById('catSupplier').value;
     loadCatTextures();
 });
-document.getElementById('catSearch').addEventListener('input', () => renderCatGrid(catTexList));
+document.getElementById('catSearch').addEventListener('input', () => renderCatGrid(_catAllTextures));
 
 // ============================================================
 //  GENERATION
@@ -1598,32 +1673,56 @@ async function addGroutColor() {
 // ============================================================
 //  ADMIN — TEXTURES
 // ============================================================
+let _allTexturesCache = [];
+
 async function loadAllTextures() {
     if (currentUser?.role !== 'admin') return;
     try {
         const r = await fetch(`${API_BASE}/api/internal/textures/all`, { credentials: 'include', headers: H() });
-        const textures = await r.json();
-        const c = document.getElementById('texturesList');
-        if (!textures.length) { c.innerHTML = '<div>Нет текстур</div>'; return; }
-        const tMap = { standard: 'Кирпич', rigel: 'Ригель', cobblestone: 'Круглый', rubble_stone: 'Рваный', flat_stone: 'Плоский', textured_stone: 'Фактурный', reika: 'Рейка' };
-        const sMap = { redstone: 'Redstone', redstone_premium: 'Redstone Premium', krasny_kamen: 'Красный Камень' };
-        c.innerHTML = `<table>
-            <thead><tr><th>ID</th><th>Название</th><th>Тип</th><th>Поставщик</th><th>Файл</th><th>Действие</th></tr></thead>
-            <tbody>${textures.map(t => `<tr>
-                <td>${t.id}</td><td>${t.name}</td>
-                <td>${tMap[t.material_type]}</td><td>${sMap[t.supplier]}</td>
-                <td>${t.filename}</td>
-                <td><button class="del-btn dt" data-id="${t.id}">Удалить</button></td>
-            </tr>`).join('')}</tbody>
-        </table>`;
-        c.querySelectorAll('.dt').forEach(btn => btn.addEventListener('click', async () => {
-            if (confirm('Удалить текстуру?')) {
-                await fetch(`${API_BASE}/api/internal/textures/${btn.dataset.id}`, { method: 'DELETE', credentials: 'include', headers: H() });
-                loadAllTextures();
-            }
-        }));
+        _allTexturesCache = await r.json();
+        renderTexturesTable();
     } catch(e) { console.error(e); }
 }
+
+function renderTexturesTable() {
+    const nameQ = (document.getElementById('texFilterName')?.value || '').toLowerCase();
+    const typeQ = document.getElementById('texFilterType')?.value || '';
+    const supQ  = document.getElementById('texFilterSupplier')?.value || '';
+
+    const filtered = _allTexturesCache.filter(t =>
+        (!nameQ || t.name.toLowerCase().includes(nameQ)) &&
+        (!typeQ || t.material_type === typeQ) &&
+        (!supQ  || t.supplier === supQ)
+    );
+
+    const c = document.getElementById('texturesList');
+    if (!filtered.length) { c.innerHTML = '<div style="padding:12px;color:#9aadcc;">Нет текстур</div>'; return; }
+
+    const tMap = { standard: 'Кирпич', rigel: 'Ригель', cobblestone: 'Круглый', rubble_stone: 'Рваный', flat_stone: 'Плоский', textured_stone: 'Фактурный', derbent_stone: 'Дербент', reika: 'Рейка' };
+    const sMap = { redstone: 'Redstone', redstone_premium: 'Redstone Premium', krasny_kamen: 'Красный Камень', reika: 'Рейка' };
+
+    c.innerHTML = `<table>
+        <thead><tr><th>ID</th><th>Название</th><th>Тип</th><th>Поставщик</th><th>Файл</th><th></th></tr></thead>
+        <tbody>${filtered.map(t => `<tr>
+            <td>${t.id}</td><td>${t.name}</td>
+            <td>${tMap[t.material_type] || t.material_type}</td>
+            <td>${sMap[t.supplier] || t.supplier}</td>
+            <td style="font-size:.78rem;color:#9aadcc;">${t.filename}</td>
+            <td><button class="del-btn dt" data-id="${t.id}">Удалить</button></td>
+        </tr>`).join('')}</tbody>
+    </table>`;
+
+    c.querySelectorAll('.dt').forEach(btn => btn.addEventListener('click', async () => {
+        if (confirm('Удалить текстуру?')) {
+            await fetch(`${API_BASE}/api/internal/textures/${btn.dataset.id}`, { method: 'DELETE', credentials: 'include', headers: H() });
+            loadAllTextures();
+        }
+    }));
+}
+
+document.getElementById('texFilterName')?.addEventListener('input', renderTexturesTable);
+document.getElementById('texFilterType')?.addEventListener('change', renderTexturesTable);
+document.getElementById('texFilterSupplier')?.addEventListener('change', renderTexturesTable);
 async function addTexture() {
     const name  = document.getElementById('textureName').value.trim();
     const mtype = document.getElementById('textureMaterialType').value;
