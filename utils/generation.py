@@ -205,7 +205,7 @@ async def generate_image(image_urls: list, prompt: str) -> dict:
         "prompt": prompt,
         "image_urls": image_urls,
         "quality": "medium",
-        "image_size": "1024x1536",
+        "image_size": "1024x1024",
         "num_images": 1,
         "output_format": "png",
     }
