@@ -78,13 +78,13 @@ def build_prompt(category: str, material_type: str,
                   f"FORBIDDEN: Large blocks or slabs. Smooth or flat block faces. Irregular stone shapes. Plastic or glossy surface.")
     elif material_type == "flat_stone":
         prompt = (f"{base} {zone_instr}Replace {target} with the provided flat square stone cladding. "
-                  f"BLOCK GEOMETRY: Regular square or rectangular blocks with sharp, precise, clean-cut edges. "
-                  f"Uniform block sizes matching the provided texture reference. Perfectly straight courses and grid alignment. "
-                  f"SURFACE (CRITICAL): Each stone face is completely flat and smooth — no chipping, no roughness, no bumps, no rock-face texture. "
-                  f"The face must be planar and calibrated, like precision-cut architectural stone panels. "
-                  f"JOINTS: Thin, uniform recessed mortar lines creating a clean regular grid. Consistent joint width and depth throughout. "
-                  f"SHADOWS: Subtle shadow only at the joint lines due to joint depth — no surface relief shadows. "
-                  f"FORBIDDEN: Any rough, split-face, or rock-face texture on block surfaces. Irregular edges or shapes. Protruding bumps or mineral roughness on the face.")
+                  f"BLOCK SCALE (CRITICAL): The stone blocks must be MUCH SMALLER — roughly fist-sized relative to the windows. "
+                  f"Create a high-density grid of numerous small rectangular stones. Do NOT use large slabs or oversized panels. "
+                  f"SURFACE & GEOMETRY: Completely flat and smooth surface — no chipping, no roughness, no protruding bumps. "
+                  f"Planar and calibrated precision-cut architectural stone. Sharp, precise clean-cut edges with straight horizontal courses in a perfect grid alignment. "
+                  f"JOINTS: Very thin, sharp, and uniform recessed mortar lines. The grid must be clean and regular. "
+                  f"SHADOWS: Subtle occlusion only at the thin joint lines to define the small block boundaries. "
+                  f"VISUAL OUTPUT: Render ONLY the house with the applied texture. Do NOT display the source texture sample or any UI elements on the final image.")
     elif material_type == "standard":
         prompt = (f"{base} {zone_instr}Replace {target} with the provided brick texture. "
                   f"Apply as high-density brickwork. Bricks must be small and frequent, "
