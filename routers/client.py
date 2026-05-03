@@ -16,10 +16,10 @@ import logging
 router = APIRouter(tags=["client"])
 
 # Для flat_stone и textured_stone показываем и собственные записи,
-# и старые derbent_stone (backward compat с загруженными ранее текстурами)
+# и записи смежного типа (backward compat — старые derbent_stone мигрированы в textured_stone)
 _EXTRA_TYPES: dict[str, str] = {
-    "flat_stone": "derbent_stone",
-    "textured_stone": "derbent_stone",
+    "flat_stone": "textured_stone",
+    "textured_stone": "flat_stone",
 }
 
 redis_client = Redis(
