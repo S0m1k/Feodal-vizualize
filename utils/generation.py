@@ -38,7 +38,11 @@ from utils.common import STONE_TYPES as _STONE_TYPES
 def build_prompt(category: str, material_type: str,
                  grout_color_hex: str = None, use_zone: bool = False) -> str:
     """Промт для Облицовки (клиент + внутренний)."""
-    base = "Preserve house geometry, windows, doors, and lighting EXACTLY."
+    base = (
+        "STRICT ARCHITECTURAL PRESERVATION: Frozen geometry — Zero modifications to building silhouette. "
+        "CRITICAL: Do NOT remove, move, or alter stairs, steps, balconies, or window frames. "
+        "Preserve house geometry, windows, doors, and lighting EXACTLY."
+    )
     target = "house facade" if category == "facade" else "interior wall"
     zone_instr = (
         "The red-highlighted zone marks the area to be retextured. "
@@ -90,10 +94,11 @@ def build_prompt(category: str, material_type: str,
                   f"Apply as high-density brickwork. Bricks must be small and frequent, "
                   f"matching realistic standard brick dimensions. Tight alignment.")
     else:
-        # Ригель: пропорция 1:10, высокая горизонтальная плотность
+        # Ригель: пропорция 1:12, экстремально тонкие кирпичи
         prompt = (f"{base} {zone_instr}Replace {target} with EXACTLY the provided texture. "
-                  f"Format: Riegel brick (ultra-long, ultra-thin). Ratio 1:10. "
-                  f"Apply with maximum horizontal density and sharp linear courses.")
+                  f"Format: Riegel brick (extreme ultra-long, razor-thin). Ratio 1:12. "
+                  f"Each brick must be exceptionally thin and needle-like. "
+                  f"Apply with maximum horizontal density and razor-sharp, razor-thin linear courses.")
 
     if grout_color_hex and material_type not in _STONE_TYPES:
         prompt += f" Mortar joints color: HEX {grout_color_hex}."
@@ -105,6 +110,9 @@ def build_prompt(category: str, material_type: str,
 def _derbent_zone_detail() -> str:
     """Детальное описание Melen Brutal 3D Rockface — для зональных промтов (plinth, belt)."""
     return (
+        "GEOMETRY LOCK (CRITICAL): Apply texture STRICTLY within the red zone boundaries ONLY. "
+        "Do NOT bleed into stairs, ground level, or any adjacent building structures. "
+        "Maintain pixel-perfect precision at zone edges. Zero structural distortion. "
         "Fill the entire red zone with ultra-rugged, heavy-relief Melen stone masonry matching the provided reference. "
         "GEOMETRY DESTRUCTION (The 'No-Flat' Rule): Extreme 3D Protrusion — Each individual stone must physically protrude from the wall at various depths (3-6cm). Strictly forbid flat surfaces or smooth planes. "
         "Jagged Rock-Face — Use an extreme rock-face texture with sharp, jagged protrusions and deep, dark natural crevices. The surface must look like raw, unpolished mountain rock. "
@@ -121,8 +129,10 @@ def _derbent_zone_detail() -> str:
 def build_plinth_prompt(material_type: str = None) -> str:
     """Промт для подвкладки Цоколь."""
     base = (
-        "Preserve all original house geometry, windows, and environment EXACTLY. "
-        "The red-highlighted zone indicates the plinth. "
+        "STRICT ARCHITECTURAL PRESERVATION: Frozen geometry — Zero modifications to building silhouette. "
+        "CRITICAL: Do NOT remove, move, or alter the stairs, steps, balconies, window frames, or any structural elements. "
+        "Preserve all original house geometry, windows, doors, and environment EXACTLY. "
+        "The red-highlighted zone indicates the plinth ONLY. "
     )
     if material_type == "derbent_stone":
         fill = _derbent_zone_detail()
@@ -143,6 +153,8 @@ def build_reika_prompt(orientation: str = "horizontal") -> str:
     """Промт для подвкладки Рейка."""
     orient_word = "Horizontal" if orientation == "horizontal" else "Vertical"
     return (
+        "STRICT ARCHITECTURAL PRESERVATION: Frozen geometry. "
+        "CRITICAL: Do NOT modify window positions, doors, or structural elements. "
         "Preserve all original house geometry and lighting EXACTLY. "
         "The red-highlighted zone marks the area for decorative slats. "
         "Apply the provided reika (slatted) texture STRICTLY within this zone. "
@@ -162,6 +174,13 @@ def build_belt_prompt(has_texture: bool = True, material_type: str = None,
     Сценарий Б (has_texture=False, belt_mode='soldier'): солдатский ряд.
     Сценарий В (has_texture=False, belt_mode='chess'): шахматная вертикальная кладка.
     """
+    base_constraint = (
+        "STRICT ARCHITECTURAL PRESERVATION: Frozen geometry — Zero modifications to building silhouette or window positions. "
+        "CRITICAL: Do NOT shift, remove, or alter any window frames or door elements. "
+        "BELT WIDTH LOCK: The decorative belt must maintain its exact vertical height — "
+        "Do NOT expand, compress, or distort the height of the belt zone. "
+    )
+
     if has_texture:
         if material_type in ("textured_stone", "derbent_stone"):
             fill = _derbent_zone_detail()
@@ -172,6 +191,7 @@ def build_belt_prompt(has_texture: bool = True, material_type: str = None,
                 "The belt must look integrated into the facade with realistic depth and shadows at the seams. "
             )
         return (
+            base_constraint +
             "Preserve all original facade geometry. "
             "The red-highlighted horizontal zone is a decorative belt. " +
             fill +
@@ -180,6 +200,7 @@ def build_belt_prompt(has_texture: bool = True, material_type: str = None,
         )
     elif belt_mode == "chess":
         return (
+            base_constraint +
             "ATTENTION: Change the EXISTING facade material orientation ONLY within the red-highlighted zone. "
             "TASK: Rearrange the current bricks into a Vertical Staggered (Running Bond) pattern. "
             "Bricks must stand upright on their ends, oriented vertically. "
@@ -197,6 +218,7 @@ def build_belt_prompt(has_texture: bool = True, material_type: str = None,
         )
     else:
         return (
+            base_constraint +
             "ATTENTION: Change the EXISTING facade material orientation ONLY within the red-highlighted zone. "
             "TASK: Rearrange the current bricks into a Vertical Soldier Course. "
             "Bricks must stand upright on their ends, oriented vertically in a straight decorative row. "
