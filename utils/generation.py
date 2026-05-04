@@ -112,6 +112,8 @@ def _derbent_zone_detail() -> str:
     return (
         "GEOMETRY LOCK (CRITICAL): Apply texture STRICTLY within the red zone boundaries ONLY. "
         "Do NOT bleed into stairs, ground level, or any adjacent building structures. "
+        "ZERO-BLEED POLICY: Stone relief must NOT protrude upwards past the red boundary line. "
+        "FLUSH TOP EDGE: While the stone face is rugged, the top-most row must end in a perfectly straight line following the mask. "
         "Maintain pixel-perfect precision at zone edges. Zero structural distortion. "
         "Fill the entire red zone with ultra-rugged, heavy-relief Melen stone masonry matching the provided reference. "
         "GEOMETRY DESTRUCTION (The 'No-Flat' Rule): Extreme 3D Protrusion — Each individual stone must physically protrude from the wall at various depths (3-6cm). Strictly forbid flat surfaces or smooth planes. "
@@ -129,10 +131,12 @@ def _derbent_zone_detail() -> str:
 def build_plinth_prompt(material_type: str = None) -> str:
     """Промт для подвкладки Цоколь."""
     base = (
-        "STRICT ARCHITECTURAL PRESERVATION: Frozen geometry — Zero modifications to building silhouette. "
-        "CRITICAL: Do NOT remove, move, or alter the stairs, steps, balconies, window frames, or any structural elements. "
-        "Preserve all original house geometry, windows, doors, and environment EXACTLY. "
-        "The red-highlighted zone indicates the plinth ONLY. "
+        "STRICT BOUNDARY CONTROL: The new texture must stop EXACTLY at the top edge of the red-highlighted zone. "
+        "CRITICAL: Do NOT extend the masonry height above the red line. "
+        "NO LEDGE / NO CAP: The top of the plinth must be perfectly flush with the wall above it. "
+        "Strictly forbid any decorative trim, borders, ledges, or protruding caps at the upper boundary. "
+        "PIXEL-PERFECT ALIGNMENT: Match the perspective and height of the red zone with 100% precision. "
+        "Keep all stairs, railings, and architectural elements outside the zone frozen and unchanged. "
     )
     if material_type == "derbent_stone":
         fill = _derbent_zone_detail()
@@ -140,7 +144,6 @@ def build_plinth_prompt(material_type: str = None) -> str:
         fill = (
             "Replace the texture STRICTLY within the red zone with the provided texture. "
             "Ensure the new material (stone/brick) aligns with the perspective of the building. "
-            "The cladding must look heavy and structural. "
         )
     return (
         base + fill +
