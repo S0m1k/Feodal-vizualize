@@ -121,21 +121,15 @@ def build_prompt(category: str, material_type: str,
 def _derbent_zone_detail() -> str:
     """Детальное описание Melen Brutal 3D Rockface — для зональных промтов (plinth, belt)."""
     return (
-        "GEOMETRY LOCK (CRITICAL): Apply texture STRICTLY within the red zone boundaries ONLY. "
-        "Do NOT bleed into stairs, ground level, or any adjacent building structures. "
-        "ZERO-BLEED POLICY: Stone relief must NOT protrude upwards past the red boundary line. "
-        "FLUSH TOP EDGE: While the stone face is rugged, the top-most row must end in a perfectly straight line following the mask. "
-        "Maintain pixel-perfect precision at zone edges. Zero structural distortion. "
-        "Fill the entire red zone with ultra-rugged, heavy-relief Melen stone masonry matching the provided reference. "
-        "GEOMETRY DESTRUCTION (The 'No-Flat' Rule): Extreme 3D Protrusion — Each individual stone must physically protrude from the wall at various depths (3-6cm). Strictly forbid flat surfaces or smooth planes. "
-        "Jagged Rock-Face — Use an extreme rock-face texture with sharp, jagged protrusions and deep, dark natural crevices. The surface must look like raw, unpolished mountain rock. "
-        "Broken Edges — The edges of each stone must be irregular and chipped, not straight lines. "
-        "LIGHTING & SHADOWS: High-Contrast Relief — The sunlight must create harsh, deep shadows within the stone's own texture. "
-        "Ambient Occlusion — Every stone block must cast a physical shadow onto the stones below it. "
-        "JOINTS: Seamless Dry-Stack — Stones are tightly packed with zero grout gaps. The only 'lines' allowed are the deep, irregular shadow-cracks between the rugged stone faces. Strictly avoid any regular grid or mortar lines. "
-        "FORBIDDEN: NO bricks, NO tiles, NO flat masonry, NO smooth surfaces. "
-        "SCALE: Small-to-medium stones relative to windows for realism. "
-        "Blend seamlessly with surrounding surfaces at the zone edges. "
+        "Fill red zone with ultra-rugged Melen stone masonry matching the provided reference. "
+        "RAZOR-SHARP TOP EDGE: The top row of stones must form a perfectly straight horizontal line, "
+        "stopping exactly at the red mask limit. "
+        "ZERO-BLEED: No stone relief or texture is allowed to protrude upwards past the boundary. "
+        "FLUSH TOP: No protruding cap or ledge at the top row. "
+        "SCALE: Small stones relative to windows. "
+        "Heavy 3D relief — each stone protrudes at various depths (3-6cm), jagged rock-face texture, "
+        "sharp irregular edges, deep dark crevices. Dry-stack, no mortar lines. "
+        "FORBIDDEN: NO flat surfaces, NO smooth planes, NO bricks, NO tiles. "
     )
 
 
