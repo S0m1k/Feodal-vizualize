@@ -142,6 +142,9 @@ def _derbent_zone_detail() -> str:
 def build_plinth_prompt(material_type: str = None) -> str:
     """Промт для подвкладки Цоколь."""
     base = (
+        "MASKING RULE (highest priority): The image contains a red-colored zone. "
+        "The red pixels define the EXACT and ONLY area where changes are permitted. "
+        "Every pixel outside the red zone must remain 100% identical to the original — zero modification, zero blending. "
         "STRICT BOUNDARY CONTROL: The new texture must stop EXACTLY at the top edge of the red-highlighted zone. "
         "CRITICAL: Do NOT extend the masonry height above the red line. "
         "NO LEDGE / NO CAP: The top of the plinth must be perfectly flush with the wall above it. "
