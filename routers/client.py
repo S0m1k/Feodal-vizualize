@@ -148,7 +148,7 @@ async def _run_client_generation(
     """Фоновая задача генерации для клиентского виджета."""
     try:
         logger.info("client_generate bg start request_id=%s ip=%s", request_id, client_ip)
-        result_data = await generate_image([photo_url, texture_url], prompt)
+        result_data = await generate_image([photo_url, texture_url], prompt, material_type=material_type)
         output_url = result_data.get("output_url")
         if not output_url:
             raise ValueError("Пустой output_url от GenAPI")

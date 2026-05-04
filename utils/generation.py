@@ -4,9 +4,20 @@ import logging
 import time
 import httpx
 
+NANO_BANANA_ENDPOINT = "https://api.gen-api.ru/api/v1/networks/nano-banana-2"
 GPT_IMAGE_ENDPOINT = "https://api.gen-api.ru/api/v1/networks/gpt-image-2"
 STATUS_ENDPOINT = "https://api.gen-api.ru/api/v1/request/get/{request_id}"
 logger = logging.getLogger("generation")
+
+# Типы материалов, для которых используется Nano Banana (чёткие кирпичные паттерны)
+_NANO_BANANA_TYPES = {"standard", "rigel"}
+
+
+def _select_endpoint(material_type: str | None) -> str:
+    """Выбирает API эндпоинт в зависимости от типа материала."""
+    if material_type in _NANO_BANANA_TYPES:
+        return NANO_BANANA_ENDPOINT
+    return GPT_IMAGE_ENDPOINT
 
 
 def _extract_output_url(status_data: dict) -> str | None:
@@ -236,15 +247,21 @@ def build_belt_prompt(has_texture: bool = True, material_type: str = None,
         )
 
 
-async def generate_image(image_urls: list, prompt: str) -> dict:
+async def generate_image(image_urls: list, prompt: str,
+                         material_type: str | None = None) -> dict:
     """
     Отправляет запрос к нейросети и возвращает {'output_url': url}.
     image_urls — список URL изображений (обычно [photo_url] или [photo_url, texture_url]).
+    material_type — определяет какой API использовать:
+      standard/rigel → Nano Banana 2 (чёткие кирпичные паттерны)
+      остальные      → GPT Image 2 (натуральный камень и пр.)
     Использует асинхронный режим с опросом статуса.
     """
     api_key = os.getenv("GEN_API_KEY") or os.getenv("API_KEY")
     if not api_key:
         raise Exception("Не задан API ключ (ожидается GEN_API_KEY или API_KEY)")
+
+    endpoint = _select_endpoint(material_type)
 
     headers = {
         "Content-Type": "application/json",
@@ -266,14 +283,15 @@ async def generate_image(image_urls: list, prompt: str) -> dict:
         request_id = None
         try:
             logger.info(
-                "GenAPI POST start endpoint=%s quality=%s num_images=%s num_image_urls=%s",
-                GPT_IMAGE_ENDPOINT,
+                "GenAPI POST start endpoint=%s material_type=%s quality=%s num_images=%s num_image_urls=%s",
+                endpoint,
+                material_type,
                 payload.get("quality"),
                 payload.get("num_images"),
                 len(image_urls),
             )
             t0 = time.monotonic()
-            resp = await client.post(GPT_IMAGE_ENDPOINT, json=payload, headers=headers)
+            resp = await client.post(endpoint, json=payload, headers=headers)
             elapsed = round(time.monotonic() - t0, 2)
             if not resp.is_success:
                 body_preview = resp.text[:500]
