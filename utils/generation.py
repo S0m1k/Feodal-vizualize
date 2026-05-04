@@ -141,17 +141,6 @@ def _derbent_zone_detail() -> str:
 
 def build_plinth_prompt(material_type: str = None) -> str:
     """Промт для подвкладки Цоколь."""
-    base = (
-        "MASKING RULE (highest priority): The image contains a red-colored zone. "
-        "The red pixels define the EXACT and ONLY area where changes are permitted. "
-        "Every pixel outside the red zone must remain 100% identical to the original — zero modification, zero blending. "
-        "STRICT BOUNDARY CONTROL: The new texture must stop EXACTLY at the top edge of the red-highlighted zone. "
-        "CRITICAL: Do NOT extend the masonry height above the red line. "
-        "NO LEDGE / NO CAP: The top of the plinth must be perfectly flush with the wall above it. "
-        "Strictly forbid any decorative trim, borders, ledges, or protruding caps at the upper boundary. "
-        "PIXEL-PERFECT ALIGNMENT: Match the perspective and height of the red zone with 100% precision. "
-        "Keep all stairs, railings, and architectural elements outside the zone frozen and unchanged. "
-    )
     if material_type == "derbent_stone":
         fill = _derbent_zone_detail()
     else:
@@ -160,9 +149,17 @@ def build_plinth_prompt(material_type: str = None) -> str:
             "Ensure the new material (stone/brick) aligns with the perspective of the building. "
         )
     return (
-        base + fill +
-        "Do NOT change anything outside the red zone. "
-        "Hyper-realistic, 8k architectural visualization."
+        "SURGICAL IN-PAINTING TASK: Replace texture STRICTLY and ONLY within the red-highlighted zone. "
+        "STRICT PIXEL-PERFECT BOUNDARY (CRITICAL): The new texture must stop exactly at the top boundary of the red line. "
+        "Do not extend, bleed, or expand the plinth height by even a single pixel. "
+        "CUT-BLOCK RULE: If a full stone block does not fit within the red zone, it MUST be cut or cropped exactly at the red line. "
+        "Priority is 100% boundary accuracy over block integrity. Simply fill the shaded area and nowhere else. "
+        "FROZEN GEOMETRY: Absolutely do NOT alter, remove, move, or simplify stairs, steps, railings, windows, or the ground. "
+        "Every pixel outside the red zone must be preserved exactly as it appears in the original image. "
+        "FLUSH TRANSITION: The top edge must be perfectly flush with the wall. "
+        "Strictly forbid any decorative caps, ledges, trim, or protrusions at the upper boundary. " +
+        fill +
+        "8k, photorealistic architectural rendering."
     )
 
 
