@@ -105,13 +105,14 @@ def build_prompt(category: str, material_type: str,
                   f"Apply as high-density brickwork. Bricks must be small and frequent, "
                   f"matching realistic standard brick dimensions. Tight alignment.")
     elif material_type == "riegel_mixed":
-        prompt = (f"{base} {zone_instr}Replace {target} with the provided multi-format Riegel brick texture. "
-                  f"GEOMETRY (CRITICAL): Mixed-height ultra-long bricks. Ratio varies between 1:6 and 1:15 within the same wall. "
-                  f"Bricks must be slender but have irregular thicknesses to create a dynamic horizontal rhythm. "
-                  f"SURFACE & RELIEF: Rough mineral matte finish with subtle 3D relief. "
-                  f"Blocks should have slight natural imperfections and chipped edges. "
-                  f"Deep, dark recessed mortar joints to emphasize the varying heights. "
-                  f"SCALE: Individual bricks must be small/slender relative to the windows to maintain realistic architectural scale.")
+        prompt = (f"{base} {zone_instr}Replace {target} with high-end multi-format Riegel masonry. "
+                  f"EXTREME PROPORTIONS (1:15): The primary bricks must be needle-thin and exceptionally long. Ratio 1:15 is the target for the main units. "
+                  f"3D LENGTH DYNAMICS: Blocks must alternate randomly in length. Mix extra-long 'needle' bricks with short 'header' blocks in every direction. No two adjacent bricks should have the same length. "
+                  f"NON-LINEAR HORIZONTAL COURSES: Slightly vary the height of blocks (by 10-15%) to break the perfect horizontal line. The masonry should look like a complex mosaic, not a standard grid. "
+                  f"DEEP SHADOWS: High-relief recessed joints. The 'interruption' of the lines must be clearly visible through shadows between blocks of different lengths and heights. "
+                  f"100% MASK LOCK: Stop exactly at the red line. Cut or crop any block that exceeds the boundary. "
+                  f"FROZEN GEOMETRY: Do not touch stairs, railings, or window frames. Keep original pixels outside the mask. "
+                  f"8k, photorealistic architectural render, matte mineral texture.")
     else:
         # Ригель: пропорция 1:12, экстремально тонкие кирпичи
         prompt = (f"{base} {zone_instr}Replace {target} with EXACTLY the provided texture. "
