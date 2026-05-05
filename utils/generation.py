@@ -10,7 +10,7 @@ STATUS_ENDPOINT = "https://api.gen-api.ru/api/v1/request/get/{request_id}"
 logger = logging.getLogger("generation")
 
 # Типы материалов, для которых используется Nano Banana (чёткие кирпичные паттерны)
-_NANO_BANANA_TYPES = {"standard", "rigel", "riegel_mixed"}
+_NANO_BANANA_TYPES = {"standard", "rigel"}
 
 
 def _select_endpoint(material_type: str | None) -> str:
