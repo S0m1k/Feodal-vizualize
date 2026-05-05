@@ -581,8 +581,8 @@ async def _run_zone_generation(
             "Zone generation start request_id=%s service=%s num_urls=%d",
             request_id, service_type, len(image_urls),
         )
-        # Для цоколя всегда GPT Image 2 — лучше работает с красной маской зоны
-        effective_material_type = None if service_type == "plinth" else material_type
+        # Цоколь и пояса всегда GPT Image 2 — лучше понимает геометрические команды и маску зоны
+        effective_material_type = None if service_type in ("plinth", "belt") else material_type
         result = await generate_image(image_urls, prompt, material_type=effective_material_type)
         output_url = result["output_url"]
 
