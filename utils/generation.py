@@ -192,16 +192,13 @@ def build_belt_prompt(has_texture: bool = True, material_type: str = None,
     Сценарий В (has_texture=False, belt_mode='chess'): шахматная вертикальная кладка.
     """
     base_constraint = (
-        "STRICT ARCHITECTURAL PRESERVATION: Frozen geometry — Zero modifications to building silhouette or window positions. "
-        "CRITICAL: Do NOT shift, remove, or alter any window frames or door elements. "
-        "BELT WIDTH LOCK: The decorative belt must maintain its exact vertical height — "
-        "Do NOT expand, compress, or distort the height of the belt zone. "
-        "UNIT DIMENSION LOCK (CRITICAL): The length, height, and width of individual bricks within the belt "
-        "must be IDENTICAL to the bricks on the surrounding facade. "
-        "ZERO SCALING: Do NOT shrink, expand, or resize the material units to fit the belt. "
-        "If the belt height does not match a full brick length, CROP the material rather than scaling it down. "
+        "STRICT ARCHITECTURAL PRESERVATION: Frozen geometry outside the mask. "
+        "DIMENSIONAL SYNC (CRITICAL): The width of the vertical bricks in the belt must be EXACTLY IDENTICAL "
+        "to the height (thickness) of the horizontal bricks on the surrounding wall. Do NOT narrow or shrink the units. "
+        "IN-PAINTING CLIPPING: The pattern must be strictly clipped by the red mask. "
+        "If a vertical brick is longer than the belt height, it MUST be cut/cropped at the boundary. Do NOT scale it down to fit. "
+        "ZERO BLEED: No pixels are allowed to change outside the red-highlighted zone. "
         "JOINT WIDTH LOCK: The mortar joint thickness inside the belt must match the joint thickness of the surrounding wall. "
-        "Do NOT widen or narrow joints to compensate for cropped bricks. "
     )
 
     if has_texture:
@@ -209,50 +206,36 @@ def build_belt_prompt(has_texture: bool = True, material_type: str = None,
             fill = _derbent_zone_detail()
         else:
             fill = (
-                "Replace the texture STRICTLY within the red zone with the provided texture. "
-                "Match the orientation and scale of the sample. "
-                "The belt must look integrated into the facade with realistic depth and shadows at the seams. "
+                "Replace the texture STRICTLY within the red zone with the provided material. "
+                "FORCE ORIENTATION (CRITICAL): Ignore the orientation of the sample image. Rotate the material units 90 degrees vertically. "
+                "MATCH SCALE: The short side of the vertical unit in the belt must match the thickness of the horizontal bricks on the main wall. "
+                "CLIPPING ONLY: Do not apply texture a single pixel outside the mask. "
             )
         return (
             base_constraint +
-            "Preserve all original facade geometry. "
             "The red-highlighted horizontal zone is a decorative belt. " +
             fill +
-            "Do NOT change anything outside the red zone. "
             "8k, photorealistic."
         )
     elif belt_mode == "chess":
         return (
             base_constraint +
-            "ATTENTION: Change the EXISTING facade material orientation ONLY within the red-highlighted zone. "
-            "TASK: Rearrange the current bricks into a Vertical Staggered (Running Bond) pattern. "
-            "Bricks must stand upright on their ends, oriented vertically. "
-            "SCALE SYNC: Use the exact same brick proportions and pixel-size as the main wall bricks — do NOT rescale. "
-            "STAGGER RULE: Each adjacent vertical column is offset by exactly half a brick width. "
-            "If the zone height cuts through a brick, show only the visible part — do NOT shrink the brick to fit. "
-            "CRITICAL ALIGNMENT: The belt must be perfectly flush with the surrounding facade surfaces, "
-            "staying on the exact same plane. No recession, no 'sunken' effect. "
-            "No deep shadow gaps at the top or bottom edges. "
+            "TASK: Vertical Staggered pattern. "
+            "NO NARROWING: Maintain the full brick proportions. The bricks must look like the wall bricks just turned 90 degrees. "
+            "STAGGER: Offset adjacent columns by exactly half a brick height. "
+            "MASK CLIPPING: Strictly clip the pattern at the red line edges. No expansion beyond the belt. "
             "MATERIAL MATCH: Use the EXACT same color, tone, and material as the surrounding wall. "
-            "The only change is the pattern and orientation. "
-            "Do NOT change anything outside the red zone. "
             "Hyper-realistic architectural rendering, 8k, photorealistic lighting."
         )
     else:
         return (
             base_constraint +
-            "ATTENTION: Change the EXISTING facade material orientation ONLY within the red-highlighted zone. "
-            "TASK: Rearrange the current bricks into a Vertical Soldier Course. "
-            "Bricks must stand upright on their ends, oriented vertically in a straight decorative row. "
-            "NO SHRINKING: Individual bricks must maintain their full original length. "
-            "If the bricks are longer than the belt height, they must appear 'cut' at the boundaries, not scaled down. "
-            "CRITICAL ALIGNMENT: The decorative belt must be perfectly flush and level with the surrounding facade surfaces, "
-            "staying on the exact same plane. "
-            "Avoid any recession, offset, or 'sunken' effect. "
-            "Ensure there are no deep shadow gaps at the top or bottom edges of the belt. "
+            "TASK: Vertical Soldier Course. "
+            "DIMENSION LOCK: Vertical bricks must have the same thickness as the facade bricks. "
+            "CROP, DON'T SCALE: If the belt is 20cm high and the brick is 30cm, show a 20cm 'cut' brick. "
+            "Do NOT compress the 30cm brick into 20cm. "
+            "ZERO DEPTH: Stay perfectly flush with the wall plane. No recession, no 'sunken' effect. "
             "MATERIAL MATCH: Use the EXACT same color, tone, and material as the surrounding wall. "
-            "The only change is the orientation of the pattern. "
-            "Do NOT change anything outside the red zone. "
             "Hyper-realistic architectural rendering, 8k, photorealistic lighting."
         )
 
