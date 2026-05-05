@@ -143,6 +143,25 @@ def init_db_sync():
     conn.execute("UPDATE materials SET material_type = 'textured_stone' WHERE material_type = 'derbent_stone'")
     conn.commit()
 
+    # Миграция: добавить riegel_mixed
+    cur = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='materials'")
+    row = cur.fetchone()
+    if row and "'riegel_mixed'" not in row[0]:
+        conn.executescript("""
+            ALTER TABLE materials RENAME TO materials_old;
+            CREATE TABLE materials (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                filename TEXT NOT NULL,
+                material_type TEXT NOT NULL CHECK(material_type IN ('standard', 'rigel', 'riegel_mixed', 'cobblestone', 'rubble_stone', 'derbent_stone', 'flat_stone', 'textured_stone', 'reika')),
+                supplier TEXT NOT NULL CHECK(supplier IN ('redstone', 'redstone_premium', 'krasny_kamen', 'reika')),
+                UNIQUE(name, material_type, supplier)
+            );
+            INSERT INTO materials SELECT * FROM materials_old;
+            DROP TABLE materials_old;
+        """)
+        conn.commit()
+
     # Добавляем начальные цвета затирки
     cur = conn.execute("SELECT COUNT(*) FROM grout_colors")
     if cur.fetchone()[0] == 0:

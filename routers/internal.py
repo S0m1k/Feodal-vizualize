@@ -439,7 +439,7 @@ async def add_texture(
     file: UploadFile = File(...),
     current_admin = Depends(get_current_admin),
 ):
-    if material_type not in ("standard", "rigel", "cobblestone", "rubble_stone", "derbent_stone", "flat_stone", "textured_stone", "reika"):
+    if material_type not in ("standard", "rigel", "riegel_mixed", "cobblestone", "rubble_stone", "derbent_stone", "flat_stone", "textured_stone", "reika"):
         raise HTTPException(status_code=400, detail="Invalid material_type")
     if supplier not in ("redstone", "redstone_premium", "krasny_kamen", "reika"):
         raise HTTPException(status_code=400, detail="Invalid supplier")

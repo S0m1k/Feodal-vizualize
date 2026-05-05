@@ -10,7 +10,7 @@ STATUS_ENDPOINT = "https://api.gen-api.ru/api/v1/request/get/{request_id}"
 logger = logging.getLogger("generation")
 
 # Типы материалов, для которых используется Nano Banana (чёткие кирпичные паттерны)
-_NANO_BANANA_TYPES = {"standard", "rigel"}
+_NANO_BANANA_TYPES = {"standard", "rigel", "riegel_mixed"}
 
 
 def _select_endpoint(material_type: str | None) -> str:
@@ -104,10 +104,18 @@ def build_prompt(category: str, material_type: str,
         prompt = (f"{base} {zone_instr}Replace {target} with the provided brick texture. "
                   f"Apply as high-density brickwork. Bricks must be small and frequent, "
                   f"matching realistic standard brick dimensions. Tight alignment.")
+    elif material_type == "riegel_mixed":
+        prompt = (f"{base} {zone_instr}Replace {target} with the provided multi-format Riegel brick texture. "
+                  f"GEOMETRY (CRITICAL): Mixed-height ultra-long bricks. Ratio varies between 1:6 and 1:15 within the same wall. "
+                  f"Bricks must be slender but have irregular thicknesses to create a dynamic horizontal rhythm. "
+                  f"SURFACE & RELIEF: Rough mineral matte finish with subtle 3D relief. "
+                  f"Blocks should have slight natural imperfections and chipped edges. "
+                  f"Deep, dark recessed mortar joints to emphasize the varying heights. "
+                  f"SCALE: Individual bricks must be small/slender relative to the windows to maintain realistic architectural scale.")
     else:
         # Ригель: пропорция 1:12, экстремально тонкие кирпичи
         prompt = (f"{base} {zone_instr}Replace {target} with EXACTLY the provided texture. "
-                  f"Format: Riegel brick (extreme ultra-long, razor-thin). Ratio 1:12. "
+                  f"Format: Riegel brick (needle-thin, ultra-long). Ratio 1:12. "
                   f"Each brick must be exceptionally thin and needle-like. "
                   f"Apply with maximum horizontal density and razor-sharp, razor-thin linear courses.")
 
