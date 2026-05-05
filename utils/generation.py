@@ -193,12 +193,12 @@ def build_belt_prompt(has_texture: bool = True, material_type: str = None,
     """
     base_constraint = (
         "STRICT ARCHITECTURAL PRESERVATION: Frozen geometry outside the mask. "
-        "DIMENSIONAL SYNC (CRITICAL): The width of the vertical bricks in the belt must be EXACTLY IDENTICAL "
-        "to the height (thickness) of the horizontal bricks on the surrounding wall. Do NOT narrow or shrink the units. "
-        "IN-PAINTING CLIPPING: The pattern must be strictly clipped by the red mask. "
-        "If a vertical brick is longer than the belt height, it MUST be cut/cropped at the boundary. Do NOT scale it down to fit. "
-        "ZERO BLEED: No pixels are allowed to change outside the red-highlighted zone. "
-        "JOINT WIDTH LOCK: The mortar joint thickness inside the belt must match the joint thickness of the surrounding wall. "
+        "UNIT WIDTH LOCK (CRITICAL): The width of each vertical brick in the belt must be EXACTLY EQUAL "
+        "to the height of the horizontal bricks on the adjacent wall. "
+        "VISUAL CONTINUITY: Mortar joints in the belt must align perfectly with the thickness of mortar joints on the facade. "
+        "CROP-ONLY MODE: Strictly forbid scaling. If the brick length is 300mm and the belt is 200mm, "
+        "the model MUST show a 200mm segment of the brick. DO NOT SQUEEZE. "
+        "ZERO-BLEED: Ensure the pattern is mathematically clipped by the red zone. "
     )
 
     if has_texture:
