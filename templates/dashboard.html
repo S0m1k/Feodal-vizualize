@@ -937,7 +937,7 @@
               <div class="result-empty-text">Здесь появится визуализация</div>
             </div>
           </div>
-          <button class="gen-btn" onclick="generateSubAccent('plinth')">✨ Сгенерировать</button>
+          <button class="gen-btn" id="plinthGenBtn" onclick="generateSubAccent('plinth')">✨ Сгенерировать</button>
           <div id="plinthResult" class="zone-result-panel"></div>
         </div>
       </div>
@@ -996,7 +996,7 @@
               <div class="result-empty-text">Здесь появится визуализация</div>
             </div>
           </div>
-          <button class="gen-btn" onclick="generateSubAccent('reika')">✨ Сгенерировать</button>
+          <button class="gen-btn" id="reikaGenBtn" onclick="generateSubAccent('reika')">✨ Сгенерировать</button>
           <div id="reikaResult" class="zone-result-panel"></div>
         </div>
       </div>
@@ -1066,7 +1066,7 @@
               <div class="result-empty-text">Здесь появится визуализация</div>
             </div>
           </div>
-          <button class="gen-btn" onclick="generateSubAccent('belt')">✨ Сгенерировать</button>
+          <button class="gen-btn" id="beltGenBtn" onclick="generateSubAccent('belt')">✨ Сгенерировать</button>
           <div id="beltResult" class="zone-result-panel"></div>
         </div>
       </div>
@@ -2061,6 +2061,7 @@ function initAccentPage() {
         if (!plinthDrawer) plinthDrawer = createDrawer('plinthCanvas');
         plinthDrawer.loadImage(file);
         document.getElementById('plinthCanvasCard').style.display = '';
+        document.getElementById('plinthGenBtn').classList.add('ready');
     });
     document.getElementById('plinthBrush').addEventListener('input', e => plinthDrawer?.setBrush(+e.target.value));
     loadSubSupplierChips('plinth', plinthMat);
@@ -2070,6 +2071,7 @@ function initAccentPage() {
         if (!reikaDrawer) reikaDrawer = createDrawer('reikaCanvas');
         reikaDrawer.loadImage(file);
         document.getElementById('reikaCanvasCard').style.display = '';
+        document.getElementById('reikaGenBtn').classList.add('ready');
     });
     document.getElementById('reikaBrush').addEventListener('input', e => reikaDrawer?.setBrush(+e.target.value));
     loadSubSupplierChips('reika', 'reika');
@@ -2079,6 +2081,7 @@ function initAccentPage() {
         if (!beltDrawer) beltDrawer = createDrawer('beltCanvas');
         beltDrawer.loadImage(file);
         document.getElementById('beltCanvasCard').style.display = '';
+        document.getElementById('beltGenBtn').classList.add('ready');
     });
     document.getElementById('beltBrush').addEventListener('input', e => beltDrawer?.setBrush(+e.target.value));
     loadSubSupplierChips('belt', beltMat);
