@@ -6,117 +6,164 @@
   <title>Визуализатор</title>
   <link rel="icon" type="image/png" href="/static/favicon.svg">
   <link rel="apple-touch-icon" href="/static/icons/icon.svg">
-  <meta name="theme-color" content="#ff3b3b">
+  <meta name="theme-color" content="#cc785c">
   <link rel="manifest" href="/static/manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
+    /* ===== CLAUDE DESIGN SYSTEM (warm editorial) ===== */
+    :root {
+      --cream:        #faf9f5;   /* page canvas */
+      --cream-card:   #ffffff;   /* cards on cream */
+      --cream-soft:   #f3efe6;   /* subtle inner surfaces */
+      --line:         #e8e2d3;   /* hairline divider */
+      --line-strong:  #d6cfbd;
+      --ink:          #1a1815;   /* primary text */
+      --ink-2:        #3d3833;   /* secondary text */
+      --muted:        #8a8275;   /* tertiary / placeholder */
+      --coral:        #cc785c;   /* signature accent */
+      --coral-soft:   #f4e7e1;   /* tinted bg */
+      --coral-hover:  #b86a51;
+      --coral-deep:   #9a5a44;
+      --navy:         #1f2937;   /* dark mockup surface */
+      --good:         #4f8a55;
+      --bad:          #b8443a;
+      --serif:        'Lora', 'Source Serif 4', Georgia, 'Times New Roman', serif;
+      --sans:         'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+
     /* ===== RESET & BASE ===== */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-      background: #f0f2f7;
+      font-family: var(--sans);
+      background: var(--cream);
       min-height: 100vh;
-      color: #1e2a3b;
+      color: var(--ink);
+      font-feature-settings: 'cv11','ss01';
+      -webkit-font-smoothing: antialiased;
     }
+
+    /* ===== PHOSPHOR ICON SYSTEM ===== */
+    .ico {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 1em; height: 1em; flex-shrink: 0;
+      vertical-align: -0.15em;
+    }
+    .ico svg { width: 100%; height: 100%; display: block; }
+    .ico-lg { width: 1.4em; height: 1.4em; }
+    .ico-xl { width: 2.6em; height: 2.6em; }
 
     /* ===== HEADER ===== */
     .app-header {
       position: sticky; top: 0; z-index: 100;
-      background: #fff;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
-      height: 60px;
-      padding: 0 24px;
+      background: var(--cream);
+      border-bottom: 1px solid var(--line);
+      height: 64px;
+      padding: 0 28px;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
-    .header-left { display: flex; align-items: center; gap: 14px; }
+    .header-left { display: flex; align-items: center; gap: 16px; }
     .burger-btn {
       background: none; border: none;
-      font-size: 1.4rem; cursor: pointer; color: #1e2a3b;
-      padding: 7px 9px; border-radius: 10px; transition: background .15s;
+      cursor: pointer; color: var(--ink);
+      padding: 8px; border-radius: 10px; transition: background .15s;
+      font-size: 1.25rem;
     }
-    .burger-btn:hover { background: #f0f2f7; }
-    .header-title { font-weight: 700; font-size: 1.05rem; }
+    .burger-btn:hover { background: var(--cream-soft); }
+    .header-title {
+      font-family: var(--serif); font-weight: 600;
+      font-size: 1.15rem; letter-spacing: -.01em; color: var(--ink);
+    }
     .logout-btn {
-      background: none; border: 1.5px solid #ff3b3b; color: #ff3b3b;
-      padding: 7px 18px; border-radius: 40px; cursor: pointer;
-      font-weight: 600; font-size: .875rem; transition: all .15s;
+      background: none; border: 1px solid var(--line-strong); color: var(--ink-2);
+      padding: 8px 18px; border-radius: 999px; cursor: pointer;
+      font-family: var(--sans); font-weight: 500; font-size: .85rem;
+      transition: all .15s; display: inline-flex; align-items: center; gap: 6px;
     }
-    .logout-btn:hover { background: #ff3b3b; color: #fff; }
+    .logout-btn:hover { background: var(--coral); border-color: var(--coral); color: #fff; }
 
     /* ===== BELL / NOTIFICATIONS ===== */
     .bell-btn {
       position: relative; background: none; border: none;
-      font-size: 1.25rem; cursor: pointer; padding: 7px 9px;
-      border-radius: 10px; transition: background .15s; color: #1e2a3b;
+      cursor: pointer; padding: 8px;
+      border-radius: 10px; transition: background .15s; color: var(--ink);
+      font-size: 1.15rem;
     }
-    .bell-btn:hover { background: #f0f2f7; }
+    .bell-btn:hover { background: var(--cream-soft); }
     .notif-badge {
       display: none; position: absolute; top: 2px; right: 2px;
       min-width: 18px; height: 18px; padding: 0 4px;
-      background: #e53935; color: #fff; border-radius: 99px;
+      background: var(--coral); color: #fff; border-radius: 99px;
       font-size: .68rem; font-weight: 700;
       align-items: center; justify-content: center;
     }
     .notif-panel {
       display: none; position: absolute; top: 58px; right: 16px;
       width: 360px; max-height: 480px; overflow-y: auto;
-      background: #fff; border-radius: 16px; z-index: 500;
-      box-shadow: 0 8px 32px rgba(0,0,0,.15);
+      background: var(--cream-card); border-radius: 16px; z-index: 500;
+      border: 1px solid var(--line);
+      box-shadow: 0 12px 32px rgba(26,24,21,.08);
     }
     .notif-panel.open { display: block; }
     .notif-head {
-      padding: 14px 18px; border-bottom: 1px solid #eaf0f8;
+      padding: 16px 20px; border-bottom: 1px solid var(--line);
       display: flex; align-items: center; justify-content: space-between;
-      font-weight: 700; font-size: .9rem;
+      font-family: var(--serif); font-weight: 600; font-size: .95rem; color: var(--ink);
     }
     .notif-read-all {
-      background: none; border: none; color: #5b6fa0; font-size: .78rem;
-      cursor: pointer; padding: 2px 8px; border-radius: 6px;
+      background: none; border: none; color: var(--coral); font-size: .78rem;
+      cursor: pointer; padding: 4px 10px; border-radius: 6px; font-weight: 500;
     }
-    .notif-read-all:hover { background: #f0f4ff; color: #3b4fa0; }
+    .notif-read-all:hover { background: var(--coral-soft); }
     .notif-item {
-      display: flex; gap: 12px; padding: 12px 18px;
-      border-bottom: 1px solid #f0f4fb; cursor: pointer; transition: background .1s;
+      display: flex; gap: 12px; padding: 14px 20px;
+      border-bottom: 1px solid var(--line); cursor: pointer; transition: background .1s;
     }
-    .notif-item:hover { background: #f8faff; }
-    .notif-item.unread { background: #fff8f8; border-left: 3px solid #e53935; }
-    .notif-icon { font-size: 1.2rem; flex-shrink: 0; }
-    .notif-msg { font-size: .84rem; color: #1e2a3b; margin-bottom: 2px; }
-    .notif-time { font-size: .74rem; color: #9aadcc; }
-    .notif-empty { padding: 24px; text-align: center; color: #9aadcc; font-size: .85rem; }
+    .notif-item:hover { background: var(--cream-soft); }
+    .notif-item.unread { background: var(--coral-soft); border-left: 3px solid var(--coral); }
+    .notif-icon { color: var(--coral-deep); flex-shrink: 0; font-size: 1.05rem; }
+    .notif-msg { font-size: .84rem; color: var(--ink); margin-bottom: 2px; }
+    .notif-time { font-size: .74rem; color: var(--muted); }
+    .notif-empty { padding: 28px; text-align: center; color: var(--muted); font-size: .85rem; }
 
     /* ===== CANVAS DRAWING TOOL ===== */
     .zone-layout {
-      display: grid; grid-template-columns: 360px 1fr; gap: 24px; align-items: start;
+      display: grid; grid-template-columns: 380px 1fr; gap: 24px; align-items: start;
     }
     @media(max-width:860px) { .zone-layout { grid-template-columns: 1fr; } }
     .zone-left { display: flex; flex-direction: column; gap: 18px; }
     .canvas-wrap {
-      border: 2px dashed #c8d4e8; border-radius: 14px;
-      overflow: hidden; background: #f4f6fb; cursor: crosshair;
+      border: 1.5px dashed var(--line-strong); border-radius: 14px;
+      overflow: hidden; background: var(--cream-soft); cursor: crosshair;
       display: flex; align-items: center; justify-content: center;
       min-height: 160px;
     }
     .canvas-wrap canvas { display: block; max-width: 100%; touch-action: none; }
     .brush-ctrl {
       display: flex; align-items: center; gap: 10px;
-      padding: 10px 14px; background: #f4f6fb; border-radius: 12px;
+      padding: 10px 14px; background: var(--cream-soft); border-radius: 12px;
+      border: 1px solid var(--line);
     }
-    .brush-ctrl label { font-size: .8rem; color: #5b6fa0; white-space: nowrap; }
-    .brush-ctrl input[type=range] { flex: 1; }
+    .brush-ctrl label { font-size: .8rem; color: var(--ink-2); white-space: nowrap; font-weight: 500; }
+    .brush-ctrl input[type=range] { flex: 1; accent-color: var(--coral); }
     .brush-ctrl button {
-      padding: 5px 12px; border: none; border-radius: 8px;
-      background: #e8ecf8; color: #3b4fa0; font-size: .8rem; cursor: pointer;
+      padding: 6px 14px; border: 1px solid var(--line-strong); border-radius: 999px;
+      background: var(--cream-card); color: var(--ink-2); font-size: .8rem; font-weight: 500;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+      transition: all .15s;
     }
-    .brush-ctrl button:hover { background: #d0d8f0; }
+    .brush-ctrl button:hover { background: var(--coral-soft); border-color: var(--coral); color: var(--coral-deep); }
     .zone-result {
-      background: #fff; border-radius: 20px; padding: 24px;
-      box-shadow: 0 2px 16px rgba(0,0,0,.06); min-height: 280px;
+      background: var(--cream-card); border-radius: 20px; padding: 28px;
+      border: 1px solid var(--line);
+      min-height: 280px;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
     }
     .zone-result img { max-width: 100%; border-radius: 12px; cursor: zoom-in; }
-    .zone-hint { color: #9aadcc; font-size: .9rem; }
+    .zone-hint { color: var(--muted); font-size: .9rem; }
     .zone-tex-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
@@ -126,81 +173,81 @@
       padding: 2px;
     }
     .zone-tex-card {
-      background: #fff;
-      border-radius: 14px;
+      background: var(--cream-card);
+      border-radius: 12px;
       overflow: hidden;
       cursor: pointer;
-      border: 2px solid transparent;
-      box-shadow: 0 2px 8px rgba(0,0,0,.07);
-      transition: all .2s;
+      border: 1px solid var(--line);
+      transition: all .15s;
     }
     .zone-tex-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0,0,0,.11);
-      border-color: #dde4f0;
+      border-color: var(--coral);
     }
     .zone-tex-card img {
       width: 100%; aspect-ratio: 1; object-fit: cover; display: block;
     }
     .zone-tex-name {
-      padding: 6px 8px;
+      padding: 8px 10px;
       font-size: .75rem; font-weight: 500;
-      text-align: center; color: #1e2a3b;
-      border-top: 1px solid #f0f4f8;
+      text-align: center; color: var(--ink);
+      border-top: 1px solid var(--line);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .zone-tex-card.sel {
-      border-color: #e53935;
-      box-shadow: 0 0 0 3px rgba(229,57,53,.15);
+      border-color: var(--coral);
+      box-shadow: 0 0 0 2px var(--coral-soft);
     }
     .zone-gen-btn {
-      width: 100%; padding: 14px; border: none; border-radius: 14px;
-      background: linear-gradient(135deg, #e53935, #c62828);
-      color: #fff; font-size: 1rem; font-weight: 700; cursor: pointer;
-      transition: opacity .15s;
+      width: 100%; padding: 14px; border: none; border-radius: 999px;
+      background: var(--coral);
+      color: #fff; font-size: 1rem; font-weight: 600; cursor: pointer;
+      transition: background .15s;
     }
-    .zone-gen-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .zone-gen-btn:hover { background: var(--coral-hover); }
+    .zone-gen-btn:disabled { opacity: .45; cursor: not-allowed; }
 
     /* ===== MAT / MODE BUTTONS ===== */
     .mat-btn {
-      padding: 8px 18px; border-radius: 10px;
-      border: 1.5px solid #dde4f0; background: #f4f6fb;
-      color: #3b4fa0; font-size: .85rem; font-weight: 600;
+      padding: 8px 16px; border-radius: 999px;
+      border: 1px solid var(--line-strong); background: var(--cream-card);
+      color: var(--ink-2); font-size: .85rem; font-weight: 500;
       cursor: pointer; transition: all .15s; white-space: nowrap;
+      display: inline-flex; align-items: center; gap: 6px;
     }
-    .mat-btn:hover { border-color: #c0392b; color: #c0392b; background: #fff1f1; }
+    .mat-btn:hover { border-color: var(--coral); color: var(--coral-deep); background: var(--coral-soft); }
     .mat-btn.active {
-      background: #c0392b; border-color: #c0392b;
-      color: #fff; box-shadow: 0 2px 8px rgba(192,57,43,.25);
+      background: var(--ink); border-color: var(--ink);
+      color: var(--cream);
     }
 
     /* ===== PHOTO UPLOADER (accent zones) ===== */
     .photo-uploader { padding: 2px 0; }
-    .photo-uploader.drag-over .photo-uploader-empty { outline: 2px dashed #e53935; outline-offset: 4px; border-radius: 12px; }
+    .photo-uploader.drag-over .photo-uploader-empty { outline: 2px dashed var(--coral); outline-offset: 4px; border-radius: 12px; }
     .photo-uploader-empty { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
     .photo-add-btn {
       display: inline-flex; align-items: center; gap: 8px;
-      padding: 10px 22px; border-radius: 12px;
-      background: #f0f4ff; border: 1.5px solid #c0ccee;
-      color: #3b4fa0; font-size: .9rem; font-weight: 600;
+      padding: 10px 20px; border-radius: 999px;
+      background: var(--cream-card); border: 1px solid var(--line-strong);
+      color: var(--ink); font-size: .9rem; font-weight: 500;
       cursor: pointer; transition: all .15s;
     }
-    .photo-add-btn:hover { background: #e0e8ff; border-color: #99aadd; color: #2a3a90; }
-    .photo-uploader-hint { font-size: .75rem; color: #9aadcc; }
+    .photo-add-btn:hover { background: var(--coral-soft); border-color: var(--coral); color: var(--coral-deep); }
+    .photo-uploader-hint { font-size: .75rem; color: var(--muted); }
     .photo-uploader-filled { display: flex; align-items: center; gap: 12px; }
     .photo-uploader-thumb {
       width: 62px; height: 62px; border-radius: 10px; object-fit: cover;
-      box-shadow: 0 2px 10px rgba(0,0,0,.12); flex-shrink: 0;
+      border: 1px solid var(--line); flex-shrink: 0;
     }
     .photo-uploader-info { flex: 1; min-width: 0; }
     .photo-uploader-name {
-      font-size: .82rem; font-weight: 600; color: #1e2a3b;
+      font-size: .82rem; font-weight: 600; color: var(--ink);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       max-width: 240px; margin-bottom: 5px;
     }
     .photo-change-btn {
       background: none; border: none;
-      color: #e53935; font-size: .78rem; font-weight: 600;
+      color: var(--coral); font-size: .78rem; font-weight: 600;
       cursor: pointer; padding: 0;
     }
     .photo-change-btn:hover { text-decoration: underline; }
@@ -215,66 +262,73 @@
       max-height: 220px; max-width: 100%;
       border-radius: 12px; cursor: zoom-in;
       display: block;
-      box-shadow: 0 4px 18px rgba(0,0,0,.12);
+      border: 1px solid var(--line);
     }
 
     /* ===== SUPPLIER CHIPS ===== */
     .supplier-chip {
-      padding: 5px 16px; border-radius: 20px;
-      border: 1.5px solid #dde4f0; background: #fff;
+      padding: 6px 16px; border-radius: 999px;
+      border: 1px solid var(--line-strong); background: var(--cream-card);
       cursor: pointer; font-size: .82rem; font-weight: 500;
-      transition: all .15s; color: #1e2a3b;
+      transition: all .15s; color: var(--ink-2);
     }
-    .supplier-chip:hover { border-color: #c0392b; color: #c0392b; }
-    .supplier-chip.active { background: #c0392b; border-color: #c0392b; color: #fff; }
+    .supplier-chip:hover { border-color: var(--coral); color: var(--coral-deep); }
+    .supplier-chip.active { background: var(--ink); border-color: var(--ink); color: var(--cream); }
 
     /* ===== LEADS TABLE ===== */
-    .leads-count { font-size: .8rem; color: #9aadcc; margin-left: 8px; font-weight: 400; }
+    .leads-count { font-size: .8rem; color: var(--muted); margin-left: 8px; font-weight: 400; }
 
     /* ===== SIDEBAR ===== */
     .sidebar-overlay {
       display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,.42); z-index: 200;
+      background: rgba(26,24,21,.38); z-index: 200;
       opacity: 0; transition: opacity .25s;
     }
     .sidebar-overlay.open { display: block; opacity: 1; }
     .sidebar {
-      position: fixed; left: -280px; top: 0;
-      width: 280px; height: 100%; background: #fff; z-index: 300;
-      box-shadow: 4px 0 24px rgba(0,0,0,.12);
+      position: fixed; left: -300px; top: 0;
+      width: 300px; height: 100%; background: var(--cream); z-index: 300;
+      border-right: 1px solid var(--line);
       transition: left .25s cubic-bezier(.4,0,.2,1);
       display: flex; flex-direction: column;
     }
     .sidebar.open { left: 0; }
     .sidebar-head {
-      padding: 18px 20px; border-bottom: 1px solid #eaf0f8;
+      padding: 20px 22px; border-bottom: 1px solid var(--line);
       display: flex; align-items: center; justify-content: space-between;
     }
-    .sidebar-head-title { font-weight: 700; font-size: 1rem; }
+    .sidebar-head-title { font-family: var(--serif); font-weight: 600; font-size: 1.05rem; color: var(--ink); }
     .sidebar-close {
-      background: none; border: none; font-size: 1.3rem;
-      cursor: pointer; color: #7a8698; padding: 4px 8px; border-radius: 8px;
+      background: none; border: none;
+      cursor: pointer; color: var(--muted); padding: 6px; border-radius: 8px;
+      font-size: 1.05rem;
     }
-    .sidebar-close:hover { background: #f0f2f7; }
-    .sidebar-nav { list-style: none; padding: 12px; flex: 1; }
+    .sidebar-close:hover { background: var(--cream-soft); color: var(--ink); }
+    .sidebar-nav { list-style: none; padding: 14px; flex: 1; }
     .sidebar-nav li { margin-bottom: 2px; }
     .nav-link {
       display: flex; align-items: center; gap: 12px;
-      padding: 11px 14px; border-radius: 12px;
-      text-decoration: none; color: #3d4f66;
-      font-weight: 500; font-size: .975rem;
+      padding: 11px 14px; border-radius: 10px;
+      text-decoration: none; color: var(--ink-2);
+      font-weight: 500; font-size: .95rem;
       cursor: pointer; transition: all .15s;
     }
-    .nav-link:hover { background: #f5f7fc; color: #ff3b3b; }
-    .nav-link.active { background: #fff1f1; color: #ff3b3b; font-weight: 700; }
-    .nav-icon { font-size: 1.15rem; }
+    .nav-link:hover { background: var(--cream-soft); color: var(--ink); }
+    .nav-link.active { background: var(--ink); color: var(--cream); font-weight: 500; }
+    .nav-link.active .nav-icon { color: var(--cream); }
+    .nav-icon { font-size: 1.1rem; color: var(--ink-2); display: inline-flex; }
 
     /* ===== MAIN ===== */
-    .app-main { max-width: 1400px; margin: 0 auto; padding: 24px 20px; }
+    .app-main { max-width: 1280px; margin: 0 auto; padding: 32px 24px; }
     .page { display: none; animation: fadeIn .2s ease; }
     .page.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-    .page-title { font-size: 1.45rem; font-weight: 700; margin-bottom: 22px; color: #1e2a3b; }
+    .page-title {
+      font-family: var(--serif); font-size: 1.85rem; font-weight: 600;
+      letter-spacing: -.015em; margin-bottom: 26px; color: var(--ink);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .page-title .ico { color: var(--coral); }
 
     /* ===== VISUALIZER ===== */
     .vis-layout {
@@ -283,299 +337,311 @@
       gap: 20px;
     }
     .vis-panel {
-      background: #fff; border-radius: 24px;
-      padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,.06);
+      background: var(--cream-card); border-radius: 20px;
+      padding: 28px; border: 1px solid var(--line);
     }
     .vis-step-title {
-      font-size: .8rem; font-weight: 700; color: #8899bb;
-      text-transform: uppercase; letter-spacing: .06em;
+      font-size: .72rem; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .08em;
       margin-bottom: 14px;
     }
-    .vis-divider { height: 1px; background: #eef2f8; margin: 18px 0; }
+    .vis-divider { height: 1px; background: var(--line); margin: 22px 0; }
 
     /* Upload */
     .upload-zone {
-      border: 2px dashed #c8d4e8; border-radius: 18px;
-      background: #fafcff; padding: 28px 20px;
-      text-align: center; cursor: pointer; transition: all .2s; margin-bottom: 14px;
+      border: 1.5px dashed var(--line-strong); border-radius: 16px;
+      background: var(--cream-soft); padding: 32px 20px;
+      text-align: center; cursor: pointer; transition: all .15s; margin-bottom: 14px;
     }
-    .upload-zone:hover, .upload-zone.drag-over { border-color: #ff3b3b; background: #fff8f8; }
-    .upload-icon { font-size: 2.2rem; margin-bottom: 8px; }
-    .upload-text { font-weight: 600; color: #3d4f66; margin-bottom: 4px; }
-    .upload-hint { font-size: .82rem; color: #9aadcc; }
+    .upload-zone:hover, .upload-zone.drag-over { border-color: var(--coral); background: var(--coral-soft); }
+    .upload-icon { color: var(--coral); margin-bottom: 8px; display: inline-flex; }
+    .upload-text { font-weight: 500; color: var(--ink); margin-bottom: 4px; }
+    .upload-hint { font-size: .82rem; color: var(--muted); }
 
     /* Photo preview */
     .photo-box {
-      position: relative; border-radius: 16px;
+      position: relative; border-radius: 14px;
       overflow: hidden; margin-bottom: 14px; display: none;
+      border: 1px solid var(--line);
     }
     .photo-box.visible { display: block; }
     .photo-img {
       width: 100%; max-height: 210px;
-      object-fit: cover; border-radius: 16px;
+      object-fit: cover; border-radius: 14px;
       cursor: pointer; display: block;
     }
     .photo-remove {
       position: absolute; top: 8px; right: 8px;
-      background: rgba(0,0,0,.6); border: none; border-radius: 20px;
-      color: #fff; padding: 5px 12px; cursor: pointer; font-size: .82rem;
+      background: rgba(26,24,21,.7); border: none; border-radius: 999px;
+      color: #fff; padding: 6px 14px; cursor: pointer; font-size: .78rem;
+      display: inline-flex; align-items: center; gap: 5px; font-weight: 500;
     }
 
     /* Texture pick */
     .pick-btn {
-      width: 100%; padding: 11px 20px;
-      border: 2px solid #ff3b3b; background: #fff; color: #ff3b3b;
-      border-radius: 40px; font-weight: 700; font-size: .9rem;
+      width: 100%; padding: 12px 20px;
+      border: 1px solid var(--line-strong); background: var(--cream-card); color: var(--ink);
+      border-radius: 999px; font-weight: 500; font-size: .9rem;
       cursor: pointer; transition: all .15s; margin-bottom: 14px;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     }
-    .pick-btn:hover { background: #ff3b3b; color: #fff; }
+    .pick-btn:hover { background: var(--coral-soft); border-color: var(--coral); color: var(--coral-deep); }
     .selected-tex {
       display: none; align-items: center; gap: 12px;
-      padding: 12px 14px; background: #f5f7fc; border-radius: 14px;
-      margin-bottom: 14px;
+      padding: 12px 14px; background: var(--cream-soft); border-radius: 14px;
+      margin-bottom: 14px; border: 1px solid var(--line);
     }
     .selected-tex.visible { display: flex; }
     .tex-thumb {
       width: 50px; height: 50px;
-      border-radius: 10px; object-fit: cover; border: 1.5px solid #e0e8f4;
+      border-radius: 10px; object-fit: cover; border: 1px solid var(--line);
       flex-shrink: 0;
     }
     .tex-info { flex: 1; min-width: 0; }
-    .tex-label { font-size: .72rem; color: #9aadcc; margin-bottom: 2px; }
-    .tex-name { font-weight: 700; font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tex-label { font-size: .72rem; color: var(--muted); margin-bottom: 2px; }
+    .tex-name { font-weight: 600; font-size: .9rem; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .tex-change {
-      background: none; border: none; color: #ff3b3b;
-      cursor: pointer; font-size: .82rem; font-weight: 700;
+      background: none; border: none; color: var(--coral);
+      cursor: pointer; font-size: .82rem; font-weight: 600;
       padding: 4px 8px; border-radius: 8px; flex-shrink: 0;
     }
-    .tex-change:hover { background: #fff1f1; }
+    .tex-change:hover { background: var(--coral-soft); }
 
     /* Category */
     .cat-row { display: flex; gap: 8px; margin-bottom: 4px; }
     .cat-btn {
-      flex: 1; padding: 9px 8px; border: 1.5px solid #c8d4e8;
-      background: #fff; border-radius: 12px;
-      font-size: .8rem; font-weight: 600; cursor: pointer;
-      color: #5b6a80; transition: all .15s;
+      flex: 1; padding: 11px 12px; border: 1px solid var(--line-strong);
+      background: var(--cream-card); border-radius: 12px;
+      font-size: .85rem; font-weight: 500; cursor: pointer;
+      color: var(--ink-2); transition: all .15s;
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
     }
-    .cat-btn.active { border-color: #ff3b3b; color: #ff3b3b; background: #fff1f1; }
+    .cat-btn:hover { border-color: var(--coral); color: var(--coral-deep); }
+    .cat-btn.active { border-color: var(--ink); color: var(--ink); background: var(--cream-soft); }
 
     /* Result panel */
     .result-box {
-      min-height: 280px; background: #f5f7fc; border-radius: 18px;
+      min-height: 320px; background: var(--cream-soft); border-radius: 16px;
       display: flex; align-items: center; justify-content: center;
       margin-bottom: 18px; position: relative; overflow: hidden;
+      border: 1px solid var(--line);
     }
-    .result-empty { text-align: center; color: #9aadcc; user-select: none; }
-    .result-empty-icon { font-size: 2.8rem; margin-bottom: 10px; }
+    .result-empty { text-align: center; color: var(--muted); user-select: none; }
+    .result-empty-icon { color: var(--line-strong); margin-bottom: 12px; display: inline-flex; }
     .result-empty-text { font-size: .9rem; }
     .result-img {
-      width: 100%; max-height: 340px;
-      object-fit: contain; border-radius: 18px;
+      width: 100%; max-height: 380px;
+      object-fit: contain; border-radius: 16px;
       cursor: zoom-in; display: none;
     }
     .result-img.visible { display: block; }
     .gen-overlay {
       display: none; position: absolute; inset: 0;
-      background: rgba(255,255,255,.88);
+      background: rgba(250,249,245,.92);
       align-items: center; justify-content: center;
-      flex-direction: column; gap: 14px; border-radius: 18px;
+      flex-direction: column; gap: 14px; border-radius: 16px;
     }
     .gen-overlay.visible { display: flex; }
     .spinner {
-      width: 38px; height: 38px;
-      border: 3px solid #e8edf5;
-      border-top-color: #ff3b3b;
+      width: 36px; height: 36px;
+      border: 2.5px solid var(--cream-soft);
+      border-top-color: var(--coral);
       border-radius: 50%;
       animation: spin .75s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .gen-text { font-weight: 600; color: #3d4f66; font-size: .9rem; }
+    .gen-text { font-weight: 500; color: var(--ink-2); font-size: .9rem; }
 
     /* Grout */
     .section-label {
-      font-size: .78rem; font-weight: 700; color: #8899bb;
-      text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px;
+      font-size: .72rem; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .08em; margin-bottom: 10px;
     }
     .grout-row { display: flex; gap: 9px; flex-wrap: wrap; margin-bottom: 18px; }
     .grout-swatch {
-      width: 42px; height: 42px; border-radius: 11px;
-      cursor: pointer; border: 2.5px solid transparent;
-      transition: all .15s; box-shadow: 0 1px 4px rgba(0,0,0,.12);
+      width: 40px; height: 40px; border-radius: 10px;
+      cursor: pointer; border: 2px solid var(--line);
+      transition: all .15s;
     }
-    .grout-swatch:hover { transform: scale(1.1); }
-    .grout-swatch.selected { border-color: #ff3b3b; transform: scale(1.12); box-shadow: 0 0 0 3px rgba(255,59,59,.18); }
+    .grout-swatch:hover { transform: scale(1.08); border-color: var(--line-strong); }
+    .grout-swatch.selected { border-color: var(--coral); transform: scale(1.1); box-shadow: 0 0 0 2px var(--coral-soft); }
 
     /* Generate button */
     .gen-btn {
-      width: 100%; padding: 15px;
-      background: #c8d5e8; color: #fff; border: none;
-      border-radius: 60px; font-weight: 700; font-size: 1rem;
-      cursor: not-allowed; transition: all .2s;
+      width: 100%; padding: 14px;
+      background: var(--cream-soft); color: var(--muted); border: 1px solid var(--line);
+      border-radius: 999px; font-weight: 500; font-size: 1rem;
+      cursor: not-allowed; transition: all .15s;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     }
     .gen-btn.ready {
-      background: linear-gradient(135deg, #ff3b3b, #ff6b3b);
+      background: var(--coral); color: #fff; border-color: var(--coral);
       cursor: pointer;
-      box-shadow: 0 4px 18px rgba(255,59,59,.28);
     }
-    .gen-btn.ready:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(255,59,59,.38); }
+    .gen-btn.ready:hover { background: var(--coral-hover); border-color: var(--coral-hover); }
     .status-banner {
-      padding: 9px 16px; border-radius: 40px; font-weight: 600;
+      padding: 10px 18px; border-radius: 999px; font-weight: 500;
       font-size: .88rem; text-align: center; margin-top: 10px; display: none;
     }
-    .status-banner.success { display: block; background: #10b981; color: #fff; }
-    .status-banner.error   { display: block; background: #ff3b3b; color: #fff; }
+    .status-banner.success { display: block; background: var(--good); color: #fff; }
+    .status-banner.error   { display: block; background: var(--bad);  color: #fff; }
 
     /* ===== CATALOG PAGE ===== */
     .catalog-filters {
-      background: #fff; border-radius: 18px; padding: 18px 20px;
-      margin-bottom: 18px; box-shadow: 0 2px 8px rgba(0,0,0,.05);
+      background: var(--cream-card); border-radius: 16px; padding: 18px 20px;
+      margin-bottom: 18px; border: 1px solid var(--line);
       display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end;
     }
     .filter-group { flex: 1; min-width: 150px; }
     .filter-group label {
-      display: block; font-size: .76rem; font-weight: 700; color: #8899bb;
-      text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px;
+      display: block; font-size: .72rem; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px;
     }
     .filter-group select, .filter-group input[type="text"] {
-      width: 100%; padding: 9px 14px; border-radius: 40px;
-      border: 1.5px solid #c8d4e8; background: #fff;
-      font-size: .9rem; color: #1e2a3b; outline: none; transition: border .15s;
+      width: 100%; padding: 10px 14px; border-radius: 12px;
+      border: 1px solid var(--line-strong); background: var(--cream-card);
+      font-family: var(--sans);
+      font-size: .9rem; color: var(--ink); outline: none; transition: border .15s;
     }
-    .filter-group select:focus, .filter-group input:focus { border-color: #ff3b3b; }
+    .filter-group select:focus, .filter-group input:focus { border-color: var(--coral); }
     .tex-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
       gap: 14px;
     }
     .tex-card {
-      background: #fff; border-radius: 16px; overflow: hidden;
-      cursor: pointer; border: 2px solid transparent;
-      box-shadow: 0 2px 8px rgba(0,0,0,.06); transition: all .2s;
+      background: var(--cream-card); border-radius: 14px; overflow: hidden;
+      cursor: pointer; border: 1.5px solid var(--line);
+      transition: all .18s;
     }
-    .tex-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.1); }
-    .tex-card.selected { border-color: #ff3b3b; }
+    .tex-card:hover { transform: translateY(-2px); border-color: var(--line-strong); }
+    .tex-card.selected { border-color: var(--coral); box-shadow: 0 0 0 2px var(--coral-soft); }
     .tex-card-img { aspect-ratio: 1; background-size: cover; background-position: center; }
     .tex-card-name {
-      padding: 9px 12px; font-weight: 500; font-size: .88rem;
-      border-top: 1px solid #f0f4f8; text-align: center; color: #1e2a3b;
+      padding: 10px 12px 4px; font-weight: 500; font-size: .88rem;
+      text-align: center; color: var(--ink);
     }
     .tex-card-badge {
-      padding: 2px 10px 6px; font-size: .72rem; text-align: center;
-      color: #9aadcc; font-weight: 500;
+      padding: 0 10px 10px; font-size: .72rem; text-align: center;
+      color: var(--muted); font-weight: 500;
     }
 
     /* ===== CATALOG MODAL ===== */
     .modal-backdrop {
       display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,.5); z-index: 500;
+      background: rgba(26,24,21,.55); z-index: 500;
       align-items: center; justify-content: center;
     }
     .modal-backdrop.open { display: flex; }
     .modal-backdrop.open .modal-box { animation: modalIn .2s ease; }
-    @keyframes modalIn { from { opacity: 0; transform: scale(.95); } to { opacity: 1; transform: scale(1); } }
+    @keyframes modalIn { from { opacity: 0; transform: scale(.97); } to { opacity: 1; transform: scale(1); } }
     .modal-box {
-      background: #fff; border-radius: 26px;
+      background: var(--cream-card); border-radius: 20px;
       width: 92%; max-width: 860px; max-height: 88vh;
       display: flex; flex-direction: column;
       box-shadow: 0 20px 60px rgba(0,0,0,.22);
     }
     .modal-head {
-      padding: 18px 22px; border-bottom: 1px solid #eaf0f8;
+      padding: 18px 22px; border-bottom: 1px solid var(--line);
       display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
     }
-    .modal-head-title { font-size: 1.1rem; font-weight: 700; }
+    .modal-head-title { font-family: var(--serif); font-size: 1.15rem; font-weight: 600; color: var(--ink); }
     .modal-close {
-      background: #f5f7fc; border: none; width: 34px; height: 34px;
-      border-radius: 50%; font-size: 1.1rem; cursor: pointer;
+      background: var(--cream-soft); border: none; width: 34px; height: 34px;
+      border-radius: 50%; font-size: 1rem; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      color: #5b6a80; transition: all .15s;
+      color: var(--ink-2); transition: all .15s;
     }
-    .modal-close:hover { background: #ffe8e8; color: #ff3b3b; }
+    .modal-close:hover { background: var(--coral-soft); color: var(--coral); }
     .modal-body { padding: 18px 22px; overflow-y: auto; flex: 1; }
     .modal-filters { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
 
     /* ===== HISTORY ===== */
     .table-wrap {
-      background: #fff; border-radius: 18px;
-      overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.05);
+      background: var(--cream-card); border-radius: 16px;
+      overflow: hidden; border: 1px solid var(--line);
     }
     table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 11px 16px; text-align: left; border-bottom: 1px solid #f0f4f8; }
-    th { background: #f8fafd; font-weight: 700; font-size: .78rem; color: #8899bb; text-transform: uppercase; letter-spacing: .05em; }
+    th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--line); }
+    th { background: var(--cream-soft); font-weight: 600; font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
     tr:last-child td { border-bottom: none; }
-    tr:hover td { background: #fafbff; }
+    tr:hover td { background: var(--cream); }
     .history-img {
       width: 58px; height: 58px; object-fit: cover;
       border-radius: 9px; cursor: zoom-in; transition: transform .15s;
     }
     .history-img:hover { transform: scale(1.06); }
     .pagination {
-      display: flex; gap: 7px; justify-content: center; padding: 16px;
+      display: flex; gap: 6px; justify-content: center; padding: 16px;
     }
     .page-btn {
-      padding: 6px 13px; border: 1.5px solid #c8d4e8;
-      background: #fff; cursor: pointer; border-radius: 9px;
-      font-weight: 600; font-size: .88rem; transition: all .15s;
+      padding: 7px 14px; border: 1px solid var(--line-strong);
+      background: var(--cream-card); cursor: pointer; border-radius: 10px;
+      font-weight: 500; font-size: .88rem; color: var(--ink-2); transition: all .15s;
     }
-    .page-btn:hover { border-color: #ff3b3b; color: #ff3b3b; }
-    .page-btn.active { background: #ff3b3b; color: #fff; border-color: #ff3b3b; }
+    .page-btn:hover { border-color: var(--coral); color: var(--coral); }
+    .page-btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
 
     /* ===== ADMIN ===== */
     .admin-section {
-      background: #fff; border-radius: 20px; padding: 22px;
-      margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.05);
+      background: var(--cream-card); border-radius: 18px; padding: 24px;
+      margin-bottom: 20px; border: 1px solid var(--line);
     }
-    .admin-section h3 { font-size: 1.05rem; font-weight: 700; color: #1e2a3b; margin-bottom: 18px; }
+    .admin-section h3 { font-family: var(--serif); font-size: 1.1rem; font-weight: 600; color: var(--ink); margin-bottom: 18px; }
     .admin-form {
       display: flex; gap: 10px; flex-wrap: wrap;
       align-items: flex-end; margin-bottom: 18px;
     }
     .admin-form input, .admin-form select {
-      padding: 9px 14px; border-radius: 40px;
-      border: 1.5px solid #c8d4e8; font-size: .88rem; outline: none;
+      padding: 10px 14px; border-radius: 12px;
+      border: 1px solid var(--line-strong); font-family: var(--sans); font-size: .88rem; outline: none;
+      color: var(--ink); background: var(--cream-card);
     }
-    .admin-form input:focus, .admin-form select:focus { border-color: #ff3b3b; }
+    .admin-form input:focus, .admin-form select:focus { border-color: var(--coral); }
     .admin-form button {
-      padding: 9px 20px; background: #ff3b3b; color: #fff;
-      border: none; border-radius: 40px; cursor: pointer;
-      font-weight: 700; font-size: .88rem; transition: background .15s;
+      padding: 10px 22px; background: var(--coral); color: #fff;
+      border: none; border-radius: 999px; cursor: pointer;
+      font-family: var(--sans); font-weight: 500; font-size: .88rem; transition: background .15s;
+      display: inline-flex; align-items: center; gap: 6px;
     }
-    .admin-form button:hover { background: #e52d2d; }
+    .admin-form button:hover { background: var(--coral-hover); }
     .del-btn {
-      background: none; border: none; color: #ff3b3b;
-      cursor: pointer; font-weight: 700; padding: 4px 10px;
+      background: none; border: none; color: var(--coral);
+      cursor: pointer; font-weight: 500; padding: 4px 10px;
       border-radius: 8px; font-size: .88rem;
+      display: inline-flex; align-items: center; gap: 4px;
     }
-    .del-btn:hover { background: #fff1f1; }
+    .del-btn:hover { background: var(--coral-soft); }
     .gen-filter { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 18px; }
     .gen-filter select, .gen-filter input {
-      padding: 8px 14px; border-radius: 40px;
-      border: 1.5px solid #c8d4e8; font-size: .88rem;
+      padding: 9px 14px; border-radius: 12px;
+      border: 1px solid var(--line-strong); font-family: var(--sans); font-size: .88rem;
+      color: var(--ink); background: var(--cream-card);
     }
     .gen-filter button {
-      padding: 8px 20px; background: #ff3b3b; color: #fff;
-      border: none; border-radius: 40px; cursor: pointer; font-weight: 600;
+      padding: 9px 22px; background: var(--coral); color: #fff;
+      border: none; border-radius: 999px; cursor: pointer; font-weight: 500;
     }
     .badge {
       display: inline-block; padding: 3px 10px;
-      border-radius: 20px; font-size: .76rem; font-weight: 700;
+      border-radius: 999px; font-size: .74rem; font-weight: 500;
     }
-    .badge-client   { background: #e8f4fd; color: #0077b6; }
-    .badge-internal { background: #e8fdf4; color: #0a8a5a; }
+    .badge-client   { background: var(--coral-soft); color: var(--coral-deep); }
+    .badge-internal { background: #e6efe7; color: var(--good); }
 
     /* ===== LIGHTBOX ===== */
     .lightbox {
       display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,.92); z-index: 900;
+      background: rgba(15,14,12,.94); z-index: 900;
       align-items: center; justify-content: center;
     }
     .lightbox.open { display: flex; }
     .lightbox-img { max-width: 92vw; max-height: 92vh; object-fit: contain; border-radius: 10px; }
     .lightbox-close {
       position: absolute; top: 20px; right: 28px; color: #fff;
-      font-size: 2.4rem; cursor: pointer; background: none;
-      border: none; opacity: .8; transition: opacity .15s; line-height: 1;
+      font-size: 1.6rem; cursor: pointer; background: none;
+      border: none; opacity: .85; transition: opacity .15s; line-height: 1;
+      width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center;
     }
     .lightbox-close:hover { opacity: 1; }
 
@@ -597,14 +663,14 @@
 <!-- HEADER -->
 <header class="app-header">
   <div class="header-left">
-    <button class="burger-btn" id="burgerBtn" aria-label="Открыть меню">☰</button>
+    <button class="burger-btn" id="burgerBtn" aria-label="Открыть меню"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128ZM40,72H216a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16ZM216,184H40a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Z"/></svg></span></button>
     <span class="header-title">Визуализатор</span>
   </div>
   <div style="display:flex;align-items:center;gap:10px;position:relative;">
     <button class="bell-btn" id="bellBtn" title="Уведомления">
-      🔔<span class="notif-badge" id="notifBadge"></span>
+      <span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M221.8,175.94C216.25,166.38,208,139.33,208,104a80,80,0,1,0-160,0c0,35.34-8.26,62.38-13.81,71.94A16,16,0,0,0,48,200H88.81a40,40,0,0,0,78.38,0H208a16,16,0,0,0,13.8-24.06ZM128,216a24,24,0,0,1-22.62-16h45.24A24,24,0,0,1,128,216ZM48,184c7.7-13.24,16-43.92,16-80a64,64,0,1,1,128,0c0,36.05,8.28,66.73,16,80Z"/></svg></span><span class="notif-badge" id="notifBadge"></span>
     </button>
-    <button class="logout-btn" id="logoutBtn">Выйти</button>
+    <button class="logout-btn" id="logoutBtn"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M112,216a8,8,0,0,1-8,8H48a16,16,0,0,1-16-16V48A16,16,0,0,1,48,32h56a8,8,0,0,1,0,16H48V208h56A8,8,0,0,1,112,216Zm109.66-93.66-40-40a8,8,0,0,0-11.32,11.32L196.69,120H104a8,8,0,0,0,0,16h92.69l-26.35,26.34a8,8,0,0,0,11.32,11.32l40-40A8,8,0,0,0,221.66,122.34Z"/></svg></span> Выйти</button>
   </div>
 </header>
 <div class="notif-panel" id="notifPanel">
@@ -620,14 +686,14 @@
 <nav class="sidebar" id="sidebar">
   <div class="sidebar-head">
     <span class="sidebar-head-title">Навигация</span>
-    <button class="sidebar-close" id="sidebarClose">✕</button>
+    <button class="sidebar-close" id="sidebarClose"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></span></button>
   </div>
   <ul class="sidebar-nav">
-    <li><span class="nav-link active" data-page="visualizer"><span class="nav-icon">🎨</span> Фасад / Интерьер</span></li>
-    <li><span class="nav-link" data-page="accent"><span class="nav-icon">✦</span> Цоколь / Пояса / Рейка</span></li>
-    <li><span class="nav-link" data-page="catalog"><span class="nav-icon">📚</span> Каталог</span></li>
-    <li><span class="nav-link" data-page="history"><span class="nav-icon">📜</span> История</span></li>
-    <li id="adminNavItem" style="display:none;"><span class="nav-link" data-page="admin"><span class="nav-icon">⚙️</span> Администрирование</span></li>
+    <li><span class="nav-link active" data-page="visualizer"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" width="16" height="16"><path d="M200.77,53.89A103.27,103.27,0,0,0,128,24h-1.07A104,104,0,0,0,24,128c0,43,26.58,79.06,69.36,94.17A32,32,0,0,0,136,192a16,16,0,0,1,16-16h46.21a31.81,31.81,0,0,0,31.2-24.88,104.43,104.43,0,0,0,2.59-24A103.28,103.28,0,0,0,200.77,53.89Zm13,93.71A15.89,15.89,0,0,1,198.21,160H152a32,32,0,0,0-32,32,16,16,0,0,1-21.31,15.07C62.49,194.3,40,164,40,128a88,88,0,0,1,87.09-88h.9a88.35,88.35,0,0,1,88,87.25A88.86,88.86,0,0,1,213.81,147.6ZM140,76a12,12,0,1,1-12-12A12,12,0,0,1,140,76ZM96,100A12,12,0,1,1,84,88,12,12,0,0,1,96,100Zm0,56a12,12,0,1,1-12-12A12,12,0,0,1,96,156Zm88-56a12,12,0,1,1-12-12A12,12,0,0,1,184,100Z"/></svg></span> Фасад / Интерьер</span></li>
+    <li><span class="nav-link" data-page="accent"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" width="16" height="16"><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88ZM137,164.22a8,8,0,0,0-4.74,4.74L112,223.85,91.78,169A8,8,0,0,0,87,164.22L32.15,144,87,123.78A8,8,0,0,0,91.78,119L112,64.15,132.22,119a8,8,0,0,0,4.74,4.74L191.85,144ZM144,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H184V64a8,8,0,0,1-16,0V48H152A8,8,0,0,1,144,40ZM248,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,248,88Z"/></svg></span> Цоколь / Пояса / Рейка</span></li>
+    <li><span class="nav-link" data-page="catalog"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" width="16" height="16"><path d="M231.65,194.55,198.46,36.75a16,16,0,0,0-19-12.39L132.65,34.42a16.08,16.08,0,0,0-12.3,19l33.19,157.8A16,16,0,0,0,169.16,224a16.25,16.25,0,0,0,3.38-.36l46.81-10.06A16.09,16.09,0,0,0,231.65,194.55ZM136,50.15c0-.06,0-.09,0-.09l46.8-10,3.33,15.87L139.33,66Zm6.62,31.47,46.82-10.05,3.34,15.9L146,97.53Zm6.64,31.57,46.82-10.06,13.3,63.24-46.82,10.06ZM216,197.94l-46.8,10-3.33-15.87L212.67,182,216,197.85C216,197.91,216,197.94,216,197.94ZM104,32H56A16,16,0,0,0,40,48V208a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V48A16,16,0,0,0,104,32ZM56,48h48V64H56Zm0,32h48v96H56Zm48,128H56V192h48v16Z"/></svg></span> Каталог</span></li>
+    <li><span class="nav-link" data-page="history"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" width="16" height="16"><path d="M96,104a8,8,0,0,1,8-8h64a8,8,0,0,1,0,16H104A8,8,0,0,1,96,104Zm8,40h64a8,8,0,0,0,0-16H104a8,8,0,0,0,0,16Zm128,48a32,32,0,0,1-32,32H88a32,32,0,0,1-32-32V64a16,16,0,0,0-32,0c0,5.74,4.83,9.62,4.88,9.66h0A8,8,0,0,1,24,88a7.89,7.89,0,0,1-4.79-1.61h0C18.05,85.54,8,77.61,8,64A32,32,0,0,1,40,32H176a32,32,0,0,1,32,32V168h8a8,8,0,0,1,4.8,1.6C222,170.46,232,178.39,232,192ZM96.26,173.48A8.07,8.07,0,0,1,104,168h88V64a16,16,0,0,0-16-16H67.69A31.71,31.71,0,0,1,72,64V192a16,16,0,0,0,32,0c0-5.74-4.83-9.62-4.88-9.66A7.82,7.82,0,0,1,96.26,173.48ZM216,192a12.58,12.58,0,0,0-3.23-8h-94a26.92,26.92,0,0,1,1.21,8,31.82,31.82,0,0,1-4.29,16H200A16,16,0,0,0,216,192Z"/></svg></span> История</span></li>
+    <li id="adminNavItem" style="display:none;"><span class="nav-link" data-page="admin"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" width="16" height="16"><path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm88-29.84q.06-2.16,0-4.32l14.92-18.64a8,8,0,0,0,1.48-7.06,107.21,107.21,0,0,0-10.88-26.25,8,8,0,0,0-6-3.93l-23.72-2.64q-1.48-1.56-3-3L186,40.54a8,8,0,0,0-3.94-6,107.71,107.71,0,0,0-26.25-10.87,8,8,0,0,0-7.06,1.49L130.16,40Q128,40,125.84,40L107.2,25.11a8,8,0,0,0-7.06-1.48A107.6,107.6,0,0,0,73.89,34.51a8,8,0,0,0-3.93,6L67.32,64.27q-1.56,1.49-3,3L40.54,70a8,8,0,0,0-6,3.94,107.71,107.71,0,0,0-10.87,26.25,8,8,0,0,0,1.49,7.06L40,125.84Q40,128,40,130.16L25.11,148.8a8,8,0,0,0-1.48,7.06,107.21,107.21,0,0,0,10.88,26.25,8,8,0,0,0,6,3.93l23.72,2.64q1.49,1.56,3,3L70,215.46a8,8,0,0,0,3.94,6,107.71,107.71,0,0,0,26.25,10.87,8,8,0,0,0,7.06-1.49L125.84,216q2.16.06,4.32,0l18.64,14.92a8,8,0,0,0,7.06,1.48,107.21,107.21,0,0,0,26.25-10.88,8,8,0,0,0,3.93-6l2.64-23.72q1.56-1.48,3-3L215.46,186a8,8,0,0,0,6-3.94,107.71,107.71,0,0,0,10.87-26.25,8,8,0,0,0-1.49-7.06Zm-16.1-6.5a73.93,73.93,0,0,1,0,8.68,8,8,0,0,0,1.74,5.48l14.19,17.73a91.57,91.57,0,0,1-6.23,15L187,173.11a8,8,0,0,0-5.1,2.64,74.11,74.11,0,0,1-6.14,6.14,8,8,0,0,0-2.64,5.1l-2.51,22.58a91.32,91.32,0,0,1-15,6.23l-17.74-14.19a8,8,0,0,0-5-1.75h-.48a73.93,73.93,0,0,1-8.68,0,8,8,0,0,0-5.48,1.74L100.45,215.8a91.57,91.57,0,0,1-15-6.23L82.89,187a8,8,0,0,0-2.64-5.1,74.11,74.11,0,0,1-6.14-6.14,8,8,0,0,0-5.1-2.64L46.43,170.6a91.32,91.32,0,0,1-6.23-15l14.19-17.74a8,8,0,0,0,1.74-5.48,73.93,73.93,0,0,1,0-8.68,8,8,0,0,0-1.74-5.48L40.2,100.45a91.57,91.57,0,0,1,6.23-15L69,82.89a8,8,0,0,0,5.1-2.64,74.11,74.11,0,0,1,6.14-6.14A8,8,0,0,0,82.89,69L85.4,46.43a91.32,91.32,0,0,1,15-6.23l17.74,14.19a8,8,0,0,0,5.48,1.74,73.93,73.93,0,0,1,8.68,0,8,8,0,0,0,5.48-1.74L155.55,40.2a91.57,91.57,0,0,1,15,6.23L173.11,69a8,8,0,0,0,2.64,5.1,74.11,74.11,0,0,1,6.14,6.14,8,8,0,0,0,5.1,2.64l22.58,2.51a91.32,91.32,0,0,1,6.23,15l-14.19,17.74A8,8,0,0,0,199.87,123.66Z"/></svg></span> Администрирование</span></li>
   </ul>
 </nav>
 
@@ -636,7 +702,7 @@
 
   <!-- ====== VISUALIZER ====== -->
   <section class="page active" id="page-visualizer">
-    <h1 class="page-title">🎨 Фасад / Интерьер</h1>
+    <h1 class="page-title"><span class="ico ico-lg" style="color:var(--coral)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M200.77,53.89A103.27,103.27,0,0,0,128,24h-1.07A104,104,0,0,0,24,128c0,43,26.58,79.06,69.36,94.17A32,32,0,0,0,136,192a16,16,0,0,1,16-16h46.21a31.81,31.81,0,0,0,31.2-24.88,104.43,104.43,0,0,0,2.59-24A103.28,103.28,0,0,0,200.77,53.89Zm13,93.71A15.89,15.89,0,0,1,198.21,160H152a32,32,0,0,0-32,32,16,16,0,0,1-21.31,15.07C62.49,194.3,40,164,40,128a88,88,0,0,1,87.09-88h.9a88.35,88.35,0,0,1,88,87.25A88.86,88.86,0,0,1,213.81,147.6ZM140,76a12,12,0,1,1-12-12A12,12,0,0,1,140,76ZM96,100A12,12,0,1,1,84,88,12,12,0,0,1,96,100Zm0,56a12,12,0,1,1-12-12A12,12,0,0,1,96,156Zm88-56a12,12,0,1,1-12-12A12,12,0,0,1,184,100Z"/></svg></span> Фасад / Интерьер</h1>
     <div class="vis-layout">
 
       <!-- Left: inputs -->
@@ -644,7 +710,7 @@
         <div class="vis-step-title">1 · Фотография</div>
 
         <div class="upload-zone" id="dropzone">
-          <div class="upload-icon">📸</div>
+          <div class="upload-icon"><span class="ico ico-xl" style="color:var(--muted)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,56H180.28L166.65,35.56A8,8,0,0,0,160,32H96a8,8,0,0,0-6.65,3.56L75.71,56H48A24,24,0,0,0,24,80V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm8,136a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V80a8,8,0,0,1,8-8H80a8,8,0,0,0,6.66-3.56L100.28,48h55.43l13.63,20.44A8,8,0,0,0,176,72h32a8,8,0,0,1,8,8ZM128,88a44,44,0,1,0,44,44A44.05,44.05,0,0,0,128,88Zm0,72a28,28,0,1,1,28-28A28,28,0,0,1,128,160Z"/></svg></span></div>
           <div class="upload-text">Перетащите фото или нажмите</div>
           <div class="upload-hint">JPG / PNG, до 10 МБ</div>
           <input type="file" id="fileInput" accept="image/jpeg,image/jpg,image/png" style="display:none">
@@ -652,7 +718,7 @@
 
         <div class="photo-box" id="photoBox">
           <img class="photo-img" id="photoImg" src="" alt="" onclick="openLightbox(this.src)">
-          <button class="photo-remove" id="photoRemoveBtn">✕ Удалить</button>
+          <button class="photo-remove" id="photoRemoveBtn"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></span> Удалить</button>
         </div>
 
         <!-- Canvas drawing overlay (shown only when zone mode is on) -->
@@ -672,17 +738,17 @@
 
         <!-- Zone toggle -->
         <div style="display:none;align-items:center;gap:10px;margin-top:10px;" id="vizZoneToggleRow">
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.9rem;color:#5b6fa0;font-weight:600;">
-            <input type="checkbox" id="vizZoneToggle" style="width:16px;height:16px;cursor:pointer;">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.9rem;color:var(--ink-2);font-weight:500;">
+            <input type="checkbox" id="vizZoneToggle" style="width:16px;height:16px;cursor:pointer;accent-color:var(--coral);">
             Рисовать зону обработки
           </label>
-          <span style="font-size:.75rem;color:#9aadcc;">(закрасьте красным нужную область)</span>
+          <span style="font-size:.75rem;color:var(--muted);">(закрасьте нужную область)</span>
         </div>
 
         <div class="vis-divider"></div>
         <div class="vis-step-title">2 · Текстура</div>
 
-        <button class="pick-btn" id="openCatalogBtn">📚 Выбрать из каталога</button>
+        <button class="pick-btn" id="openCatalogBtn"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M231.65,194.55,198.46,36.75a16,16,0,0,0-19-12.39L132.65,34.42a16.08,16.08,0,0,0-12.3,19l33.19,157.8A16,16,0,0,0,169.16,224a16.25,16.25,0,0,0,3.38-.36l46.81-10.06A16.09,16.09,0,0,0,231.65,194.55ZM136,50.15c0-.06,0-.09,0-.09l46.8-10,3.33,15.87L139.33,66Zm6.62,31.47,46.82-10.05,3.34,15.9L146,97.53Zm6.64,31.57,46.82-10.06,13.3,63.24-46.82,10.06ZM216,197.94l-46.8,10-3.33-15.87L212.67,182,216,197.85C216,197.91,216,197.94,216,197.94ZM104,32H56A16,16,0,0,0,40,48V208a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V48A16,16,0,0,0,104,32ZM56,48h48V64H56Zm0,32h48v96H56Zm48,128H56V192h48v16Z"/></svg></span> Выбрать из каталога</button>
 
         <div class="selected-tex" id="selectedTexBox">
           <img class="tex-thumb" id="texThumb" src="" alt="">
@@ -696,8 +762,8 @@
         <div class="vis-divider"></div>
         <div class="vis-step-title">3 · Категория</div>
         <div class="cat-row">
-          <button class="cat-btn active" data-cat="facade">🏠 Фасад</button>
-          <button class="cat-btn" data-cat="interior">🛋 Интерьер</button>
+          <button class="cat-btn active" data-cat="facade"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M219.31,108.68l-80-80a16,16,0,0,0-22.62,0l-80,80A15.87,15.87,0,0,0,32,120v96a8,8,0,0,0,8,8h64a8,8,0,0,0,8-8V160h32v56a8,8,0,0,0,8,8h64a8,8,0,0,0,8-8V120A15.87,15.87,0,0,0,219.31,108.68ZM208,208H160V152a8,8,0,0,0-8-8H104a8,8,0,0,0-8,8v56H48V120l80-80,80,80Z"/></svg></span> Фасад</button>
+          <button class="cat-btn" data-cat="interior"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M240,106.17V72a16,16,0,0,0-16-16H32A16,16,0,0,0,16,72v34.17A16,16,0,0,0,8,120v48a16,16,0,0,0,16,16h8v16a8,8,0,0,0,16,0V184H208v16a8,8,0,0,0,16,0V184h8a16,16,0,0,0,16-16V120A16,16,0,0,0,240,106.17ZM224,104h-8a16,16,0,0,0-16,16v16H136V72h88ZM120,72v64H56V120a16,16,0,0,0-16-16H32V72Zm112,96H24V120H40v24a8,8,0,0,0,8,8H208a8,8,0,0,0,8-8V120h16Z"/></svg></span> Интерьер</button>
         </div>
 
         <div class="vis-divider"></div>
@@ -711,7 +777,7 @@
 
         <div class="result-box" id="resultBox">
           <div class="result-empty" id="resultEmpty">
-            <div class="result-empty-icon">🖼</div>
+            <div class="result-empty-icon"><span class="ico ico-xl"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM48,48H208v77.38l-24.69-24.7a16,16,0,0,0-22.62,0L53.37,208H48ZM208,208H76l96-96,36,36v60ZM96,120A24,24,0,1,0,72,96,24,24,0,0,0,96,120Zm0-32a8,8,0,1,1-8,8A8,8,0,0,1,96,88Z"/></svg></span></div>
             <div class="result-empty-text">Здесь появится визуализация</div>
           </div>
           <img class="result-img" id="resultImg" src="" alt="Результат" onclick="openLightbox(this.src)">
@@ -721,7 +787,7 @@
           </div>
         </div>
 
-        <button class="gen-btn" id="generateBtn">✨ Визуализировать</button>
+        <button class="gen-btn" id="generateBtn"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88ZM137,164.22a8,8,0,0,0-4.74,4.74L112,223.85,91.78,169A8,8,0,0,0,87,164.22L32.15,144,87,123.78A8,8,0,0,0,91.78,119L112,64.15,132.22,119a8,8,0,0,0,4.74,4.74L191.85,144ZM144,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H184V64a8,8,0,0,1-16,0V48H152A8,8,0,0,1,144,40ZM248,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,248,88Z"/></svg></span> Визуализировать</button>
         <div class="status-banner" id="statusBanner"></div>
       </div>
     </div>
@@ -729,7 +795,7 @@
 
   <!-- ====== CATALOG PAGE ====== -->
   <section class="page" id="page-catalog">
-    <h1 class="page-title">📚 Каталог текстур</h1>
+    <h1 class="page-title"><span class="ico ico-lg" style="color:var(--coral)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M231.65,194.55,198.46,36.75a16,16,0,0,0-19-12.39L132.65,34.42a16.08,16.08,0,0,0-12.3,19l33.19,157.8A16,16,0,0,0,169.16,224a16.25,16.25,0,0,0,3.38-.36l46.81-10.06A16.09,16.09,0,0,0,231.65,194.55ZM136,50.15c0-.06,0-.09,0-.09l46.8-10,3.33,15.87L139.33,66Zm6.62,31.47,46.82-10.05,3.34,15.9L146,97.53Zm6.64,31.57,46.82-10.06,13.3,63.24-46.82,10.06ZM216,197.94l-46.8,10-3.33-15.87L212.67,182,216,197.85C216,197.91,216,197.94,216,197.94ZM104,32H56A16,16,0,0,0,40,48V208a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V48A16,16,0,0,0,104,32ZM56,48h48V64H56Zm0,32h48v96H56Zm48,128H56V192h48v16Z"/></svg></span> Каталог текстур</h1>
     <div class="catalog-filters">
       <div class="filter-group">
         <label>Тип материала</label>
@@ -742,6 +808,7 @@
           <option value="rubble_stone">Рваный камень</option>
           <option value="flat_stone">Плоский камень</option>
           <option value="textured_stone">Фактурный камень</option>
+          <option value="solid">Сплошные</option>
         </select>
       </div>
       <div class="filter-group">
@@ -760,7 +827,7 @@
 
   <!-- ====== HISTORY ====== -->
   <section class="page" id="page-history">
-    <h1 class="page-title">📜 История генераций</h1>
+    <h1 class="page-title"><span class="ico ico-lg" style="color:var(--coral)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M96,104a8,8,0,0,1,8-8h64a8,8,0,0,1,0,16H104A8,8,0,0,1,96,104Zm8,40h64a8,8,0,0,0,0-16H104a8,8,0,0,0,0,16Zm128,48a32,32,0,0,1-32,32H88a32,32,0,0,1-32-32V64a16,16,0,0,0-32,0c0,5.74,4.83,9.62,4.88,9.66h0A8,8,0,0,1,24,88a7.89,7.89,0,0,1-4.79-1.61h0C18.05,85.54,8,77.61,8,64A32,32,0,0,1,40,32H176a32,32,0,0,1,32,32V168h8a8,8,0,0,1,4.8,1.6C222,170.46,232,178.39,232,192ZM96.26,173.48A8.07,8.07,0,0,1,104,168h88V64a16,16,0,0,0-16-16H67.69A31.71,31.71,0,0,1,72,64V192a16,16,0,0,0,32,0c0-5.74-4.83-9.62-4.88-9.66A7.82,7.82,0,0,1,96.26,173.48ZM216,192a12.58,12.58,0,0,0-3.23-8h-94a26.92,26.92,0,0,1,1.21,8,31.82,31.82,0,0,1-4.29,16H200A16,16,0,0,0,216,192Z"/></svg></span> История генераций</h1>
     <div class="table-wrap">
       <div id="historyTableWrap"></div>
       <div class="pagination" id="historyPagination"></div>
@@ -769,10 +836,10 @@
 
   <!-- ====== ADMIN ====== -->
   <section class="page" id="page-admin">
-    <h1 class="page-title">⚙️ Администрирование</h1>
+    <h1 class="page-title"><span class="ico ico-lg" style="color:var(--coral)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm88-29.84q.06-2.16,0-4.32l14.92-18.64a8,8,0,0,0,1.48-7.06,107.21,107.21,0,0,0-10.88-26.25,8,8,0,0,0-6-3.93l-23.72-2.64q-1.48-1.56-3-3L186,40.54a8,8,0,0,0-3.94-6,107.71,107.71,0,0,0-26.25-10.87,8,8,0,0,0-7.06,1.49L130.16,40Q128,40,125.84,40L107.2,25.11a8,8,0,0,0-7.06-1.48A107.6,107.6,0,0,0,73.89,34.51a8,8,0,0,0-3.93,6L67.32,64.27q-1.56,1.49-3,3L40.54,70a8,8,0,0,0-6,3.94,107.71,107.71,0,0,0-10.87,26.25,8,8,0,0,0,1.49,7.06L40,125.84Q40,128,40,130.16L25.11,148.8a8,8,0,0,0-1.48,7.06,107.21,107.21,0,0,0,10.88,26.25,8,8,0,0,0,6,3.93l23.72,2.64q1.49,1.56,3,3L70,215.46a8,8,0,0,0,3.94,6,107.71,107.71,0,0,0,26.25,10.87,8,8,0,0,0,7.06-1.49L125.84,216q2.16.06,4.32,0l18.64,14.92a8,8,0,0,0,7.06,1.48,107.21,107.21,0,0,0,26.25-10.88,8,8,0,0,0,3.93-6l2.64-23.72q1.56-1.48,3-3L215.46,186a8,8,0,0,0,6-3.94,107.71,107.71,0,0,0,10.87-26.25,8,8,0,0,0-1.49-7.06Zm-16.1-6.5a73.93,73.93,0,0,1,0,8.68,8,8,0,0,0,1.74,5.48l14.19,17.73a91.57,91.57,0,0,1-6.23,15L187,173.11a8,8,0,0,0-5.1,2.64,74.11,74.11,0,0,1-6.14,6.14,8,8,0,0,0-2.64,5.1l-2.51,22.58a91.32,91.32,0,0,1-15,6.23l-17.74-14.19a8,8,0,0,0-5-1.75h-.48a73.93,73.93,0,0,1-8.68,0,8,8,0,0,0-5.48,1.74L100.45,215.8a91.57,91.57,0,0,1-15-6.23L82.89,187a8,8,0,0,0-2.64-5.1,74.11,74.11,0,0,1-6.14-6.14,8,8,0,0,0-5.1-2.64L46.43,170.6a91.32,91.32,0,0,1-6.23-15l14.19-17.74a8,8,0,0,0,1.74-5.48,73.93,73.93,0,0,1,0-8.68,8,8,0,0,0-1.74-5.48L40.2,100.45a91.57,91.57,0,0,1,6.23-15L69,82.89a8,8,0,0,0,5.1-2.64,74.11,74.11,0,0,1,6.14-6.14A8,8,0,0,0,82.89,69L85.4,46.43a91.32,91.32,0,0,1,15-6.23l17.74,14.19a8,8,0,0,0,5.48,1.74,73.93,73.93,0,0,1,8.68,0,8,8,0,0,0,5.48-1.74L155.55,40.2a91.57,91.57,0,0,1,15,6.23L173.11,69a8,8,0,0,0,2.64,5.1,74.11,74.11,0,0,1,6.14,6.14,8,8,0,0,0,5.1,2.64l22.58,2.51a91.32,91.32,0,0,1,6.23,15l-14.19,17.74A8,8,0,0,0,199.87,123.66Z"/></svg></span> Администрирование</h1>
 
     <div class="admin-section">
-      <h3>👤 Пользователь</h3>
+      <h3><span class="ico" style="color:var(--coral)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg></span> Пользователь</h3>
       <div class="admin-form">
         <input type="text" id="newUsername" placeholder="Логин">
         <input type="password" id="newPassword" placeholder="Пароль">
@@ -786,7 +853,7 @@
     </div>
 
     <div class="admin-section">
-      <h3>🎨 Цвет затирки</h3>
+      <h3><span class="ico" style="color:var(--coral)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M200.77,53.89A103.27,103.27,0,0,0,128,24h-1.07A104,104,0,0,0,24,128c0,43,26.58,79.06,69.36,94.17A32,32,0,0,0,136,192a16,16,0,0,1,16-16h46.21a31.81,31.81,0,0,0,31.2-24.88,104.43,104.43,0,0,0,2.59-24A103.28,103.28,0,0,0,200.77,53.89Zm13,93.71A15.89,15.89,0,0,1,198.21,160H152a32,32,0,0,0-32,32,16,16,0,0,1-21.31,15.07C62.49,194.3,40,164,40,128a88,88,0,0,1,87.09-88h.9a88.35,88.35,0,0,1,88,87.25A88.86,88.86,0,0,1,213.81,147.6ZM140,76a12,12,0,1,1-12-12A12,12,0,0,1,140,76ZM96,100A12,12,0,1,1,84,88,12,12,0,0,1,96,100Zm0,56a12,12,0,1,1-12-12A12,12,0,0,1,96,156Zm88-56a12,12,0,1,1-12-12A12,12,0,0,1,184,100Z"/></svg></span> Цвет затирки</h3>
       <div class="admin-form">
         <input type="text" id="groutName" placeholder="Название">
         <input type="text" id="groutHex" placeholder="#FFFFFF">
@@ -796,7 +863,7 @@
     </div>
 
     <div class="admin-section">
-      <h3>🧱 Добавить текстуру</h3>
+      <h3><span class="ico" style="color:var(--coral)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224,48H32a8,8,0,0,0-8,8V200a8,8,0,0,0,8,8H224a8,8,0,0,0,8-8V56A8,8,0,0,0,224,48ZM88,144V112h80v32Zm-48,0V112H72v32Zm144-32h32v32H184Zm32-16H136V64h80ZM120,64V96H40V64ZM40,160h80v32H40Zm96,32V160h80v32Z"/></svg></span> Добавить текстуру</h3>
       <div class="admin-form">
         <input type="text" id="textureName" placeholder="Название">
         <select id="textureMaterialType">
@@ -809,12 +876,14 @@
           <option value="textured_stone">Фактурный камень</option>
           <option value="derbent_stone">Дербент (старый)</option>
           <option value="reika">Рейка</option>
+          <option value="solid">Сплошные</option>
         </select>
         <select id="textureSupplier">
           <option value="redstone">Redstone</option>
           <option value="redstone_premium">Redstone Premium</option>
           <option value="krasny_kamen">Красный Камень</option>
           <option value="reika">Рейка</option>
+          <option value="solid">Сплошные</option>
         </select>
         <input type="file" id="textureFile" accept="image/jpeg,image/jpg,image/png">
         <button id="addTextureBtn">Добавить</button>
@@ -822,7 +891,7 @@
     </div>
 
     <div class="admin-section">
-      <h3>📋 Список текстур</h3>
+      <h3><span class="ico" style="color:var(--coral)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M168,152a8,8,0,0,1-8,8H96a8,8,0,0,1,0-16h64A8,8,0,0,1,168,152Zm-8-40H96a8,8,0,0,0,0,16h64a8,8,0,0,0,0-16Zm56-64V216a16,16,0,0,1-16,16H56a16,16,0,0,1-16-16V48A16,16,0,0,1,56,32H92.26a47.92,47.92,0,0,1,71.48,0H200A16,16,0,0,1,216,48ZM96,64h64a32,32,0,0,0-64,0ZM200,48H173.25A47.93,47.93,0,0,1,176,64v8a8,8,0,0,1-8,8H88a8,8,0,0,1-8-8V64a47.93,47.93,0,0,1,2.75-16H56V216H200Z"/></svg></span> Список текстур</h3>
       <div class="gen-filter" style="margin-bottom:12px;">
         <input type="text" id="texFilterName" placeholder="Поиск по названию…" style="flex:2;">
         <select id="texFilterType">
@@ -836,6 +905,7 @@
           <option value="textured_stone">Фактурный камень</option>
           <option value="derbent_stone">Дербент (старый)</option>
           <option value="reika">Рейка</option>
+          <option value="solid">Сплошные</option>
         </select>
         <select id="texFilterSupplier">
           <option value="">Все поставщики</option>
@@ -843,13 +913,14 @@
           <option value="redstone_premium">Redstone Premium</option>
           <option value="krasny_kamen">Красный Камень</option>
           <option value="reika">Рейка</option>
+          <option value="solid">Сплошные</option>
         </select>
       </div>
       <div id="texturesList"></div>
     </div>
 
     <div class="admin-section">
-      <h3>📊 Генерация</h3>
+      <h3><span class="ico" style="color:var(--coral)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224,200h-8V40a8,8,0,0,0-8-8H152a8,8,0,0,0-8,8V80H96a8,8,0,0,0-8,8v40H48a8,8,0,0,0-8,8v64H32a8,8,0,0,0,0,16H224a8,8,0,0,0,0-16ZM160,48h40V200H160ZM104,96h40V200H104ZM56,144H88v56H56Z"/></svg></span> Генерация</h3>
       <div class="gen-filter">
         <select id="filterUserType">
           <option value="">Все типы</option>
@@ -858,22 +929,22 @@
         </select>
         <input type="text" id="filterUserId" placeholder="ID пользователя">
         <button id="applyFilterBtn">Применить</button>
-        <button id="deleteSelectedBtn" class="del-btn" style="display:none;margin-left:auto;" onclick="deleteSelectedGenerations()">🗑 Удалить выбранные</button>
+        <button id="deleteSelectedBtn" class="del-btn" style="display:none;margin-left:auto;" onclick="deleteSelectedGenerations()"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"/></svg></span> Удалить выбранные</button>
       </div>
       <div id="allGenerationsTable"></div>
       <div class="pagination" id="adminPagination"></div>
     </div>
 
     <div class="admin-section">
-      <h3>👤 Лиды <span class="leads-count" id="leadsCount"></span></h3>
-      <div id="leadsTable"><div style="padding:12px;color:#9aadcc;">Загрузка…</div></div>
+      <h3><span class="ico" style="color:var(--coral)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg></span> Лиды <span class="leads-count" id="leadsCount"></span></h3>
+      <div id="leadsTable"><div style="padding:12px;color:var(--muted);">Загрузка…</div></div>
       <div class="pagination" id="leadsPagination"></div>
     </div>
   </section>
 
   <!-- ====== ACCENT (Акценты) ====== -->
   <section class="page" id="page-accent">
-    <h1 class="page-title">✦ Цоколь / Пояса / Рейка</h1>
+    <h1 class="page-title"><span class="ico ico-lg" style="color:var(--coral)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88ZM137,164.22a8,8,0,0,0-4.74,4.74L112,223.85,91.78,169A8,8,0,0,0,87,164.22L32.15,144,87,123.78A8,8,0,0,0,91.78,119L112,64.15,132.22,119a8,8,0,0,0,4.74,4.74L191.85,144ZM144,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H184V64a8,8,0,0,1-16,0V48H152A8,8,0,0,1,144,40ZM248,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,248,88Z"/></svg></span> Цоколь / Пояса / Рейка</h1>
 
     <!-- Subtab nav -->
     <div style="display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap;">
@@ -891,7 +962,7 @@
           <div class="photo-uploader" id="plinthDrop">
             <input type="file" id="plinthFile" accept="image/*" style="display:none">
             <div class="photo-uploader-empty">
-              <button type="button" class="photo-add-btn" onclick="document.getElementById('plinthFile').click()">📷 Добавить фото</button>
+              <button type="button" class="photo-add-btn" onclick="document.getElementById('plinthFile').click()"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,56H180.28L166.65,35.56A8,8,0,0,0,160,32H96a8,8,0,0,0-6.65,3.56L75.71,56H48A24,24,0,0,0,24,80V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm8,136a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V80a8,8,0,0,1,8-8H80a8,8,0,0,0,6.66-3.56L100.28,48h55.43l13.63,20.44A8,8,0,0,0,176,72h32a8,8,0,0,1,8,8ZM128,88a44,44,0,1,0,44,44A44.05,44.05,0,0,0,128,88Zm0,72a28,28,0,1,1,28-28A28,28,0,0,1,128,160Z"/></svg></span> Добавить фото</button>
               <span class="photo-uploader-hint">или перетащите файл · JPG, PNG</span>
             </div>
             <div class="photo-uploader-filled" style="display:none;">
@@ -905,7 +976,7 @@
 
           <div id="plinthCanvasCard" style="display:none;">
             <div class="vis-divider"></div>
-            <div class="vis-step-title">Обозначьте зону <span style="color:#e53935">красным</span></div>
+            <div class="vis-step-title">Обозначьте зону <span style="color:var(--bad)">красным</span></div>
             <div class="brush-ctrl">
               <label>Кисть</label><input type="range" id="plinthBrush" min="4" max="60" value="14">
               <button onclick="plinthDrawer&&plinthDrawer.reset()">Очистить</button>
@@ -923,9 +994,10 @@
             <button class="mat-btn" onclick="setSubMat('plinth',this,'rubble_stone')">Рваный камень</button>
             <button class="mat-btn" onclick="setSubMat('plinth',this,'flat_stone')">Плоский камень</button>
             <button class="mat-btn" onclick="setSubMat('plinth',this,'textured_stone')">Фактурный камень</button>
+            <button class="mat-btn" onclick="setSubMat('plinth',this,'solid')">Сплошные</button>
           </div>
-          <div id="plinthSupplierChips" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;"><span style="color:#9aadcc;font-size:.82rem;">Выберите тип материала</span></div>
-          <div class="zone-tex-grid" id="plinthTexGrid"><div style="color:#9aadcc;font-size:.82rem;padding:8px;">Выберите поставщика</div></div>
+          <div id="plinthSupplierChips" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;"><span style="color:var(--muted);font-size:.82rem;">Выберите тип материала</span></div>
+          <div class="zone-tex-grid" id="plinthTexGrid"><div style="color:var(--muted);font-size:.82rem;padding:8px;">Выберите поставщика</div></div>
         </div>
 
         <!-- Right: result -->
@@ -933,11 +1005,11 @@
           <div class="vis-step-title">Результат</div>
           <div class="result-box" id="plinthResultBox">
             <div class="result-empty" id="plinthResultEmpty">
-              <div class="result-empty-icon">🖼</div>
+              <div class="result-empty-icon"><span class="ico ico-xl"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM48,48H208v77.38l-24.69-24.7a16,16,0,0,0-22.62,0L53.37,208H48ZM208,208H76l96-96,36,36v60ZM96,120A24,24,0,1,0,72,96,24,24,0,0,0,96,120Zm0-32a8,8,0,1,1-8,8A8,8,0,0,1,96,88Z"/></svg></span></div>
               <div class="result-empty-text">Здесь появится визуализация</div>
             </div>
           </div>
-          <button class="gen-btn" id="plinthGenBtn" onclick="generateSubAccent('plinth')">✨ Сгенерировать</button>
+          <button class="gen-btn" id="plinthGenBtn" onclick="generateSubAccent('plinth')"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88ZM137,164.22a8,8,0,0,0-4.74,4.74L112,223.85,91.78,169A8,8,0,0,0,87,164.22L32.15,144,87,123.78A8,8,0,0,0,91.78,119L112,64.15,132.22,119a8,8,0,0,0,4.74,4.74L191.85,144ZM144,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H184V64a8,8,0,0,1-16,0V48H152A8,8,0,0,1,144,40ZM248,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,248,88Z"/></svg></span> Сгенерировать</button>
           <div id="plinthResult" class="zone-result-panel"></div>
         </div>
       </div>
@@ -952,7 +1024,7 @@
           <div class="photo-uploader" id="reikaDrop">
             <input type="file" id="reikaFile" accept="image/*" style="display:none">
             <div class="photo-uploader-empty">
-              <button type="button" class="photo-add-btn" onclick="document.getElementById('reikaFile').click()">📷 Добавить фото</button>
+              <button type="button" class="photo-add-btn" onclick="document.getElementById('reikaFile').click()"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,56H180.28L166.65,35.56A8,8,0,0,0,160,32H96a8,8,0,0,0-6.65,3.56L75.71,56H48A24,24,0,0,0,24,80V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm8,136a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V80a8,8,0,0,1,8-8H80a8,8,0,0,0,6.66-3.56L100.28,48h55.43l13.63,20.44A8,8,0,0,0,176,72h32a8,8,0,0,1,8,8ZM128,88a44,44,0,1,0,44,44A44.05,44.05,0,0,0,128,88Zm0,72a28,28,0,1,1,28-28A28,28,0,0,1,128,160Z"/></svg></span> Добавить фото</button>
               <span class="photo-uploader-hint">или перетащите файл · JPG, PNG</span>
             </div>
             <div class="photo-uploader-filled" style="display:none;">
@@ -966,7 +1038,7 @@
 
           <div id="reikaCanvasCard" style="display:none;">
             <div class="vis-divider"></div>
-            <div class="vis-step-title">Обозначьте зону <span style="color:#e53935">красным</span></div>
+            <div class="vis-step-title">Обозначьте зону <span style="color:var(--bad)">красным</span></div>
             <div class="brush-ctrl">
               <label>Кисть</label><input type="range" id="reikaBrush" min="4" max="60" value="14">
               <button onclick="reikaDrawer&&reikaDrawer.reset()">Очистить</button>
@@ -977,14 +1049,14 @@
           <div class="vis-divider"></div>
           <div class="vis-step-title">2 · Ориентация</div>
           <div style="display:flex;gap:8px;margin-bottom:14px;" id="reikaOrientBtns">
-            <button class="mat-btn active" onclick="setReikaOrient('horizontal',this)">↔ Горизонтально</button>
-            <button class="mat-btn" onclick="setReikaOrient('vertical',this)">↕ Вертикально</button>
+            <button class="mat-btn active" onclick="setReikaOrient('horizontal',this)"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M237.66,133.66l-32,32a8,8,0,0,1-11.32-11.32L212.69,136H43.31l18.35,18.34a8,8,0,0,1-11.32,11.32l-32-32a8,8,0,0,1,0-11.32l32-32a8,8,0,0,1,11.32,11.32L43.31,120H212.69l-18.35-18.34a8,8,0,0,1,11.32-11.32l32,32A8,8,0,0,1,237.66,133.66Z"/></svg></span> Горизонтально</button>
+            <button class="mat-btn" onclick="setReikaOrient('vertical',this)"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M165.66,194.34a8,8,0,0,1,0,11.32l-32,32a8,8,0,0,1-11.32,0l-32-32a8,8,0,0,1,11.32-11.32L120,212.69V43.31L101.66,61.66A8,8,0,0,1,90.34,50.34l32-32a8,8,0,0,1,11.32,0l32,32a8,8,0,0,1-11.32,11.32L136,43.31V212.69l18.34-18.35A8,8,0,0,1,165.66,194.34Z"/></svg></span> Вертикально</button>
           </div>
 
           <div class="vis-divider"></div>
           <div class="vis-step-title">3 · Текстура</div>
-          <div id="reikaSupplierChips" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;"><span style="color:#9aadcc;font-size:.82rem;">Загрузка…</span></div>
-          <div class="zone-tex-grid" id="reikaTexGrid"><div style="color:#9aadcc;font-size:.82rem;padding:8px;">Выберите поставщика</div></div>
+          <div id="reikaSupplierChips" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;"><span style="color:var(--muted);font-size:.82rem;">Загрузка…</span></div>
+          <div class="zone-tex-grid" id="reikaTexGrid"><div style="color:var(--muted);font-size:.82rem;padding:8px;">Выберите поставщика</div></div>
         </div>
 
         <!-- Right: result -->
@@ -992,11 +1064,11 @@
           <div class="vis-step-title">Результат</div>
           <div class="result-box" id="reikaResultBox">
             <div class="result-empty" id="reikaResultEmpty">
-              <div class="result-empty-icon">🖼</div>
+              <div class="result-empty-icon"><span class="ico ico-xl"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM48,48H208v77.38l-24.69-24.7a16,16,0,0,0-22.62,0L53.37,208H48ZM208,208H76l96-96,36,36v60ZM96,120A24,24,0,1,0,72,96,24,24,0,0,0,96,120Zm0-32a8,8,0,1,1-8,8A8,8,0,0,1,96,88Z"/></svg></span></div>
               <div class="result-empty-text">Здесь появится визуализация</div>
             </div>
           </div>
-          <button class="gen-btn" id="reikaGenBtn" onclick="generateSubAccent('reika')">✨ Сгенерировать</button>
+          <button class="gen-btn" id="reikaGenBtn" onclick="generateSubAccent('reika')"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88ZM137,164.22a8,8,0,0,0-4.74,4.74L112,223.85,91.78,169A8,8,0,0,0,87,164.22L32.15,144,87,123.78A8,8,0,0,0,91.78,119L112,64.15,132.22,119a8,8,0,0,0,4.74,4.74L191.85,144ZM144,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H184V64a8,8,0,0,1-16,0V48H152A8,8,0,0,1,144,40ZM248,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,248,88Z"/></svg></span> Сгенерировать</button>
           <div id="reikaResult" class="zone-result-panel"></div>
         </div>
       </div>
@@ -1011,7 +1083,7 @@
           <div class="photo-uploader" id="beltDrop">
             <input type="file" id="beltFile" accept="image/*" style="display:none">
             <div class="photo-uploader-empty">
-              <button type="button" class="photo-add-btn" onclick="document.getElementById('beltFile').click()">📷 Добавить фото</button>
+              <button type="button" class="photo-add-btn" onclick="document.getElementById('beltFile').click()"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,56H180.28L166.65,35.56A8,8,0,0,0,160,32H96a8,8,0,0,0-6.65,3.56L75.71,56H48A24,24,0,0,0,24,80V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm8,136a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V80a8,8,0,0,1,8-8H80a8,8,0,0,0,6.66-3.56L100.28,48h55.43l13.63,20.44A8,8,0,0,0,176,72h32a8,8,0,0,1,8,8ZM128,88a44,44,0,1,0,44,44A44.05,44.05,0,0,0,128,88Zm0,72a28,28,0,1,1,28-28A28,28,0,0,1,128,160Z"/></svg></span> Добавить фото</button>
               <span class="photo-uploader-hint">или перетащите файл · JPG, PNG</span>
             </div>
             <div class="photo-uploader-filled" style="display:none;">
@@ -1025,7 +1097,7 @@
 
           <div id="beltCanvasCard" style="display:none;">
             <div class="vis-divider"></div>
-            <div class="vis-step-title">Обозначьте зону <span style="color:#e53935">красным</span></div>
+            <div class="vis-step-title">Обозначьте зону <span style="color:var(--bad)">красным</span></div>
             <div class="brush-ctrl">
               <label>Кисть</label><input type="range" id="beltBrush" min="4" max="60" value="14">
               <button onclick="beltDrawer&&beltDrawer.reset()">Очистить</button>
@@ -1034,7 +1106,7 @@
           </div>
 
           <div class="vis-divider"></div>
-          <div class="vis-step-title">2 · Текстура <span style="color:#9aadcc;font-weight:400;font-size:.82rem;">(опционально)</span></div>
+          <div class="vis-step-title">2 · Текстура <span style="color:var(--muted);font-weight:400;font-size:.82rem;">(опционально)</span></div>
           <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;" id="beltMatBtns">
             <button class="mat-btn active" onclick="setSubMat('belt',this,'standard')">Кирпич</button>
             <button class="mat-btn" onclick="setSubMat('belt',this,'rigel')">Ригель</button>
@@ -1043,17 +1115,23 @@
             <button class="mat-btn" onclick="setSubMat('belt',this,'rubble_stone')">Рваный камень</button>
             <button class="mat-btn" onclick="setSubMat('belt',this,'flat_stone')">Плоский камень</button>
             <button class="mat-btn" onclick="setSubMat('belt',this,'textured_stone')">Фактурный камень</button>
+            <button class="mat-btn" onclick="setSubMat('belt',this,'solid')">Сплошные</button>
           </div>
-          <div id="beltSupplierChips" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;"><span style="color:#9aadcc;font-size:.82rem;">Выберите тип материала</span></div>
-          <div class="zone-tex-grid" id="beltTexGrid"><div style="color:#9aadcc;font-size:.82rem;padding:8px;">Выберите поставщика</div></div>
-          <div id="beltSelectedTex" style="display:none;margin-top:10px;padding:10px;background:#f4f7fc;border-radius:10px;align-items:center;gap:10px;">
-            <span id="beltTexLabel" style="font-weight:600;font-size:.9rem;"></span>
-            <button style="margin-left:auto;background:none;border:none;color:#ff3b3b;cursor:pointer;font-weight:600;" onclick="clearSubTex('belt')">✕ Убрать текстуру</button>
+          <div id="beltSupplierChips" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;"><span style="color:var(--muted);font-size:.82rem;">Выберите тип материала</span></div>
+          <div class="zone-tex-grid" id="beltTexGrid"><div style="color:var(--muted);font-size:.82rem;padding:8px;">Выберите поставщика</div></div>
+          <div id="beltSelectedTex" style="display:none;margin-top:10px;padding:10px;background:var(--cream-soft);border-radius:10px;align-items:center;gap:10px;border:1px solid var(--line);">
+            <span id="beltTexLabel" style="font-weight:500;font-size:.9rem;color:var(--ink);"></span>
+            <button style="margin-left:auto;background:none;border:none;color:var(--coral);cursor:pointer;font-weight:500;display:inline-flex;align-items:center;gap:4px;" onclick="clearSubTex('belt')"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></span> Убрать текстуру</button>
           </div>
-          <div id="beltModeRow" style="display:flex;gap:8px;margin-top:10px;align-items:center;">
-            <span style="font-size:.82rem;color:#9aadcc;margin-right:4px;">Режим перекомпоновки:</span>
-            <button id="beltModeSoldier" class="mat-btn active" onclick="setBeltMode('soldier',this)">⬛ Солдатская</button>
-            <button id="beltModeChess"   class="mat-btn"        onclick="setBeltMode('chess',this)">♟ Шахматная</button>
+          <div id="beltModeRow" style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap;">
+            <span style="font-size:.82rem;color:var(--muted);margin-right:4px;">Режим перекомпоновки:</span>
+            <button id="beltModeSoldier" class="mat-btn active" onclick="setBeltMode('soldier',this)"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32Zm0,176H48V48H208V208Z"/></svg></span> Солдатская</button>
+            <button id="beltModeChess"   class="mat-btn"        onclick="setBeltMode('chess',this)"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M200,40H56A16,16,0,0,0,40,56V200a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V56A16,16,0,0,0,200,40Zm0,80H136V56h64ZM120,56v64H56V56ZM56,136h64v64H56Zm144,64H136V136h64v64Z"/></svg></span> Шахматная</button>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap;">
+            <span style="font-size:.82rem;color:var(--muted);margin-right:4px;">Карнизы:</span>
+            <button id="beltCorniceNo"  class="mat-btn active" onclick="setBeltCornice('no',this)">Нет</button>
+            <button id="beltCorniceYes" class="mat-btn"        onclick="setBeltCornice('yes',this)">Есть</button>
           </div>
         </div>
 
@@ -1062,11 +1140,11 @@
           <div class="vis-step-title">Результат</div>
           <div class="result-box" id="beltResultBox">
             <div class="result-empty" id="beltResultEmpty">
-              <div class="result-empty-icon">🖼</div>
+              <div class="result-empty-icon"><span class="ico ico-xl"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM48,48H208v77.38l-24.69-24.7a16,16,0,0,0-22.62,0L53.37,208H48ZM208,208H76l96-96,36,36v60ZM96,120A24,24,0,1,0,72,96,24,24,0,0,0,96,120Zm0-32a8,8,0,1,1-8,8A8,8,0,0,1,96,88Z"/></svg></span></div>
               <div class="result-empty-text">Здесь появится визуализация</div>
             </div>
           </div>
-          <button class="gen-btn" id="beltGenBtn" onclick="generateSubAccent('belt')">✨ Сгенерировать</button>
+          <button class="gen-btn" id="beltGenBtn" onclick="generateSubAccent('belt')"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88ZM137,164.22a8,8,0,0,0-4.74,4.74L112,223.85,91.78,169A8,8,0,0,0,87,164.22L32.15,144,87,123.78A8,8,0,0,0,91.78,119L112,64.15,132.22,119a8,8,0,0,0,4.74,4.74L191.85,144ZM144,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H184V64a8,8,0,0,1-16,0V48H152A8,8,0,0,1,144,40ZM248,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,248,88Z"/></svg></span> Сгенерировать</button>
           <div id="beltResult" class="zone-result-panel"></div>
         </div>
       </div>
@@ -1080,8 +1158,8 @@
 <div class="modal-backdrop" id="catalogModal">
   <div class="modal-box">
     <div class="modal-head">
-      <span class="modal-head-title">📚 Выберите текстуру</span>
-      <button class="modal-close" id="catalogModalClose">✕</button>
+      <span class="modal-head-title"><span class="ico" style="color:var(--coral)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M231.65,194.55,198.46,36.75a16,16,0,0,0-19-12.39L132.65,34.42a16.08,16.08,0,0,0-12.3,19l33.19,157.8A16,16,0,0,0,169.16,224a16.25,16.25,0,0,0,3.38-.36l46.81-10.06A16.09,16.09,0,0,0,231.65,194.55ZM136,50.15c0-.06,0-.09,0-.09l46.8-10,3.33,15.87L139.33,66Zm6.62,31.47,46.82-10.05,3.34,15.9L146,97.53Zm6.64,31.57,46.82-10.06,13.3,63.24-46.82,10.06ZM216,197.94l-46.8,10-3.33-15.87L212.67,182,216,197.85C216,197.91,216,197.94,216,197.94ZM104,32H56A16,16,0,0,0,40,48V208a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V48A16,16,0,0,0,104,32ZM56,48h48V64H56Zm0,32h48v96H56Zm48,128H56V192h48v16Z"/></svg></span> Выберите текстуру</span>
+      <button class="modal-close" id="catalogModalClose"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></span></button>
     </div>
     <div class="modal-body">
       <div class="modal-filters">
@@ -1095,6 +1173,7 @@
             <option value="rubble_stone">Рваный камень</option>
             <option value="flat_stone">Плоский камень</option>
             <option value="textured_stone">Фактурный камень</option>
+            <option value="solid">Сплошные</option>
           </select>
         </div>
         <div class="filter-group">
@@ -1118,6 +1197,43 @@
 </div>
 
 <script>
+// ============================================================
+//  PHOSPHOR ICONS
+// ============================================================
+const ICONS = {
+  list:               `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128ZM40,72H216a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16ZM216,184H40a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Z"/></svg>`,
+  x:                  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>`,
+  bell:               `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M221.8,175.94C216.25,166.38,208,139.33,208,104a80,80,0,1,0-160,0c0,35.34-8.26,62.38-13.81,71.94A16,16,0,0,0,48,200H88.81a40,40,0,0,0,78.38,0H208a16,16,0,0,0,13.8-24.06ZM128,216a24,24,0,0,1-22.62-16h45.24A24,24,0,0,1,128,216ZM48,184c7.7-13.24,16-43.92,16-80a64,64,0,1,1,128,0c0,36.05,8.28,66.73,16,80Z"/></svg>`,
+  palette:            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M200.77,53.89A103.27,103.27,0,0,0,128,24h-1.07A104,104,0,0,0,24,128c0,43,26.58,79.06,69.36,94.17A32,32,0,0,0,136,192a16,16,0,0,1,16-16h46.21a31.81,31.81,0,0,0,31.2-24.88,104.43,104.43,0,0,0,2.59-24A103.28,103.28,0,0,0,200.77,53.89Zm13,93.71A15.89,15.89,0,0,1,198.21,160H152a32,32,0,0,0-32,32,16,16,0,0,1-21.31,15.07C62.49,194.3,40,164,40,128a88,88,0,0,1,87.09-88h.9a88.35,88.35,0,0,1,88,87.25A88.86,88.86,0,0,1,213.81,147.6ZM140,76a12,12,0,1,1-12-12A12,12,0,0,1,140,76ZM96,100A12,12,0,1,1,84,88,12,12,0,0,1,96,100Zm0,56a12,12,0,1,1-12-12A12,12,0,0,1,96,156Zm88-56a12,12,0,1,1-12-12A12,12,0,0,1,184,100Z"/></svg>`,
+  sparkle:            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88ZM137,164.22a8,8,0,0,0-4.74,4.74L112,223.85,91.78,169A8,8,0,0,0,87,164.22L32.15,144,87,123.78A8,8,0,0,0,91.78,119L112,64.15,132.22,119a8,8,0,0,0,4.74,4.74L191.85,144ZM144,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H184V64a8,8,0,0,1-16,0V48H152A8,8,0,0,1,144,40ZM248,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,248,88Z"/></svg>`,
+  books:              `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M231.65,194.55,198.46,36.75a16,16,0,0,0-19-12.39L132.65,34.42a16.08,16.08,0,0,0-12.3,19l33.19,157.8A16,16,0,0,0,169.16,224a16.25,16.25,0,0,0,3.38-.36l46.81-10.06A16.09,16.09,0,0,0,231.65,194.55ZM136,50.15c0-.06,0-.09,0-.09l46.8-10,3.33,15.87L139.33,66Zm6.62,31.47,46.82-10.05,3.34,15.9L146,97.53Zm6.64,31.57,46.82-10.06,13.3,63.24-46.82,10.06ZM216,197.94l-46.8,10-3.33-15.87L212.67,182,216,197.85C216,197.91,216,197.94,216,197.94ZM104,32H56A16,16,0,0,0,40,48V208a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V48A16,16,0,0,0,104,32ZM56,48h48V64H56Zm0,32h48v96H56Zm48,128H56V192h48v16Z"/></svg>`,
+  scroll:             `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M96,104a8,8,0,0,1,8-8h64a8,8,0,0,1,0,16H104A8,8,0,0,1,96,104Zm8,40h64a8,8,0,0,0,0-16H104a8,8,0,0,0,0,16Zm128,48a32,32,0,0,1-32,32H88a32,32,0,0,1-32-32V64a16,16,0,0,0-32,0c0,5.74,4.83,9.62,4.88,9.66h0A8,8,0,0,1,24,88a7.89,7.89,0,0,1-4.79-1.61h0C18.05,85.54,8,77.61,8,64A32,32,0,0,1,40,32H176a32,32,0,0,1,32,32V168h8a8,8,0,0,1,4.8,1.6C222,170.46,232,178.39,232,192ZM96.26,173.48A8.07,8.07,0,0,1,104,168h88V64a16,16,0,0,0-16-16H67.69A31.71,31.71,0,0,1,72,64V192a16,16,0,0,0,32,0c0-5.74-4.83-9.62-4.88-9.66A7.82,7.82,0,0,1,96.26,173.48ZM216,192a12.58,12.58,0,0,0-3.23-8h-94a26.92,26.92,0,0,1,1.21,8,31.82,31.82,0,0,1-4.29,16H200A16,16,0,0,0,216,192Z"/></svg>`,
+  gear:               `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm88-29.84q.06-2.16,0-4.32l14.92-18.64a8,8,0,0,0,1.48-7.06,107.21,107.21,0,0,0-10.88-26.25,8,8,0,0,0-6-3.93l-23.72-2.64q-1.48-1.56-3-3L186,40.54a8,8,0,0,0-3.94-6,107.71,107.71,0,0,0-26.25-10.87,8,8,0,0,0-7.06,1.49L130.16,40Q128,40,125.84,40L107.2,25.11a8,8,0,0,0-7.06-1.48A107.6,107.6,0,0,0,73.89,34.51a8,8,0,0,0-3.93,6L67.32,64.27q-1.56,1.49-3,3L40.54,70a8,8,0,0,0-6,3.94,107.71,107.71,0,0,0-10.87,26.25,8,8,0,0,0,1.49,7.06L40,125.84Q40,128,40,130.16L25.11,148.8a8,8,0,0,0-1.48,7.06,107.21,107.21,0,0,0,10.88,26.25,8,8,0,0,0,6,3.93l23.72,2.64q1.49,1.56,3,3L70,215.46a8,8,0,0,0,3.94,6,107.71,107.71,0,0,0,26.25,10.87,8,8,0,0,0,7.06-1.49L125.84,216q2.16.06,4.32,0l18.64,14.92a8,8,0,0,0,7.06,1.48,107.21,107.21,0,0,0,26.25-10.88,8,8,0,0,0,3.93-6l2.64-23.72q1.56-1.48,3-3L215.46,186a8,8,0,0,0,6-3.94,107.71,107.71,0,0,0,10.87-26.25,8,8,0,0,0-1.49-7.06Zm-16.1-6.5a73.93,73.93,0,0,1,0,8.68,8,8,0,0,0,1.74,5.48l14.19,17.73a91.57,91.57,0,0,1-6.23,15L187,173.11a8,8,0,0,0-5.1,2.64,74.11,74.11,0,0,1-6.14,6.14,8,8,0,0,0-2.64,5.1l-2.51,22.58a91.32,91.32,0,0,1-15,6.23l-17.74-14.19a8,8,0,0,0-5-1.75h-.48a73.93,73.93,0,0,1-8.68,0,8,8,0,0,0-5.48,1.74L100.45,215.8a91.57,91.57,0,0,1-15-6.23L82.89,187a8,8,0,0,0-2.64-5.1,74.11,74.11,0,0,1-6.14-6.14,8,8,0,0,0-5.1-2.64L46.43,170.6a91.32,91.32,0,0,1-6.23-15l14.19-17.74a8,8,0,0,0,1.74-5.48,73.93,73.93,0,0,1,0-8.68,8,8,0,0,0-1.74-5.48L40.2,100.45a91.57,91.57,0,0,1,6.23-15L69,82.89a8,8,0,0,0,5.1-2.64,74.11,74.11,0,0,1,6.14-6.14A8,8,0,0,0,82.89,69L85.4,46.43a91.32,91.32,0,0,1,15-6.23l17.74,14.19a8,8,0,0,0,5.48,1.74,73.93,73.93,0,0,1,8.68,0,8,8,0,0,0,5.48-1.74L155.55,40.2a91.57,91.57,0,0,1,15,6.23L173.11,69a8,8,0,0,0,2.64,5.1,74.11,74.11,0,0,1,6.14,6.14,8,8,0,0,0,5.1,2.64l22.58,2.51a91.32,91.32,0,0,1,6.23,15l-14.19,17.74A8,8,0,0,0,199.87,123.66Z"/></svg>`,
+  camera:             `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,56H180.28L166.65,35.56A8,8,0,0,0,160,32H96a8,8,0,0,0-6.65,3.56L75.71,56H48A24,24,0,0,0,24,80V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm8,136a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V80a8,8,0,0,1,8-8H80a8,8,0,0,0,6.66-3.56L100.28,48h55.43l13.63,20.44A8,8,0,0,0,176,72h32a8,8,0,0,1,8,8ZM128,88a44,44,0,1,0,44,44A44.05,44.05,0,0,0,128,88Zm0,72a28,28,0,1,1,28-28A28,28,0,0,1,128,160Z"/></svg>`,
+  couch:              `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M240,106.17V72a16,16,0,0,0-16-16H32A16,16,0,0,0,16,72v34.17A16,16,0,0,0,8,120v48a16,16,0,0,0,16,16h8v16a8,8,0,0,0,16,0V184H208v16a8,8,0,0,0,16,0V184h8a16,16,0,0,0,16-16V120A16,16,0,0,0,240,106.17ZM224,104h-8a16,16,0,0,0-16,16v16H136V72h88ZM120,72v64H56V120a16,16,0,0,0-16-16H32V72Zm112,96H24V120H40v24a8,8,0,0,0,8,8H208a8,8,0,0,0,8-8V120h16Z"/></svg>`,
+  'image-square':     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM48,48H208v77.38l-24.69-24.7a16,16,0,0,0-22.62,0L53.37,208H48ZM208,208H76l96-96,36,36v60ZM96,120A24,24,0,1,0,72,96,24,24,0,0,0,96,120Zm0-32a8,8,0,1,1-8,8A8,8,0,0,1,96,88Z"/></svg>`,
+  house:              `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M219.31,108.68l-80-80a16,16,0,0,0-22.62,0l-80,80A15.87,15.87,0,0,0,32,120v96a8,8,0,0,0,8,8h64a8,8,0,0,0,8-8V160h32v56a8,8,0,0,0,8,8h64a8,8,0,0,0,8-8V120A15.87,15.87,0,0,0,219.31,108.68ZM208,208H160V152a8,8,0,0,0-8-8H104a8,8,0,0,0-8,8v56H48V120l80-80,80,80Z"/></svg>`,
+  user:               `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg>`,
+  warning:            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M236.8,188.09,149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM222.93,203.8a8.5,8.5,0,0,1-7.48,4.2H40.55a8.5,8.5,0,0,1-7.48-4.2,7.59,7.59,0,0,1,0-7.72L120.52,44.21a8.75,8.75,0,0,1,15,0l87.45,151.87A7.59,7.59,0,0,1,222.93,203.8ZM120,144V104a8,8,0,0,1,16,0v40a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,180Z"/></svg>`,
+  trash:              `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"/></svg>`,
+  wall:               `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224,48H32a8,8,0,0,0-8,8V200a8,8,0,0,0,8,8H224a8,8,0,0,0,8-8V56A8,8,0,0,0,224,48ZM88,144V112h80v32Zm-48,0V112H72v32Zm144-32h32v32H184Zm32-16H136V64h80ZM120,64V96H40V64ZM40,160h80v32H40Zm96,32V160h80v32Z"/></svg>`,
+  'chart-bar':        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224,200h-8V40a8,8,0,0,0-8-8H152a8,8,0,0,0-8,8V80H96a8,8,0,0,0-8,8v40H48a8,8,0,0,0-8,8v64H32a8,8,0,0,0,0,16H224a8,8,0,0,0,0-16ZM160,48h40V200H160ZM104,96h40V200H104ZM56,144H88v56H56Z"/></svg>`,
+  'clipboard-text':   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M168,152a8,8,0,0,1-8,8H96a8,8,0,0,1,0-16h64A8,8,0,0,1,168,152Zm-8-40H96a8,8,0,0,0,0,16h64a8,8,0,0,0,0-16Zm56-64V216a16,16,0,0,1-16,16H56a16,16,0,0,1-16-16V48A16,16,0,0,1,56,32H92.26a47.92,47.92,0,0,1,71.48,0H200A16,16,0,0,1,216,48ZM96,64h64a32,32,0,0,0-64,0ZM200,48H173.25A47.93,47.93,0,0,1,176,64v8a8,8,0,0,1-8,8H88a8,8,0,0,1-8-8V64a47.93,47.93,0,0,1,2.75-16H56V216H200Z"/></svg>`,
+  envelope:           `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224,48H32a8,8,0,0,0-8,8V192a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A8,8,0,0,0,224,48Zm-96,85.15L52.57,64H203.43ZM98.71,128,40,181.81V74.19Zm11.84,10.85,12,11.05a8,8,0,0,0,10.82,0l12-11.05,58,53.15H52.57ZM157.29,128,216,74.18V181.82Z"/></svg>`,
+  phone:              `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M222.37,158.46l-47.11-21.11-.13-.06a16,16,0,0,0-15.17,1.4,8.12,8.12,0,0,0-.75.56L134.87,160c-15.42-7.49-31.34-23.29-38.83-38.51l20.78-24.71c.2-.25.39-.5.57-.77a16,16,0,0,0,1.32-15.06l0-.12L97.54,33.64a16,16,0,0,0-16.62-9.52A56.26,56.26,0,0,0,32,80c0,79.4,64.6,144,144,144a56.26,56.26,0,0,0,55.88-48.92A16,16,0,0,0,222.37,158.46ZM176,208A128.14,128.14,0,0,1,48,80,40.2,40.2,0,0,1,82.87,40a.61.61,0,0,0,0,.12l21,47L83.2,111.86a6.13,6.13,0,0,0-.57.77,16,16,0,0,0-1,15.7c9.06,18.53,27.73,37.06,46.46,46.11a16,16,0,0,0,15.75-1.14,8.44,8.44,0,0,0,.74-.56L168.89,152l47,21.05h0s.08,0,.11,0A40.21,40.21,0,0,1,176,208Z"/></svg>`,
+  'arrows-horizontal':`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M237.66,133.66l-32,32a8,8,0,0,1-11.32-11.32L212.69,136H43.31l18.35,18.34a8,8,0,0,1-11.32,11.32l-32-32a8,8,0,0,1,0-11.32l32-32a8,8,0,0,1,11.32,11.32L43.31,120H212.69l-18.35-18.34a8,8,0,0,1,11.32-11.32l32,32A8,8,0,0,1,237.66,133.66Z"/></svg>`,
+  'arrows-vertical':  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M165.66,194.34a8,8,0,0,1,0,11.32l-32,32a8,8,0,0,1-11.32,0l-32-32a8,8,0,0,1,11.32-11.32L120,212.69V43.31L101.66,61.66A8,8,0,0,1,90.34,50.34l32-32a8,8,0,0,1,11.32,0l32,32a8,8,0,0,1-11.32,11.32L136,43.31V212.69l18.34-18.35A8,8,0,0,1,165.66,194.34Z"/></svg>`,
+  square:             `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32Zm0,176H48V48H208V208Z"/></svg>`,
+  'check-circle':     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg>`,
+  'x-circle':         `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M165.66,101.66,139.31,128l26.35,26.34a8,8,0,0,1-11.32,11.32L128,139.31l-26.34,26.35a8,8,0,0,1-11.32-11.32L116.69,128,90.34,101.66a8,8,0,0,1,11.32-11.32L128,116.69l26.34-26.35a8,8,0,0,1,11.32,11.32ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg>`,
+  hourglass:          `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M200,75.64V40a16,16,0,0,0-16-16H72A16,16,0,0,0,56,40V76a16.07,16.07,0,0,0,6.4,12.8L114.67,128,62.4,167.2A16.07,16.07,0,0,0,56,180v36a16,16,0,0,0,16,16H184a16,16,0,0,0,16-16V180.36a16.09,16.09,0,0,0-6.35-12.77L141.27,128l52.38-39.6A16.05,16.05,0,0,0,200,75.64ZM184,216H72V180l56-42,56,42.35Zm0-140.36L128,118,72,76V40H184Z"/></svg>`,
+  'sign-out':         `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M112,216a8,8,0,0,1-8,8H48a16,16,0,0,1-16-16V48A16,16,0,0,1,48,32h56a8,8,0,0,1,0,16H48V208h56A8,8,0,0,1,112,216Zm109.66-93.66-40-40a8,8,0,0,0-11.32,11.32L196.69,120H104a8,8,0,0,0,0,16h92.69l-26.35,26.34a8,8,0,0,0,11.32,11.32l40-40A8,8,0,0,0,221.66,122.34Z"/></svg>`,
+};
+function ico(name, cls = '') {
+  const svg = ICONS[name] || '';
+  return `<span class="ico${cls ? ' ' + cls : ''}">${svg}</span>`;
+}
+
 // ============================================================
 //  CONFIG
 // ============================================================
@@ -1369,7 +1485,7 @@ function renderModalGrid(list) {
     const q = document.getElementById('modalSearch').value.toLowerCase();
     const filtered = list.filter(t => t.name.toLowerCase().includes(q));
     const grid = document.getElementById('modalGrid');
-    if (!filtered.length) { grid.innerHTML = '<div style="padding:16px;color:#9aadcc;">Нет текстур</div>'; return; }
+    if (!filtered.length) { grid.innerHTML = '<div style="padding:16px;color:var(--muted);">Нет текстур</div>'; return; }
     grid.innerHTML = filtered.map((tex, i) => {
         const url = tex.url.startsWith('http') ? tex.url : `${API_BASE}${tex.url}`;
         const sel = selectedTexture?.name === tex.name
@@ -1435,7 +1551,7 @@ async function initCatalogPage() {
 
 async function loadCatTextures() {
     const grid = document.getElementById('catGrid');
-    grid.innerHTML = '<div style="padding:16px;color:#9aadcc;">Загрузка…</div>';
+    grid.innerHTML = '<div style="padding:16px;color:var(--muted);">Загрузка…</div>';
     try {
         let list;
         if (!catMatTypeVal && !catSupplierVal) {
@@ -1466,15 +1582,15 @@ async function loadCatTextures() {
         _catAllTextures = list;
         catTexList = list;
         renderCatGrid(list);
-    } catch(e) { console.error(e); document.getElementById('catGrid').innerHTML = '<div style="padding:16px;color:#e53935;">Ошибка загрузки</div>'; }
+    } catch(e) { console.error(e); document.getElementById('catGrid').innerHTML = '<div style="padding:16px;color:var(--bad);">Ошибка загрузки</div>'; }
 }
 
 function renderCatGrid(list) {
     const q = document.getElementById('catSearch').value.toLowerCase();
     const filtered = list.filter(t => t.name.toLowerCase().includes(q));
     const grid = document.getElementById('catGrid');
-    if (!filtered.length) { grid.innerHTML = '<div style="padding:16px;color:#9aadcc;">Нет текстур</div>'; return; }
-    const tMap = { standard: 'Кирпич', rigel: 'Ригель', riegel_mixed: 'Разноформат.', cobblestone: 'Круглый', rubble_stone: 'Рваный', flat_stone: 'Плоский', textured_stone: 'Фактурный', derbent_stone: 'Дербент', reika: 'Рейка' };
+    if (!filtered.length) { grid.innerHTML = '<div style="padding:16px;color:var(--muted);">Нет текстур</div>'; return; }
+    const tMap = { standard: 'Кирпич', rigel: 'Ригель', riegel_mixed: 'Разноформат.', cobblestone: 'Круглый', rubble_stone: 'Рваный', flat_stone: 'Плоский', textured_stone: 'Фактурный', derbent_stone: 'Дербент', reika: 'Рейка', solid: 'Сплошные' };
     grid.innerHTML = filtered.map((tex, i) => {
         const url = tex.url.startsWith('http') ? tex.url : `${API_BASE}${tex.url}`;
         const sel = selectedTexture?.name === tex.name
@@ -1513,7 +1629,9 @@ function setGenerating(on) {
     document.getElementById('genOverlay').classList.toggle('visible', on);
     const btn = document.getElementById('generateBtn');
     btn.disabled = on;
-    btn.textContent = on ? '⏳ Генерация…' : '✨ Визуализировать';
+    btn.innerHTML = on
+      ? `${ico('hourglass')} Генерация…`
+      : `${ico('sparkle')} Визуализировать`;
 }
 function showResult(url) {
     const img  = document.getElementById('resultImg');
@@ -1542,15 +1660,15 @@ function pollStatus(requestId) {
                 setGenerating(false);
                 const url = d.result_url.startsWith('http') ? d.result_url : `${API_BASE}${d.result_url}`;
                 showResult(url);
-                showStatus('success', '✅ Готово!');
+                showStatus('success', 'Готово!');
             } else if (d.status === 'error') {
                 clearInterval(pollingInterval);
                 setGenerating(false);
-                showStatus('error', '❌ Ошибка генерации');
+                showStatus('error', 'Ошибка генерации');
             } else if (attempts >= 90) {
                 clearInterval(pollingInterval);
                 setGenerating(false);
-                showStatus('error', '⏱ Превышено время ожидания');
+                showStatus('error', 'Превышено время ожидания');
             }
         } catch(e) { console.error(e); }
     }, 2000);
@@ -1569,7 +1687,7 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
             fileToSend = await vizDrawer.getBlob();
         } catch(e) {
             setGenerating(false);
-            showStatus('error', '❌ Не удалось экспортировать маску');
+            showStatus('error', 'Не удалось экспортировать маску');
             return;
         }
     }
@@ -1595,13 +1713,13 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
             setGenerating(false);
             const url = d.result_url.startsWith('http') ? d.result_url : `${API_BASE}${d.result_url}`;
             showResult(url);
-            showStatus('success', '✅ Готово!');
+            showStatus('success', 'Готово!');
         } else {
             throw new Error('Не получен request_id или result_url');
         }
     } catch(e) {
         setGenerating(false);
-        showStatus('error', `❌ ${e.message}`);
+        showStatus('error', e.message);
     }
 });
 
@@ -1617,12 +1735,12 @@ async function loadHistory(page = 1) {
         renderPagination(d.page, d.pages, 'history');
     } catch {
         document.getElementById('historyTableWrap').innerHTML =
-            '<div style="padding:20px;color:#ff3b3b;">Ошибка загрузки истории</div>';
+            '<div style="padding:20px;color:var(--coral);">Ошибка загрузки истории</div>';
     }
 }
 function renderHistory(items) {
     const wrap = document.getElementById('historyTableWrap');
-    if (!items.length) { wrap.innerHTML = '<div style="padding:20px;color:#9aadcc;">Нет записей</div>'; return; }
+    if (!items.length) { wrap.innerHTML = '<div style="padding:20px;color:var(--muted);">Нет записей</div>'; return; }
     wrap.innerHTML = `<table>
         <thead><tr>
           <th>ID</th><th>Дата</th><th>Материал</th><th>Поставщик</th>
@@ -1754,9 +1872,9 @@ function renderTexturesTable() {
     );
 
     const c = document.getElementById('texturesList');
-    if (!filtered.length) { c.innerHTML = '<div style="padding:12px;color:#9aadcc;">Нет текстур</div>'; return; }
+    if (!filtered.length) { c.innerHTML = '<div style="padding:12px;color:var(--muted);">Нет текстур</div>'; return; }
 
-    const tMap = { standard: 'Кирпич', rigel: 'Ригель', riegel_mixed: 'Разноформат.', cobblestone: 'Круглый', rubble_stone: 'Рваный', flat_stone: 'Плоский', textured_stone: 'Фактурный', derbent_stone: 'Дербент', reika: 'Рейка' };
+    const tMap = { standard: 'Кирпич', rigel: 'Ригель', riegel_mixed: 'Разноформат.', cobblestone: 'Круглый', rubble_stone: 'Рваный', flat_stone: 'Плоский', textured_stone: 'Фактурный', derbent_stone: 'Дербент', reika: 'Рейка', solid: 'Сплошные' };
     const sMap = { redstone: 'Redstone', redstone_premium: 'Redstone Premium', krasny_kamen: 'Красный Камень', reika: 'Рейка' };
 
     c.innerHTML = `<table>
@@ -1765,7 +1883,7 @@ function renderTexturesTable() {
             <td>${t.id}</td><td>${t.name}</td>
             <td>${tMap[t.material_type] || t.material_type}</td>
             <td>${sMap[t.supplier] || t.supplier}</td>
-            <td style="font-size:.78rem;color:#9aadcc;">${t.filename}</td>
+            <td style="font-size:.78rem;color:var(--muted);">${t.filename}</td>
             <td><button class="del-btn dt" data-id="${t.id}">Удалить</button></td>
         </tr>`).join('')}</tbody>
     </table>`;
@@ -1820,7 +1938,7 @@ async function loadAllGenerations(page = 1) {
 function renderAllGenerations(items) {
     const c = document.getElementById('allGenerationsTable');
     const delBtn = document.getElementById('deleteSelectedBtn');
-    if (!items.length) { c.innerHTML = '<div style="padding:16px;color:#9aadcc;">Нет генераций</div>'; delBtn.style.display='none'; return; }
+    if (!items.length) { c.innerHTML = '<div style="padding:16px;color:var(--muted);">Нет генераций</div>'; delBtn.style.display='none'; return; }
     delBtn.style.display = 'inline-flex';
     c.innerHTML = `<table>
         <thead><tr>
@@ -1852,7 +1970,7 @@ function toggleSelectAllGenerations(cb) {
 function updateDeleteBtn() {
     const selected = document.querySelectorAll('.gen-cb:checked').length;
     const btn = document.getElementById('deleteSelectedBtn');
-    if (btn) btn.textContent = selected ? `🗑 Удалить выбранные (${selected})` : '🗑 Удалить выбранные';
+    if (btn) btn.innerHTML = selected ? `${ico('trash')} Удалить выбранные (${selected})` : `${ico('trash')} Удалить выбранные`;
 }
 async function deleteSelectedGenerations() {
     const ids = [...document.querySelectorAll('.gen-cb:checked')].map(el => Number(el.dataset.id));
@@ -1936,7 +2054,7 @@ async function loadNotifications() {
         }
         list.innerHTML = d.notifications.map(n => `
             <div class="notif-item${n.is_read ? '' : ' unread'}" data-id="${n.id}" onclick="markNotifRead(${n.id},this)">
-              <span class="notif-icon">${n.type === 'lead' ? '👤' : '⚠️'}</span>
+              <span class="notif-icon">${n.type === 'lead' ? ico('user') : ico('warning')}</span>
               <div>
                 <div class="notif-msg">${n.message}</div>
                 <div class="notif-time">${new Date(n.created_at).toLocaleString('ru')}</div>
@@ -1969,14 +2087,14 @@ async function loadLeads(page = 1) {
         const d = await r.json();
         document.getElementById('leadsCount').textContent = `(${d.total})`;
         const c = document.getElementById('leadsTable');
-        if (!d.items.length) { c.innerHTML = '<div style="padding:16px;color:#9aadcc;">Лидов пока нет</div>'; return; }
+        if (!d.items.length) { c.innerHTML = '<div style="padding:16px;color:var(--muted);">Лидов пока нет</div>'; return; }
         c.innerHTML = `<table>
             <thead><tr><th>ID</th><th>Имя</th><th>Контакт</th><th>Тип</th><th>Дата</th></tr></thead>
             <tbody>${d.items.map(l => `<tr>
               <td>${l.id}</td>
               <td>${l.name}</td>
               <td>${l.contact}</td>
-              <td>${l.contact_type === 'email' ? '📧 Email' : '📱 Телефон'}</td>
+              <td>${l.contact_type === 'email' ? `${ico('envelope')} Email` : `${ico('phone')} Телефон`}</td>
               <td>${new Date(l.created_at).toLocaleString('ru')}</td>
             </tr>`).join('')}</tbody>
         </table>`;
@@ -2048,6 +2166,12 @@ function setBeltMode(mode, btn) {
     document.querySelectorAll('#beltModeRow .mat-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
 }
+let beltCornice = 'no';
+function setBeltCornice(val, btn) {
+    beltCornice = val;
+    document.querySelectorAll('#beltCorniceNo, #beltCorniceYes').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
 let reikaDrawer  = null, reikaTex  = null, reikaOrientation = 'horizontal';
 let beltDrawer   = null, beltTex   = null, beltMat = 'standard';
 let accentInited = false, currentAccentTab = 'plinth';
@@ -2104,7 +2228,7 @@ function setSubMat(prefix, btn, mat) {
     if (prefix === 'belt')   { beltMat = mat; clearSubTex('belt'); }
     document.querySelectorAll(`#${prefix}MatBtns .mat-btn`).forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    document.getElementById(`${prefix}TexGrid`).innerHTML = '<div style="color:#9aadcc;font-size:.82rem;padding:8px;">Выберите поставщика</div>';
+    document.getElementById(`${prefix}TexGrid`).innerHTML = '<div style="color:var(--muted);font-size:.82rem;padding:8px;">Выберите поставщика</div>';
     loadSubSupplierChips(prefix, mat);
 }
 
@@ -2118,11 +2242,11 @@ function setReikaOrient(orient, btn) {
 // Загрузка чипов поставщиков
 async function loadSubSupplierChips(prefix, mat) {
     const container = document.getElementById(`${prefix}SupplierChips`);
-    container.innerHTML = '<span style="color:#9aadcc;font-size:.82rem;">Загрузка…</span>';
+    container.innerHTML = '<span style="color:var(--muted);font-size:.82rem;">Загрузка…</span>';
     try {
         const r = await fetch(`${API_BASE}/api/internal/suppliers?material_type=${mat}`, { credentials: 'include', headers: H() });
         const list = await r.json();
-        if (!list.length) { container.innerHTML = '<span style="color:#9aadcc;font-size:.82rem;">Нет поставщиков</span>'; return; }
+        if (!list.length) { container.innerHTML = '<span style="color:var(--muted);font-size:.82rem;">Нет поставщиков</span>'; return; }
         container.innerHTML = list.map(s =>
             `<button class="supplier-chip" data-code="${s.code}" onclick="selectSubSupplier('${prefix}','${mat}','${s.code}',this)">${s.name}</button>`
         ).join('');
@@ -2136,24 +2260,24 @@ async function loadSubSupplierChips(prefix, mat) {
                 : container.querySelector('.supplier-chip');
             if (chip) selectSubSupplier(prefix, mat, defaultSup.code, chip);
         }
-    } catch(e) { container.innerHTML = '<span style="color:#e53935;font-size:.82rem;">Ошибка загрузки</span>'; }
+    } catch(e) { container.innerHTML = '<span style="color:var(--bad);font-size:.82rem;">Ошибка загрузки</span>'; }
 }
 
 async function selectSubSupplier(prefix, mat, code, el) {
     document.querySelectorAll(`#${prefix}SupplierChips .supplier-chip`).forEach(c => c.classList.remove('active'));
     el.classList.add('active');
     const grid = document.getElementById(`${prefix}TexGrid`);
-    grid.innerHTML = '<div style="color:#9aadcc;font-size:.82rem;padding:8px;">Загрузка…</div>';
+    grid.innerHTML = '<div style="color:var(--muted);font-size:.82rem;padding:8px;">Загрузка…</div>';
     try {
         const r = await fetch(`${API_BASE}/api/internal/textures?material_type=${mat}&supplier=${code}`, { credentials: 'include', headers: H() });
         const list = await r.json();
         renderSubTexGrid(prefix, list, mat, code);
-    } catch(e) { grid.innerHTML = '<div style="color:#e53935;font-size:.82rem;padding:8px;">Ошибка загрузки</div>'; }
+    } catch(e) { grid.innerHTML = '<div style="color:var(--bad);font-size:.82rem;padding:8px;">Ошибка загрузки</div>'; }
 }
 
 function renderSubTexGrid(prefix, list, mat, sup) {
     const grid = document.getElementById(`${prefix}TexGrid`);
-    if (!list.length) { grid.innerHTML = '<div style="color:#9aadcc;font-size:.82rem;padding:8px;">Нет текстур</div>'; return; }
+    if (!list.length) { grid.innerHTML = '<div style="color:var(--muted);font-size:.82rem;padding:8px;">Нет текстур</div>'; return; }
     grid.innerHTML = list.map(t => {
         const url = t.url.startsWith('http') ? t.url : `${API_BASE}${t.url}`;
         const safeN = t.name.replace(/'/g, "\\'");
@@ -2201,7 +2325,7 @@ async function generateSubAccent(type) {
     fd.append('annotated_photo', blob, `${type}.jpg`);
     fd.append('accent_type', type);
     if (type === 'reika') fd.append('orientation', reikaOrientation);
-    if (type === 'belt') fd.append('belt_mode', beltMode);
+    if (type === 'belt') { fd.append('belt_mode', beltMode); fd.append('cornice', beltCornice); }
     if (tex) {
         fd.append('texture',       tex.name);
         fd.append('material_type', tex.material_type);
@@ -2212,15 +2336,15 @@ async function generateSubAccent(type) {
     const resultBox = document.getElementById(`${type}ResultBox`);
     const resultEmpty = document.getElementById(`${type}ResultEmpty`);
     if (resultEmpty) resultEmpty.style.display = 'none';
-    if (resultBox) resultBox.innerHTML = '<div style="padding:40px;text-align:center;color:#9aadcc;"><div class="spinner"></div><div style="margin-top:12px;">ИИ генерирует изображение…</div></div>';
+    if (resultBox) resultBox.innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted);"><div class="spinner"></div><div style="margin-top:12px;">ИИ генерирует изображение…</div></div>';
     const resultDiv = document.getElementById(`${type}Result`);
     resultDiv.className = 'zone-result-panel';
     try {
         const r = await fetch(`${API_BASE}/api/internal/accent/generate`, { method: 'POST', credentials: 'include', headers: H(), body: fd });
         const d = await r.json();
         if (d.request_id) pollZoneResult(d.request_id, `${type}Result`);
-        else resultDiv.innerHTML = `<div style="padding:16px;color:#e53935;">Ошибка: ${d.detail || 'неизвестная'}</div>`;
-    } catch(e) { resultDiv.innerHTML = `<div style="padding:16px;color:#e53935;">${e}</div>`; }
+        else resultDiv.innerHTML = `<div style="padding:16px;color:var(--bad);">Ошибка: ${d.detail || 'неизвестная'}</div>`;
+    } catch(e) { resultDiv.innerHTML = `<div style="padding:16px;color:var(--bad);">${e}</div>`; }
 }
 
 function pollZoneResult(requestId, divId) {
@@ -2231,7 +2355,7 @@ function pollZoneResult(requestId, divId) {
     const timer = setInterval(async () => {
         if (++attempts > 90) {
             clearInterval(timer);
-            if (resultBox) resultBox.innerHTML = '<div style="padding:24px;text-align:center;color:#e53935;">Таймаут генерации — попробуйте ещё раз</div>';
+            if (resultBox) resultBox.innerHTML = '<div style="padding:24px;text-align:center;color:var(--bad);">Таймаут генерации — попробуйте ещё раз</div>';
             return;
         }
         try {
@@ -2246,7 +2370,7 @@ function pollZoneResult(requestId, divId) {
                 }
             } else if (resp.status === 'error') {
                 clearInterval(timer);
-                if (resultBox) resultBox.innerHTML = '<div style="padding:24px;text-align:center;color:#e53935;font-size:.9rem;">Ошибка генерации. Попробуйте ещё раз.</div>';
+                if (resultBox) resultBox.innerHTML = '<div style="padding:24px;text-align:center;color:var(--bad);font-size:.9rem;">Ошибка генерации. Попробуйте ещё раз.</div>';
             }
         } catch {}
     }, 2000);

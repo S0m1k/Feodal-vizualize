@@ -411,7 +411,7 @@ async def get_suppliers(material_type: str, current_user = Depends(get_current_m
         rows = await cursor.fetchall()
     finally:
         await db.close()
-    name_map = {"redstone": "Redstone", "redstone_premium": "Redstone Premium", "krasny_kamen": "Красный Камень", "reika": "Рейка"}
+    name_map = {"redstone": "Redstone", "redstone_premium": "Redstone Premium", "krasny_kamen": "Красный Камень", "reika": "Рейка", "solid": "Сплошные"}
     return [{"code": row["supplier"], "name": name_map.get(row["supplier"], row["supplier"])} for row in rows]
 
 @router.get("/textures")
@@ -439,9 +439,9 @@ async def add_texture(
     file: UploadFile = File(...),
     current_admin = Depends(get_current_admin),
 ):
-    if material_type not in ("standard", "rigel", "riegel_mixed", "cobblestone", "rubble_stone", "derbent_stone", "flat_stone", "textured_stone", "reika"):
+    if material_type not in ("standard", "rigel", "riegel_mixed", "cobblestone", "rubble_stone", "derbent_stone", "flat_stone", "textured_stone", "reika", "solid"):
         raise HTTPException(status_code=400, detail="Invalid material_type")
-    if supplier not in ("redstone", "redstone_premium", "krasny_kamen", "reika"):
+    if supplier not in ("redstone", "redstone_premium", "krasny_kamen", "reika", "solid"):
         raise HTTPException(status_code=400, detail="Invalid supplier")
     if not (file.content_type or "").startswith("image/"):
         raise HTTPException(status_code=400, detail="Ожидается изображение")
@@ -622,6 +622,7 @@ async def accent_generate(
     accent_type: str = Form("plinth"),        # plinth | reika | belt
     orientation: str = Form("horizontal"),    # для reika: horizontal | vertical
     belt_mode: str = Form("soldier"),         # для belt без текстуры: soldier | chess
+    cornice: str = Form("no"),                # для belt: yes | no — наличие карниза
     texture: str = Form(None),               # опционально для belt
     material_type: str = Form(None),
     supplier: str = Form(None),
@@ -678,7 +679,7 @@ async def accent_generate(
             raise HTTPException(status_code=400, detail="Для Рейки необходимо выбрать текстуру")
         prompt = build_reika_prompt(orientation)
     else:  # belt
-        prompt = build_belt_prompt(has_texture, material_type, belt_mode)
+        prompt = build_belt_prompt(has_texture, material_type, belt_mode, cornice)
 
     redis_client.setex(f"gen_status:{request_id}", 3600, "processing")
     asyncio.create_task(_run_zone_generation(
