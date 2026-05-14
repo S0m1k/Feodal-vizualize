@@ -3,6 +3,9 @@
 .env.local
 *.pem
 
+# Claude working context
+CLAUDE.md
+
 # Python
 .venv/
 venv/

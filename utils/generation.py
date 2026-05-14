@@ -100,6 +100,15 @@ def build_prompt(category: str, material_type: str,
                   f"JOINTS: Very thin, sharp, and uniform recessed mortar lines. The grid must be clean and regular. "
                   f"SHADOWS: Subtle occlusion only at the thin joint lines to define the small block boundaries. "
                   f"VISUAL OUTPUT: Render ONLY the house with the applied texture. Do NOT display the source texture sample or any UI elements on the final image.")
+    elif material_type == "solid":
+        prompt = (f"{base} {zone_instr}Replace {target} with the provided solid surface texture. "
+                  f"CONTINUOUS SURFACE (CRITICAL): Render as a single uninterrupted plane — "
+                  f"NO joints, NO mortar lines, NO seams, NO grout, NO transitions, NO blocks, NO bricks. "
+                  f"The colour and micro-texture of the source sample must wrap the wall as ONE continuous coat. "
+                  f"SUBTLE NATURAL VARIATION: Allow gentle, organic colour and tonal variation as in the source — "
+                  f"but never introduce repeating tiles or grid patterns. "
+                  f"FINISH: Match the matte/glossy character of the source sample exactly. "
+                  f"FORBIDDEN: any kind of joint line, panel edge, or visible repetition.")
     elif material_type == "standard":
         prompt = (f"{base} {zone_instr}Replace {target} with the provided brick texture. "
                   f"Apply as high-density brickwork. Bricks must be small and frequent, "
@@ -142,10 +151,23 @@ def _derbent_zone_detail() -> str:
     )
 
 
+def _solid_zone_detail() -> str:
+    """Детальное описание сплошной (бесшовной) текстуры — для зональных промтов."""
+    return (
+        "Fill the red zone with the provided texture as a CONTINUOUS, SEAMLESS surface. "
+        "Strictly NO joints, NO seams, NO mortar lines, NO blocks, NO bricks, NO panel edges, NO repetition. "
+        "Treat the source as a single uninterrupted coat that wraps the entire zone. "
+        "Allow only gentle, organic colour/tonal variation; never produce a tiled or grid look. "
+        "Match the matte/glossy character of the sample exactly. "
+    )
+
+
 def build_plinth_prompt(material_type: str = None) -> str:
     """Промт для подвкладки Цоколь."""
     if material_type == "derbent_stone":
         fill = _derbent_zone_detail()
+    elif material_type == "solid":
+        fill = _solid_zone_detail()
     else:
         fill = (
             "Replace the texture STRICTLY within the red zone with the provided texture. "
@@ -185,11 +207,12 @@ def build_reika_prompt(orientation: str = "horizontal") -> str:
 
 
 def build_belt_prompt(has_texture: bool = True, material_type: str = None,
-                      belt_mode: str = "soldier") -> str:
+                      belt_mode: str = "soldier", cornice: str = "no") -> str:
     """Промт для подвкладки Пояса.
     Сценарий А (has_texture=True): заменить зону на выбранную текстуру.
     Сценарий Б (has_texture=False, belt_mode='soldier'): солдатский ряд.
     Сценарий В (has_texture=False, belt_mode='chess'): шахматная вертикальная кладка.
+    cornice: 'yes' — добавить выступающий карниз сверху, 'no' — без карниза (заподлицо).
     """
     base_constraint = (
         "STRICT ARCHITECTURAL PRESERVATION: Frozen geometry outside the mask. "
@@ -201,9 +224,20 @@ def build_belt_prompt(has_texture: bool = True, material_type: str = None,
         "ZERO-BLEED: Ensure the pattern is mathematically clipped by the red zone. "
     )
 
+    cornice_instr = (
+        "CORNICE: Add a clearly visible decorative cornice along the top edge of the belt — "
+        "a horizontal protruding moulding/ledge (3-6 cm depth) casting a soft drop-shadow on the wall below. "
+        "The cornice profile must be straight, continuous, and match the architectural style of the facade. "
+        if cornice == "yes" else
+        "NO CORNICE: The top edge of the belt must be perfectly flush with the wall plane. "
+        "Strictly no protruding moulding, no ledge, no cap, no overhang at the top boundary. "
+    )
+
     if has_texture:
         if material_type in ("textured_stone", "derbent_stone"):
             fill = _derbent_zone_detail()
+        elif material_type == "solid":
+            fill = _solid_zone_detail()
         else:
             fill = (
                 "Replace the texture STRICTLY within the red zone with the provided material. "
@@ -215,6 +249,7 @@ def build_belt_prompt(has_texture: bool = True, material_type: str = None,
             base_constraint +
             "The red-highlighted horizontal zone is a decorative belt. " +
             fill +
+            cornice_instr +
             "8k, photorealistic."
         )
     elif belt_mode == "chess":
@@ -224,7 +259,8 @@ def build_belt_prompt(has_texture: bool = True, material_type: str = None,
             "NO NARROWING: Maintain the full brick proportions. The bricks must look like the wall bricks just turned 90 degrees. "
             "STAGGER: Offset adjacent columns by exactly half a brick height. "
             "MASK CLIPPING: Strictly clip the pattern at the red line edges. No expansion beyond the belt. "
-            "MATERIAL MATCH: Use the EXACT same color, tone, and material as the surrounding wall. "
+            "MATERIAL MATCH: Use the EXACT same color, tone, and material as the surrounding wall. " +
+            cornice_instr +
             "Hyper-realistic architectural rendering, 8k, photorealistic lighting."
         )
     else:
@@ -235,7 +271,8 @@ def build_belt_prompt(has_texture: bool = True, material_type: str = None,
             "CROP, DON'T SCALE: If the belt is 20cm high and the brick is 30cm, show a 20cm 'cut' brick. "
             "Do NOT compress the 30cm brick into 20cm. "
             "ZERO DEPTH: Stay perfectly flush with the wall plane. No recession, no 'sunken' effect. "
-            "MATERIAL MATCH: Use the EXACT same color, tone, and material as the surrounding wall. "
+            "MATERIAL MATCH: Use the EXACT same color, tone, and material as the surrounding wall. " +
+            cornice_instr +
             "Hyper-realistic architectural rendering, 8k, photorealistic lighting."
         )
 
