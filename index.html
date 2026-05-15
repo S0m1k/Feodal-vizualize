@@ -844,17 +844,26 @@ function applyTexture(tex) {
 // ── Catalog modal ──
 async function loadCatSuppliers() {
   const supSel = $('catSup');
-  supSel.innerHTML = '<option>Загрузка…</option>';
+  supSel.innerHTML = '<option disabled>Загрузка…</option>';
+  $('catGrid').innerHTML = '<div class="cat-msg">Загрузка…</div>';
   try {
     const r = await fetch(`${API_BASE}/api/client/suppliers?material_type=${catMat}`);
-    if (!r.ok) throw new Error();
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const sups = await r.json();
+    if (!sups.length) {
+      supSel.innerHTML = '<option disabled>Нет поставщиков</option>';
+      $('catGrid').innerHTML = '<div class="cat-msg">Нет текстур для данного типа материала</div>';
+      catSup = null;
+      return;
+    }
     supSel.innerHTML = sups.map(s => `<option value="${s.code}">${s.name}</option>`).join('');
-    catSup = sups[0]?.code || null;
-    if (catSup) loadCatTextures();
-  } catch {
-    supSel.innerHTML = '<option>Ошибка</option>';
-    $('catGrid').innerHTML = '<div class="cat-msg">Ошибка загрузки</div>';
+    catSup = sups[0].code;
+    supSel.value = catSup;
+    await loadCatTextures();
+  } catch(e) {
+    console.error('loadCatSuppliers:', e);
+    supSel.innerHTML = '<option disabled>Ошибка</option>';
+    $('catGrid').innerHTML = '<div class="cat-msg">Не удалось загрузить поставщиков. Обновите страницу.</div>';
   }
 }
 
@@ -863,21 +872,24 @@ async function loadCatTextures() {
   $('catGrid').innerHTML = '<div class="cat-msg">Загрузка…</div>';
   try {
     const r = await fetch(`${API_BASE}/api/client/textures?material_type=${catMat}&supplier=${catSup}`);
-    if (!r.ok) throw new Error();
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
     catTextures = await r.json();
-    renderCatGrid();
-  } catch {
-    $('catGrid').innerHTML = '<div class="cat-msg">Ошибка загрузки</div>';
+  } catch(e) {
+    console.error('loadCatTextures:', e);
+    $('catGrid').innerHTML = '<div class="cat-msg">Не удалось загрузить текстуры. Обновите страницу.</div>';
+    return;
   }
+  renderCatGrid();
 }
 
 function renderCatGrid() {
-  const q = $('catSearch').value.toLowerCase();
-  const list = catTextures.filter(t => t.name.toLowerCase().includes(q));
+  const q = ($('catSearch')?.value || '').toLowerCase();
+  const list = catTextures.filter(t => (t.name || '').toLowerCase().includes(q));
   const grid = $('catGrid');
   if (!list.length) { grid.innerHTML = '<div class="cat-msg">Нет текстур</div>'; return; }
   grid.innerHTML = list.map((tex, i) => {
-    const url = tex.url.startsWith('http') ? tex.url : `${API_BASE}${tex.url}`;
+    const rawUrl = tex.url || '';
+    const url = rawUrl.startsWith('http') ? rawUrl : `${API_BASE}${rawUrl}`;
     const isSel = selectedTex?.name === tex.name
                && selectedTex?.material_type === catMat
                && selectedTex?.supplier === catSup;
