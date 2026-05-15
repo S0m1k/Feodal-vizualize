@@ -63,12 +63,16 @@ def build_prompt(category: str, material_type: str,
 
     if material_type == "rubble_stone":
         prompt = (f"{base} {zone_instr}Replace {target} with the provided texture. "
-                  f"FORMAT: Wild rubble / irregular angular fieldstone. "
-                  f"CRITICAL SCALE & DENSITY: The new stonework must consist of a high-density mosaic of small-to-medium stones (hand-sized relative to windows). "
-                  f"Avoid oversized boulders or large stone slabs. Stones must be tightly packed with minimal visible gaps, creating a fine-grained architectural texture. "
-                  f"TEXTURE & RELIEF: Each stone must have sharp, jagged edges and a matte, rugged surface. Maintain a natural, three-dimensional relief where individual stones protrude slightly. "
-                  f"Strictly avoid smooth or glossy 'plastic-like' finishes. "
-                  f"JOINTS: Incorporate deep, dark, recessed mortar joints to create realistic ambient occlusion and shadow depth between the small stones.")
+                  f"FORMAT: Irregular rubble / angular fieldstone masonry. "
+                  f"EDGES (CRITICAL — most important rule): Every single stone MUST have razor-sharp, abrupt, angular edges. "
+                  f"Stone boundaries are hard, decisive lines — NOT rounded, NOT soft, NOT blurred. "
+                  f"Each stone face meets its neighbour at a crisp, clearly defined break with no transitional blending. "
+                  f"Reject any rounded, smoothed, or river-worn look — this is freshly split, rough-fractured stone. "
+                  f"SCALE & DENSITY: High-density mosaic of small-to-medium irregularly shaped stones (hand-sized relative to windows). "
+                  f"Avoid large slabs or boulders. Stones are tightly packed. "
+                  f"SURFACE TEXTURE: Matte, coarse, split-face mineral surface with visible grain. Strictly no smooth or glossy finishes. "
+                  f"RELIEF: Each stone protrudes slightly in 3D — sharp facets catch light along the top edge, cast hard shadow along the bottom. "
+                  f"JOINTS: Deep, dark, recessed mortar lines with sharp-edged borders — strong ambient occlusion between stones.")
     elif material_type == "cobblestone":
         prompt = (f"{base} {zone_instr}"
                   f"TASK: Replace {target} with raw, natural weathered cobblestone. "
