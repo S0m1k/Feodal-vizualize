@@ -22,6 +22,9 @@ _EXTRA_TYPES: dict[str, str] = {
     "textured_stone": "flat_stone",
 }
 
+# Типы текстур, скрытые от клиентского виджета (доступны только во внутреннем визуализаторе)
+_CLIENT_BLOCKED_TYPES: set[str] = {"reika", "solid"}
+
 redis_client = Redis(
     host='localhost', port=6379, decode_responses=True,
     password=os.getenv("REDIS_PASSWORD") or None,
@@ -60,6 +63,8 @@ def increment_count(client_ip: str) -> int:
 
 @router.get("/suppliers")
 async def get_suppliers(material_type: str):
+    if material_type in _CLIENT_BLOCKED_TYPES:
+        raise HTTPException(status_code=404, detail="Material type not available")
     types = list({material_type, _EXTRA_TYPES.get(material_type, material_type)})
     placeholders = ",".join("?" * len(types))
     db = await get_db()
@@ -71,10 +76,15 @@ async def get_suppliers(material_type: str):
     finally:
         await db.close()
     name_map = {"redstone": "Redstone", "redstone_premium": "Redstone Premium", "krasny_kamen": "Красный Камень"}
-    return [{"code": row["supplier"], "name": name_map.get(row["supplier"], row["supplier"])} for row in rows]
+    sort_order = {"krasny_kamen": 0, "redstone": 1, "redstone_premium": 2}
+    suppliers = [{"code": row["supplier"], "name": name_map.get(row["supplier"], row["supplier"])} for row in rows]
+    suppliers.sort(key=lambda s: sort_order.get(s["code"], 99))
+    return suppliers
 
 @router.get("/textures")
 async def get_textures(material_type: str, supplier: str):
+    if material_type in _CLIENT_BLOCKED_TYPES:
+        raise HTTPException(status_code=404, detail="Material type not available")
     types = list({material_type, _EXTRA_TYPES.get(material_type, material_type)})
     placeholders = ",".join("?" * len(types))
     db = await get_db()
@@ -207,6 +217,8 @@ async def client_generate(
         "client_generate start ip=%s material_type=%s supplier=%s texture=%s category=%s grout=%s",
         client_ip, material_type, supplier, texture, category, grout_color_name,
     )
+    if material_type in _CLIENT_BLOCKED_TYPES:
+        raise HTTPException(status_code=404, detail="Material type not available")
     if not can_generate(client_ip):
         return JSONResponse(status_code=429, content={"error": "Лимит исчерпан"})
 

@@ -412,7 +412,11 @@ async def get_suppliers(material_type: str, current_user = Depends(get_current_m
     finally:
         await db.close()
     name_map = {"redstone": "Redstone", "redstone_premium": "Redstone Premium", "krasny_kamen": "Красный Камень", "reika": "Рейка", "solid": "Сплошные"}
-    return [{"code": row["supplier"], "name": name_map.get(row["supplier"], row["supplier"])} for row in rows]
+    # Для ригеля порядок: Красный камень → Redstone → Redstone Premium
+    sort_order = {"krasny_kamen": 0, "redstone": 1, "redstone_premium": 2}
+    suppliers = [{"code": row["supplier"], "name": name_map.get(row["supplier"], row["supplier"])} for row in rows]
+    suppliers.sort(key=lambda s: sort_order.get(s["code"], 99))
+    return suppliers
 
 @router.get("/textures")
 async def get_internal_textures(

@@ -6,127 +6,187 @@
   ================================================================
 -->
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
+
 <style>
 /* ============================================================
    Все классы с префиксом .rsv- — не конфликтуют со стилями Tilda
+   Дизайн-система: warm editorial (cream + calm brick red)
    ============================================================ */
 
 .rsv-wrap {
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  font-size: 15px; color: #1e2a3b;
+  --rsv-cream:        #faf9f5;
+  --rsv-card:         #ffffff;
+  --rsv-cream-soft:   #f3efe6;
+  --rsv-line:         #e8e2d3;
+  --rsv-line-strong:  #d6cfbd;
+  --rsv-ink:          #1a1815;
+  --rsv-ink-2:        #3d3833;
+  --rsv-muted:        #8a8275;
+  --rsv-coral:        #b54639;
+  --rsv-coral-soft:   #f5e6e3;
+  --rsv-coral-hover:  #9c382c;
+  --rsv-coral-deep:   #7d2c23;
+  --rsv-good:         #4f8a55;
+  --rsv-bad:          #b8443a;
+  --rsv-serif:        'Lora', 'Source Serif 4', Georgia, serif;
+  --rsv-sans:         'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  font-family: var(--rsv-sans);
+  font-size: 15px; color: var(--rsv-ink);
   max-width: 1100px; margin: 0 auto; padding: 16px;
   box-sizing: border-box;
+  background: var(--rsv-cream);
 }
 .rsv-wrap *, .rsv-wrap *::before, .rsv-wrap *::after { box-sizing: border-box; }
+.rsv-wrap .ico {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 1em; height: 1em; vertical-align: -.15em;
+}
+.rsv-wrap .ico svg { width: 100%; height: 100%; }
+.rsv-wrap .ico-lg { width: 1.3em; height: 1.3em; }
+.rsv-wrap .ico-xl { width: 2.4em; height: 2.4em; }
 
 /* ── Card ── */
 .rsv-card {
-  background: #fff;
-  border-radius: 28px;
-  box-shadow: 0 4px 32px rgba(0,0,0,.09);
+  background: var(--rsv-card);
+  border-radius: 20px;
+  box-shadow: 0 4px 24px rgba(26,24,21,.08);
   overflow: hidden;
   display: grid;
   grid-template-columns: 340px 1fr;
   min-height: 520px;
+  border: 1px solid var(--rsv-line);
 }
 
 /* ── Left panel ── */
 .rsv-left {
-  padding: 28px 24px;
-  border-right: 1px solid #eef2f9;
+  padding: 26px 22px;
+  border-right: 1px solid var(--rsv-line);
   display: flex; flex-direction: column; gap: 0;
   overflow-y: auto;
 }
 .rsv-section { margin-bottom: 20px; }
 .rsv-section:last-child { margin-bottom: 0; }
 .rsv-label {
-  font-size: .72rem; font-weight: 700; color: #8899bb;
-  text-transform: uppercase; letter-spacing: .07em;
+  font-size: .72rem; font-weight: 600; color: var(--rsv-muted);
+  text-transform: uppercase; letter-spacing: .08em;
   margin-bottom: 10px;
+  display: inline-flex; align-items: center; gap: 6px;
 }
+.rsv-label .ico { color: var(--rsv-coral); }
 
 /* ── Upload zone ── */
 .rsv-dropzone {
-  border: 2px dashed #c8d4e8; border-radius: 16px;
-  background: #fafcff; padding: 20px 16px;
-  text-align: center; cursor: pointer; transition: all .2s;
+  border: 1.5px dashed var(--rsv-line-strong); border-radius: 14px;
+  background: var(--rsv-cream); padding: 22px 16px;
+  text-align: center; cursor: pointer; transition: all .18s;
   user-select: none;
 }
-.rsv-dropzone:hover, .rsv-dropzone.drag { border-color: #ff4e1f; background: #fff8f6; }
-.rsv-dropzone-icon { font-size: 2rem; margin-bottom: 6px; }
-.rsv-dropzone-text { font-weight: 600; color: #3d4f66; font-size: .9rem; margin-bottom: 2px; }
-.rsv-dropzone-hint { font-size: .78rem; color: #9aadcc; }
+.rsv-dropzone:hover, .rsv-dropzone.drag {
+  border-color: var(--rsv-coral); background: var(--rsv-coral-soft);
+}
+.rsv-dropzone-icon {
+  display: inline-flex; color: var(--rsv-muted); margin-bottom: 8px;
+}
+.rsv-dropzone:hover .rsv-dropzone-icon,
+.rsv-dropzone.drag .rsv-dropzone-icon { color: var(--rsv-coral); }
+.rsv-dropzone-text { font-weight: 500; color: var(--rsv-ink-2); font-size: .92rem; margin-bottom: 3px; }
+.rsv-dropzone-hint { font-size: .78rem; color: var(--rsv-muted); }
 .rsv-dropzone input[type=file] { display: none; }
 
 /* ── Photo thumbnail ── */
-.rsv-photo-box { display: none; position: relative; border-radius: 14px; overflow: hidden; }
+.rsv-photo-box { display: none; position: relative; border-radius: 12px; overflow: hidden; }
 .rsv-photo-box.visible { display: block; }
 .rsv-photo-mini {
   width: 100%; max-height: 130px; object-fit: cover;
-  border-radius: 14px; cursor: zoom-in; display: block;
+  border-radius: 12px; cursor: zoom-in; display: block;
 }
 .rsv-photo-remove {
   position: absolute; top: 7px; right: 7px;
-  background: rgba(0,0,0,.6); border: none; border-radius: 20px;
-  color: #fff; padding: 4px 10px; cursor: pointer; font-size: .78rem;
+  background: rgba(26,24,21,.65); border: none; border-radius: 999px;
+  color: #fff; padding: 5px 11px; cursor: pointer; font-size: .78rem;
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: var(--rsv-sans); font-weight: 500;
 }
+.rsv-photo-remove:hover { background: var(--rsv-coral); }
 
 /* ── Texture ── */
 .rsv-tex-empty {
-  font-size: .85rem; color: #9aadcc; font-style: italic; margin-bottom: 8px;
+  font-size: .85rem; color: var(--rsv-muted); font-style: italic; margin-bottom: 10px;
 }
 .rsv-tex-selected {
   display: none; align-items: center; gap: 10px;
-  padding: 10px 12px; background: #f5f7fc; border-radius: 12px;
-  margin-bottom: 8px;
+  padding: 10px 12px; background: var(--rsv-cream-soft); border-radius: 12px;
+  margin-bottom: 10px; border: 1px solid var(--rsv-line);
 }
 .rsv-tex-selected.visible { display: flex; }
 .rsv-tex-thumb {
   width: 46px; height: 46px; border-radius: 9px;
-  object-fit: cover; border: 1.5px solid #dde6f3; flex-shrink: 0;
+  object-fit: cover; border: 1.5px solid var(--rsv-line-strong); flex-shrink: 0;
 }
 .rsv-tex-info { flex: 1; min-width: 0; }
-.rsv-tex-type { font-size: .7rem; color: #9aadcc; }
-.rsv-tex-name { font-weight: 700; font-size: .88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rsv-tex-type { font-size: .7rem; color: var(--rsv-muted); }
+.rsv-tex-name { font-weight: 600; font-size: .88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--rsv-ink); }
 .rsv-btn-outline {
   width: 100%; padding: 10px 16px;
-  border: 2px solid #ff4e1f; background: #fff; color: #ff4e1f;
-  border-radius: 40px; font-weight: 700; font-size: .88rem;
+  border: 1.5px solid var(--rsv-coral); background: var(--rsv-card); color: var(--rsv-coral);
+  border-radius: 999px; font-weight: 600; font-size: .9rem;
   cursor: pointer; transition: all .15s;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: var(--rsv-sans);
 }
-.rsv-btn-outline:hover { background: #ff4e1f; color: #fff; }
+.rsv-btn-outline:hover { background: var(--rsv-coral); color: #fff; }
 
 /* ── Grout ── */
 .rsv-grout-section { display: none; }
 .rsv-grout-section.visible { display: block; }
 .rsv-grout-row { display: flex; gap: 8px; flex-wrap: wrap; }
 .rsv-swatch {
-  width: 38px; height: 38px; border-radius: 10px;
-  cursor: pointer; border: 2.5px solid transparent;
-  box-shadow: 0 1px 4px rgba(0,0,0,.13); transition: all .15s;
+  width: 36px; height: 36px; border-radius: 9px;
+  cursor: pointer; border: 2px solid transparent;
+  box-shadow: 0 1px 3px rgba(26,24,21,.12); transition: all .15s;
   flex-shrink: 0;
 }
-.rsv-swatch:hover { transform: scale(1.1); }
-.rsv-swatch.sel { border-color: #ff4e1f; transform: scale(1.12); box-shadow: 0 0 0 3px rgba(255,78,31,.18); }
+.rsv-swatch:hover { transform: scale(1.08); }
+.rsv-swatch.sel {
+  border-color: var(--rsv-coral); transform: scale(1.1);
+  box-shadow: 0 0 0 3px var(--rsv-coral-soft);
+}
 
 /* ── Generate button & status ── */
 .rsv-gen-btn {
   width: 100%; padding: 14px;
-  background: #c8d5e8; color: #fff; border: none;
-  border-radius: 50px; font-weight: 700; font-size: 1rem;
-  cursor: not-allowed; transition: all .2s; margin-top: auto;
+  background: var(--rsv-cream-soft); color: var(--rsv-muted);
+  border: 1px solid var(--rsv-line);
+  border-radius: 999px; font-weight: 500; font-size: 1rem;
+  cursor: not-allowed; transition: all .18s; margin-top: auto;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: var(--rsv-sans);
 }
 .rsv-gen-btn.ready {
-  background: linear-gradient(135deg, #ff4e1f, #ff7b1f);
-  cursor: pointer; box-shadow: 0 4px 18px rgba(255,78,31,.3);
+  background: var(--rsv-coral); color: #fff; border-color: var(--rsv-coral);
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(181,70,57,.25);
 }
-.rsv-gen-btn.ready:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(255,78,31,.4); }
-.rsv-remaining { font-size: .75rem; color: #9aadcc; text-align: center; margin-top: 7px; }
-.rsv-remaining.warn { color: #ff4e1f; font-weight: 700; }
+.rsv-gen-btn.ready:hover {
+  background: var(--rsv-coral-hover); border-color: var(--rsv-coral-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(181,70,57,.32);
+}
+.rsv-remaining {
+  font-size: .76rem; color: var(--rsv-muted);
+  text-align: center; margin-top: 8px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  width: 100%;
+}
+.rsv-remaining.warn { color: var(--rsv-bad); font-weight: 600; }
 
 /* ── Right panel ── */
 .rsv-right {
-  position: relative; background: #f4f7fc;
+  position: relative; background: var(--rsv-cream-soft);
   display: flex; align-items: center; justify-content: center;
   min-height: 400px;
 }
@@ -135,103 +195,142 @@
   display: flex; align-items: center; justify-content: center;
   position: relative;
 }
-.rsv-empty-state { text-align: center; color: #b0bed4; user-select: none; }
-.rsv-empty-icon { font-size: 3.5rem; margin-bottom: 12px; }
-.rsv-empty-text { font-size: .95rem; }
+.rsv-empty-state {
+  text-align: center; color: var(--rsv-muted); user-select: none;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+.rsv-empty-icon { color: var(--rsv-line-strong); }
+.rsv-empty-text { font-size: .95rem; font-family: var(--rsv-serif); }
 .rsv-preview-img {
   max-width: 100%; max-height: 100%;
   width: 100%; height: 100%;
   object-fit: contain; cursor: zoom-in;
-  display: none; border-radius: 0 28px 28px 0;
+  display: none;
 }
 .rsv-preview-img.visible { display: block; }
 
 /* Generating overlay */
 .rsv-gen-overlay {
   display: none; position: absolute; inset: 0;
-  background: rgba(244,247,252,.88);
+  background: rgba(250,249,245,.96);
   align-items: center; justify-content: center;
-  flex-direction: column; gap: 14px;
-  border-radius: 0 28px 28px 0;
+  flex-direction: column; gap: 16px;
+  padding: 30px;
 }
 .rsv-gen-overlay.visible { display: flex; }
-.rsv-spinner {
-  width: 44px; height: 44px;
-  border: 3px solid #dde6f3;
-  border-top-color: #ff4e1f;
-  border-radius: 50%;
-  animation: rsv-spin .8s linear infinite;
+.rsv-gen-timer {
+  font-family: var(--rsv-serif);
+  font-size: 2.4rem; font-weight: 600;
+  color: var(--rsv-coral);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .04em;
+  line-height: 1;
 }
-@keyframes rsv-spin { to { transform: rotate(360deg); } }
-.rsv-gen-label { font-weight: 600; color: #3d4f66; font-size: .9rem; }
+.rsv-gen-label {
+  font-weight: 500; color: var(--rsv-ink-2); font-size: .98rem;
+  min-height: 1.4em;
+  text-align: center;
+  transition: opacity .25s ease;
+  max-width: 320px;
+}
+.rsv-gen-progress {
+  width: min(300px, 75%); height: 6px;
+  background: var(--rsv-line);
+  border-radius: 999px; overflow: hidden;
+  position: relative;
+}
+.rsv-gen-progress-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--rsv-coral), var(--rsv-coral-hover));
+  border-radius: 999px;
+  transition: width .6s ease;
+  position: relative;
+  overflow: hidden;
+}
+.rsv-gen-progress-fill::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.4), transparent);
+  animation: rsv-shimmer 1.6s linear infinite;
+}
+@keyframes rsv-shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+.rsv-gen-hint {
+  font-size: .78rem; color: var(--rsv-muted);
+  font-style: italic;
+}
 
 /* ── Status banner ── */
 .rsv-status {
   display: none; padding: 9px 18px;
-  border-radius: 40px; font-weight: 600; font-size: .87rem;
+  border-radius: 999px; font-weight: 500; font-size: .87rem;
   text-align: center; margin-top: 10px;
 }
-.rsv-status.ok  { display: block; background: #10b981; color: #fff; }
-.rsv-status.err { display: block; background: #ff4e1f; color: #fff; }
+.rsv-status.ok  { display: block; background: var(--rsv-good); color: #fff; }
+.rsv-status.err { display: block; background: var(--rsv-bad);  color: #fff; }
 
 /* ── Toast ── */
 .rsv-toast {
   display: none; position: fixed;
   top: 20px; right: 20px; z-index: 9999;
-  background: #1e2a3b; color: #fff;
+  background: var(--rsv-ink); color: #fff;
   padding: 12px 20px; border-radius: 14px;
-  font-size: .88rem; font-weight: 600;
-  box-shadow: 0 4px 20px rgba(0,0,0,.2);
+  font-size: .88rem; font-weight: 500;
+  box-shadow: 0 10px 30px rgba(26,24,21,.25);
   max-width: 320px; line-height: 1.5;
   animation: rsv-toastin .25s ease;
+  font-family: var(--rsv-sans);
 }
 .rsv-toast.show { display: block; }
-.rsv-toast.warn { background: #ff4e1f; }
+.rsv-toast.warn { background: var(--rsv-bad); }
 @keyframes rsv-toastin { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:none; } }
 
 /* ── Catalog Modal ── */
 .rsv-modal-bg {
   display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,.52); z-index: 8000;
+  background: rgba(26,24,21,.55); z-index: 8000;
   align-items: center; justify-content: center;
 }
 .rsv-modal-bg.open { display: flex; }
 .rsv-modal {
-  background: #fff; border-radius: 26px;
+  background: var(--rsv-card); border-radius: 20px;
   width: 92vw; max-width: 820px; max-height: 88vh;
   display: flex; flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0,0,0,.22);
+  box-shadow: 0 20px 60px rgba(26,24,21,.25);
   animation: rsv-modalin .2s ease;
 }
-@keyframes rsv-modalin { from { opacity:0; transform:scale(.95); } to { opacity:1; transform:scale(1); } }
+@keyframes rsv-modalin { from { opacity:0; transform:scale(.97); } to { opacity:1; transform:scale(1); } }
 .rsv-modal-head {
-  padding: 18px 22px; border-bottom: 1px solid #eaf0f8;
+  padding: 18px 22px; border-bottom: 1px solid var(--rsv-line);
   display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
 }
-.rsv-modal-title { font-size: 1.1rem; font-weight: 700; }
-.rsv-modal-close {
-  background: #f4f7fc; border: none; width: 34px; height: 34px;
-  border-radius: 50%; font-size: 1.1rem; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  color: #5b6a80; transition: all .15s;
+.rsv-modal-title {
+  font-family: var(--rsv-serif); font-size: 1.15rem; font-weight: 600; color: var(--rsv-ink);
+  display: inline-flex; align-items: center; gap: 8px;
 }
-.rsv-modal-close:hover { background: #ffe8e0; color: #ff4e1f; }
+.rsv-modal-title .ico { color: var(--rsv-coral); }
+.rsv-modal-close {
+  background: var(--rsv-cream-soft); border: none; width: 34px; height: 34px;
+  border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--rsv-ink-2); transition: all .15s;
+}
+.rsv-modal-close:hover { background: var(--rsv-coral-soft); color: var(--rsv-coral); }
 .rsv-modal-filters {
-  padding: 16px 22px 0; display: flex; gap: 12px;
-  flex-wrap: wrap; flex-shrink: 0; border-bottom: 1px solid #eaf0f8; padding-bottom: 16px;
+  padding: 16px 22px; display: flex; gap: 12px;
+  flex-wrap: wrap; flex-shrink: 0; border-bottom: 1px solid var(--rsv-line);
 }
 .rsv-modal-body { padding: 18px 22px; overflow-y: auto; flex: 1; }
 .rsv-filter-group { flex: 1; min-width: 140px; }
 .rsv-filter-label {
-  display: block; font-size: .72rem; font-weight: 700;
-  color: #8899bb; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 5px;
+  display: block; font-size: .72rem; font-weight: 600;
+  color: var(--rsv-muted); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 5px;
 }
 .rsv-select, .rsv-input {
-  width: 100%; padding: 8px 13px; border-radius: 40px;
-  border: 1.5px solid #c8d4e8; background: #fff;
-  font-size: .88rem; color: #1e2a3b; outline: none; transition: border .15s;
+  width: 100%; padding: 9px 13px; border-radius: 10px;
+  border: 1px solid var(--rsv-line-strong); background: var(--rsv-card);
+  font-size: .9rem; color: var(--rsv-ink); outline: none; transition: border .15s;
+  font-family: var(--rsv-sans);
 }
-.rsv-select:focus, .rsv-input:focus { border-color: #ff4e1f; }
+.rsv-select:focus, .rsv-input:focus { border-color: var(--rsv-coral); }
 
 /* Texture grid */
 .rsv-tex-grid {
@@ -240,42 +339,41 @@
   gap: 14px;
 }
 .rsv-tex-card {
-  background: #fff; border-radius: 14px;
-  border: 2px solid transparent; overflow: hidden;
-  cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.06);
-  transition: all .18s;
+  background: var(--rsv-card); border-radius: 12px;
+  border: 1.5px solid var(--rsv-line); overflow: hidden;
+  cursor: pointer; transition: all .18s;
 }
-.rsv-tex-card:hover { transform: translateY(-3px); box-shadow: 0 8px 22px rgba(0,0,0,.1); }
-.rsv-tex-card.sel { border-color: #ff4e1f; }
+.rsv-tex-card:hover { transform: translateY(-2px); border-color: var(--rsv-line-strong); }
+.rsv-tex-card.sel { border-color: var(--rsv-coral); box-shadow: 0 0 0 2px var(--rsv-coral-soft); }
 .rsv-tex-card-img { aspect-ratio: 1; background-size: cover; background-position: center; }
 .rsv-tex-card-name {
-  padding: 8px 10px; font-size: .82rem; font-weight: 600;
-  border-top: 1px solid #f0f4f8; text-align: center; color: #1e2a3b;
+  padding: 8px 10px; font-size: .82rem; font-weight: 500;
+  border-top: 1px solid var(--rsv-line); text-align: center; color: var(--rsv-ink);
 }
-.rsv-loading { padding: 32px; text-align: center; color: #9aadcc; font-size: .9rem; }
+.rsv-loading { padding: 32px; text-align: center; color: var(--rsv-muted); font-size: .9rem; }
 
 /* ── Lightbox ── */
 .rsv-lightbox {
   display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,.92); z-index: 9000;
+  background: rgba(26,24,21,.95); z-index: 9000;
   align-items: center; justify-content: center;
 }
 .rsv-lightbox.open { display: flex; }
 .rsv-lightbox-img { max-width: 92vw; max-height: 92vh; object-fit: contain; border-radius: 10px; }
 .rsv-lightbox-close {
   position: absolute; top: 18px; right: 26px;
-  color: #fff; font-size: 2.4rem; cursor: pointer;
+  color: #fff; cursor: pointer;
   background: none; border: none; opacity: .8; transition: opacity .15s;
+  width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
 }
 .rsv-lightbox-close:hover { opacity: 1; }
+.rsv-lightbox-close .ico { width: 2rem; height: 2rem; }
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .rsv-card { grid-template-columns: 1fr; }
-  .rsv-left { border-right: none; border-bottom: 1px solid #eef2f9; }
+  .rsv-left { border-right: none; border-bottom: 1px solid var(--rsv-line); }
   .rsv-right { min-height: 260px; }
-  .rsv-preview-img { border-radius: 0 0 28px 28px; }
-  .rsv-gen-overlay { border-radius: 0 0 28px 28px; }
 }
 @media (max-width: 480px) {
   .rsv-wrap { padding: 10px; }
@@ -293,22 +391,33 @@
 
       <!-- 1. Photo upload -->
       <div class="rsv-section">
-        <div class="rsv-label">📸 Ваше фото</div>
+        <div class="rsv-label">
+          <span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,56H180.28L166.65,35.56A8,8,0,0,0,160,32H96a8,8,0,0,0-6.65,3.56L75.71,56H48A24,24,0,0,0,24,80V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm8,136a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V80a8,8,0,0,1,8-8H80a8,8,0,0,0,6.66-3.56L100.28,48h55.43l13.63,20.44A8,8,0,0,0,176,72h32a8,8,0,0,1,8,8ZM128,88a44,44,0,1,0,44,44A44.05,44.05,0,0,0,128,88Zm0,72a28,28,0,1,1,28-28A28,28,0,0,1,128,160Z"/></svg></span>
+          Ваше фото
+        </div>
         <div class="rsv-dropzone" id="rsvDropzone">
-          <div class="rsv-dropzone-icon">📷</div>
+          <div class="rsv-dropzone-icon">
+            <span class="ico ico-xl"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M240,136v64a16,16,0,0,1-16,16H32a16,16,0,0,1-16-16V136a16,16,0,0,1,16-16H80a8,8,0,0,1,0,16H32v64H224V136H176a8,8,0,0,1,0-16h48A16,16,0,0,1,240,136ZM85.66,77.66,120,43.31V128a8,8,0,0,0,16,0V43.31l34.34,34.35a8,8,0,0,0,11.32-11.32l-48-48a8,8,0,0,0-11.32,0l-48,48A8,8,0,0,0,85.66,77.66ZM200,168a12,12,0,1,0-12,12A12,12,0,0,0,200,168Z"/></svg></span>
+          </div>
           <div class="rsv-dropzone-text">Перетащите или нажмите для выбора</div>
           <div class="rsv-dropzone-hint">JPG / PNG, до 10 МБ</div>
           <input type="file" id="rsvFileInput" accept="image/jpeg,image/jpg,image/png">
         </div>
         <div class="rsv-photo-box" id="rsvPhotoBox">
           <img class="rsv-photo-mini" id="rsvPhotoMini" src="" alt="" onclick="rsvLightbox(this.src)">
-          <button class="rsv-photo-remove" id="rsvPhotoRemove">✕</button>
+          <button class="rsv-photo-remove" id="rsvPhotoRemove">
+            <span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></span>
+            Удалить
+          </button>
         </div>
       </div>
 
       <!-- 2. Texture -->
       <div class="rsv-section">
-        <div class="rsv-label">🧱 Текстура</div>
+        <div class="rsv-label">
+          <span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224,48H32a8,8,0,0,0-8,8V200a8,8,0,0,0,8,8H224a8,8,0,0,0,8-8V56A8,8,0,0,0,224,48ZM88,144V112h80v32Zm-48,0V112H72v32Zm144-32h32v32H184Zm32-16H136V64h80ZM120,64V96H40V64ZM40,160h80v32H40Zm96,32V160h80v32Z"/></svg></span>
+          Текстура
+        </div>
         <div class="rsv-tex-empty" id="rsvTexEmpty">Текстура не выбрана</div>
         <div class="rsv-tex-selected" id="rsvTexSelected">
           <img class="rsv-tex-thumb" id="rsvTexThumb" src="" alt="">
@@ -317,18 +426,27 @@
             <div class="rsv-tex-name" id="rsvTexName"></div>
           </div>
         </div>
-        <button class="rsv-btn-outline" id="rsvOpenCatalog">📚 Выбрать из каталога</button>
+        <button class="rsv-btn-outline" id="rsvOpenCatalog">
+          <span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M231.65,194.55,198.46,36.75a16,16,0,0,0-19-12.39L132.65,34.42a16.08,16.08,0,0,0-12.3,19l33.19,157.8A16,16,0,0,0,169.16,224a16.25,16.25,0,0,0,3.38-.36l46.81-10.06A16.09,16.09,0,0,0,231.65,194.55ZM136,50.15c0-.06,0-.09,0-.09l46.8-10,3.33,15.87L139.33,66Zm6.62,31.47,46.82-10.05,3.34,15.9L146,97.53Zm6.64,31.57,46.82-10.06,13.3,63.24-46.82,10.06ZM216,197.94l-46.8,10-3.33-15.87L212.67,182,216,197.85C216,197.91,216,197.94,216,197.94ZM104,32H56A16,16,0,0,0,40,48V208a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V48A16,16,0,0,0,104,32ZM56,48h48V64H56Zm0,32h48v96H56Zm48,128H56V192h48v16Z"/></svg></span>
+          Выбрать из каталога
+        </button>
       </div>
 
       <!-- 3. Grout colors -->
       <div class="rsv-section rsv-grout-section" id="rsvGroutSection">
-        <div class="rsv-label">🎨 Цвет затирки</div>
+        <div class="rsv-label">
+          <span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M200.77,53.89A103.27,103.27,0,0,0,128,24h-1.07A104,104,0,0,0,24,128c0,43,26.58,79.06,69.36,94.17A32,32,0,0,0,136,192a16,16,0,0,1,16-16h46.21a31.81,31.81,0,0,0,31.2-24.88,104.43,104.43,0,0,0,2.59-24A103.28,103.28,0,0,0,200.77,53.89Zm13,93.71A15.89,15.89,0,0,1,198.21,160H152a32,32,0,0,0-32,32,16,16,0,0,1-21.31,15.07C62.49,194.3,40,164,40,128a88,88,0,0,1,87.09-88h.9a88.35,88.35,0,0,1,88,87.25A88.86,88.86,0,0,1,213.81,147.6ZM140,76a12,12,0,1,1-12-12A12,12,0,0,1,140,76ZM96,100A12,12,0,1,1,84,88,12,12,0,0,1,96,100Zm0,56a12,12,0,1,1-12-12A12,12,0,0,1,96,156Zm88-56a12,12,0,1,1-12-12A12,12,0,0,1,184,100Z"/></svg></span>
+          Цвет затирки
+        </div>
         <div class="rsv-grout-row" id="rsvGroutRow"></div>
       </div>
 
       <!-- 4. Generate -->
       <div class="rsv-section" style="margin-top:auto;">
-        <button class="rsv-gen-btn" id="rsvGenBtn">✨ Визуализировать</button>
+        <button class="rsv-gen-btn" id="rsvGenBtn">
+          <span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88ZM137,164.22a8,8,0,0,0-4.74,4.74L112,223.85,91.78,169A8,8,0,0,0,87,164.22L32.15,144,87,123.78A8,8,0,0,0,91.78,119L112,64.15,132.22,119a8,8,0,0,0,4.74,4.74L191.85,144ZM144,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H184V64a8,8,0,0,1-16,0V48H152A8,8,0,0,1,144,40ZM248,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,248,88Z"/></svg></span>
+          Визуализировать
+        </button>
         <div class="rsv-remaining" id="rsvRemaining"></div>
         <div class="rsv-status" id="rsvStatus"></div>
       </div>
@@ -339,13 +457,17 @@
     <div class="rsv-right">
       <div class="rsv-preview-area">
         <div class="rsv-empty-state" id="rsvEmptyState">
-          <div class="rsv-empty-icon">🏠</div>
+          <div class="rsv-empty-icon">
+            <span class="ico ico-xl"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM48,48H208v77.38l-24.69-24.7a16,16,0,0,0-22.62,0L53.37,208H48ZM208,208H76l96-96,36,36v60ZM96,120A24,24,0,1,0,72,96,24,24,0,0,0,96,120Zm0-32a8,8,0,1,1-8,8A8,8,0,0,1,96,88Z"/></svg></span>
+          </div>
           <div class="rsv-empty-text">Загрузите фото и выберите текстуру</div>
         </div>
         <img class="rsv-preview-img" id="rsvPreviewImg" src="" alt="" onclick="rsvLightbox(this.src)">
         <div class="rsv-gen-overlay" id="rsvGenOverlay">
-          <div class="rsv-spinner"></div>
-          <div class="rsv-gen-label">ИИ генерирует изображение…</div>
+          <div class="rsv-gen-timer" id="rsvGenTimer">00:00</div>
+          <div class="rsv-gen-label" id="rsvGenLabel">Анализируем ваше фото…</div>
+          <div class="rsv-gen-progress"><div class="rsv-gen-progress-fill" id="rsvGenProgressFill"></div></div>
+          <div class="rsv-gen-hint">Среднее время — около минуты</div>
         </div>
       </div>
     </div><!-- /right -->
@@ -357,8 +479,13 @@
 <div class="rsv-modal-bg" id="rsvCatalogBg">
   <div class="rsv-modal" id="rsvCatalogModal">
     <div class="rsv-modal-head">
-      <span class="rsv-modal-title">🧱 Каталог текстур</span>
-      <button class="rsv-modal-close" id="rsvCatalogClose">✕</button>
+      <span class="rsv-modal-title">
+        <span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M231.65,194.55,198.46,36.75a16,16,0,0,0-19-12.39L132.65,34.42a16.08,16.08,0,0,0-12.3,19l33.19,157.8A16,16,0,0,0,169.16,224a16.25,16.25,0,0,0,3.38-.36l46.81-10.06A16.09,16.09,0,0,0,231.65,194.55ZM136,50.15c0-.06,0-.09,0-.09l46.8-10,3.33,15.87L139.33,66Zm6.62,31.47,46.82-10.05,3.34,15.9L146,97.53Zm6.64,31.57,46.82-10.06,13.3,63.24-46.82,10.06ZM216,197.94l-46.8,10-3.33-15.87L212.67,182,216,197.85C216,197.91,216,197.94,216,197.94ZM104,32H56A16,16,0,0,0,40,48V208a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V48A16,16,0,0,0,104,32ZM56,48h48V64H56Zm0,32h48v96H56Zm48,128H56V192h48v16Z"/></svg></span>
+        Каталог текстур
+      </span>
+      <button class="rsv-modal-close" id="rsvCatalogClose">
+        <span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></span>
+      </button>
     </div>
     <div class="rsv-modal-filters">
       <div class="rsv-filter-group">
@@ -388,7 +515,9 @@
 
 <!-- LIGHTBOX -->
 <div class="rsv-lightbox" id="rsvLightboxEl">
-  <button class="rsv-lightbox-close" id="rsvLightboxClose">&times;</button>
+  <button class="rsv-lightbox-close" id="rsvLightboxClose">
+    <span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></span>
+  </button>
   <img class="rsv-lightbox-img" id="rsvLightboxImg" src="" alt="">
 </div>
 
@@ -407,19 +536,32 @@
   // ============================================================
   //  STATE
   // ============================================================
-  let photoFile      = null;   // File object (не сериализуется)
-  let photoDataUrl   = null;   // base64 превью (sessionStorage)
-  let selTexture     = null;   // { name, url, material_type, supplier }
+  let photoFile      = null;
+  let photoDataUrl   = null;
+  let selTexture     = null;
   let selGroutName   = null;
-  let remaining      = null;   // сколько генераций осталось сегодня
+  let remaining      = null;
   let pollingTimer   = null;
 
-  // Catalog state
   let catMat         = 'standard';
   let catSup         = null;
   let catTextures    = [];
 
-  // Type labels
+  // Generation progress animation state
+  let genTimerInt    = null;
+  let genLabelInt    = null;
+  let genStartTs     = null;
+  const GEN_LABELS = [
+    'Анализируем ваше фото…',
+    'Распознаём геометрию фасада…',
+    'Подбираем фрагменты текстуры…',
+    'Применяем материал к поверхности…',
+    'Корректируем освещение и тени…',
+    'Прорисовываем швы и детали…',
+    'Финализируем изображение…',
+    'Почти готово, ещё чуть-чуть…',
+  ];
+
   const MAT_LABEL = { standard: 'Кирпич', rigel: 'Ригель', decorative_stone: 'Камень' };
 
   // ============================================================
@@ -428,7 +570,6 @@
   const $  = id => document.getElementById(id);
   const H  = () => ({ 'ngrok-skip-browser-warning': 'true' });
 
-  // Toast notification (вместо alert)
   let toastTimer = null;
   function toast(msg, warn = false) {
     const el = $('rsvToast');
@@ -446,7 +587,7 @@
   }
 
   // ============================================================
-  //  PERSISTENCE (localStorage / sessionStorage)
+  //  PERSISTENCE
   // ============================================================
   function saveTexture() {
     try { localStorage.setItem('rsv_tex', JSON.stringify(selTexture)); } catch {}
@@ -463,9 +604,8 @@
   function loadGrout() {
     try { return localStorage.getItem('rsv_grout') || null; } catch { return null; }
   }
-  // Сохранение превью фото в sessionStorage (base64, с защитой от переполнения)
   function savePhoto(dataUrl) {
-    try { sessionStorage.setItem('rsv_photo', dataUrl); } catch {} // может не влезть — ок
+    try { sessionStorage.setItem('rsv_photo', dataUrl); } catch {}
   }
   function loadPhoto() {
     try { return sessionStorage.getItem('rsv_photo'); } catch { return null; }
@@ -484,7 +624,6 @@
     $('rsvPhotoMini').src = dataUrl;
     $('rsvPhotoBox').classList.add('visible');
     dropzone.style.display = 'none';
-    // Показываем фото в правой панели, если нет результата
     if (!$('rsvPreviewImg').classList.contains('visible')) {
       showPreview(dataUrl);
     }
@@ -511,7 +650,6 @@
     fileInput.value = '';
     $('rsvPhotoBox').classList.remove('visible');
     dropzone.style.display = '';
-    // Убираем превью из правой панели (только если не показан результат)
     if ($('rsvPreviewImg').src === $('rsvPhotoMini').src || !$('rsvPreviewImg').dataset.isResult) {
       hidePreview();
     }
@@ -529,7 +667,7 @@
   });
 
   // ============================================================
-  //  PREVIEW (right panel)
+  //  PREVIEW
   // ============================================================
   function showPreview(src, isResult = false) {
     const img = $('rsvPreviewImg');
@@ -571,7 +709,6 @@
     $('rsvTexType').textContent = MAT_LABEL[tex.material_type] || tex.material_type;
     $('rsvTexName').textContent = tex.name;
 
-    // Показывать затирку только если не декоративный камень
     const showGrout = tex.material_type !== 'decorative_stone';
     $('rsvGroutSection').classList.toggle('visible', showGrout);
     if (!showGrout) { selGroutName = null; saveGrout(); }
@@ -679,7 +816,6 @@
     const ready = !!(photoFile && selTexture);
     const btn = $('rsvGenBtn');
     btn.classList.toggle('ready', ready);
-    // disabled устанавливается отдельно во время генерации
   }
 
   function updateRemaining(n) {
@@ -687,7 +823,7 @@
     const el = $('rsvRemaining');
     if (n === null || n === undefined) { el.textContent = ''; return; }
     if (n <= 0) {
-      el.textContent = '⛔ Дневной лимит исчерпан (2/2)';
+      el.innerHTML = '<span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M236.8,188.09,149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM222.93,203.8a8.5,8.5,0,0,1-7.48,4.2H40.55a8.5,8.5,0,0,1-7.48-4.2,7.59,7.59,0,0,1,0-7.72L120.52,44.21a8.75,8.75,0,0,1,15,0l87.45,151.87A7.59,7.59,0,0,1,222.93,203.8ZM120,144V104a8,8,0,0,1,16,0v40a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,180Z"/></svg></span> Дневной лимит исчерпан (2/2)';
       el.className = 'rsv-remaining warn';
       $('rsvGenBtn').disabled = true;
       $('rsvGenBtn').classList.remove('ready');
@@ -700,10 +836,54 @@
   // ============================================================
   //  GENERATION
   // ============================================================
+  function startGenAnim() {
+    genStartTs = Date.now();
+    let labelIdx = 0;
+    $('rsvGenLabel').textContent = GEN_LABELS[0];
+    $('rsvGenLabel').style.opacity = '1';
+    $('rsvGenProgressFill').style.width = '3%';
+    $('rsvGenTimer').textContent = '00:00';
+
+    if (genTimerInt) clearInterval(genTimerInt);
+    genTimerInt = setInterval(() => {
+      const elapsed = (Date.now() - genStartTs) / 1000;
+      const mm = Math.floor(elapsed / 60).toString().padStart(2, '0');
+      const ss = Math.floor(elapsed % 60).toString().padStart(2, '0');
+      $('rsvGenTimer').textContent = `${mm}:${ss}`;
+      // Asymptotic progress: fast at start, slows near 92% so we never look "stuck at 100"
+      const ETA = 50;
+      const progress = 92 * (1 - Math.exp(-elapsed / ETA));
+      $('rsvGenProgressFill').style.width = `${progress.toFixed(1)}%`;
+    }, 250);
+
+    if (genLabelInt) clearInterval(genLabelInt);
+    genLabelInt = setInterval(() => {
+      labelIdx = Math.min(labelIdx + 1, GEN_LABELS.length - 1);
+      const el = $('rsvGenLabel');
+      el.style.opacity = '0';
+      setTimeout(() => {
+        el.textContent = GEN_LABELS[labelIdx];
+        el.style.opacity = '1';
+      }, 220);
+    }, 6000);
+  }
+
+  function stopGenAnim(success) {
+    if (genTimerInt) { clearInterval(genTimerInt); genTimerInt = null; }
+    if (genLabelInt) { clearInterval(genLabelInt); genLabelInt = null; }
+    if (success) {
+      $('rsvGenProgressFill').style.width = '100%';
+    }
+  }
+
   function setGenerating(on) {
     $('rsvGenOverlay').classList.toggle('visible', on);
     $('rsvGenBtn').disabled = on;
-    $('rsvGenBtn').textContent = on ? '⏳ Генерация…' : '✨ Визуализировать';
+    if (on) startGenAnim();
+    const btn = $('rsvGenBtn');
+    btn.innerHTML = on
+      ? '<span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M200,75.64V40a16,16,0,0,0-16-16H72A16,16,0,0,0,56,40V76a16.07,16.07,0,0,0,6.4,12.8L114.67,128,62.4,167.2A16.07,16.07,0,0,0,56,180v36a16,16,0,0,0,16,16H184a16,16,0,0,0,16-16V180.36a16.09,16.09,0,0,0-6.35-12.77L141.27,128l52.38-39.6A16.05,16.05,0,0,0,200,75.64ZM184,216H72V180l56-42,56,42.35Zm0-140.36L128,118,72,76V40H184Z"/></svg></span> Генерация…'
+      : '<span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88ZM137,164.22a8,8,0,0,0-4.74,4.74L112,223.85,91.78,169A8,8,0,0,0,87,164.22L32.15,144,87,123.78A8,8,0,0,0,91.78,119L112,64.15,132.22,119a8,8,0,0,0,4.74,4.74L191.85,144ZM144,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H184V64a8,8,0,0,1-16,0V48H152A8,8,0,0,1,144,40ZM248,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,248,88Z"/></svg></span> Визуализировать';
   }
 
   function pollStatus(requestId) {
@@ -718,19 +898,22 @@
         if (d.status === 'success') {
           clearInterval(pollingTimer);
           const url = d.result_url.startsWith('http') ? d.result_url : `${API_BASE}${d.result_url}`;
+          stopGenAnim(true);
           setGenerating(false);
           showPreview(url, true);
-          setStatus('ok', '✅ Готово! Нажмите на изображение для увеличения.');
+          setStatus('ok', 'Готово! Нажмите на изображение для увеличения.');
           refreshGenBtn();
         } else if (d.status === 'error') {
           clearInterval(pollingTimer);
+          stopGenAnim(false);
           setGenerating(false);
-          setStatus('err', '❌ Ошибка генерации. Попробуйте снова.');
+          setStatus('err', 'Ошибка генерации. Попробуйте снова.');
           refreshGenBtn();
         } else if (attempts >= 90) {
           clearInterval(pollingTimer);
+          stopGenAnim(false);
           setGenerating(false);
-          setStatus('err', '⏱ Превышено время ожидания. Попробуйте снова.');
+          setStatus('err', 'Превышено время ожидания. Попробуйте снова.');
           refreshGenBtn();
         }
       } catch(e) {
@@ -749,7 +932,6 @@
     $('rsvStatus').className = 'rsv-status';
     if (pollingTimer) clearInterval(pollingTimer);
 
-    // Показываем фото в правой панели пока генерируем
     if (photoDataUrl) showPreview(photoDataUrl, false);
 
     const fd = new FormData();
@@ -765,11 +947,11 @@
         method: 'POST', credentials: 'include', headers: H(), body: fd
       });
 
-      // 429 — лимит исчерпан
       if (r.status === 429) {
+        stopGenAnim(false);
         setGenerating(false);
         updateRemaining(0);
-        setStatus('err', '⛔ Вы исчерпали дневной лимит (2/2). Попробуйте завтра.');
+        setStatus('err', 'Вы исчерпали дневной лимит (2/2). Попробуйте завтра.');
         refreshGenBtn();
         return;
       }
@@ -777,58 +959,49 @@
       const d = await r.json();
       if (!r.ok) throw new Error(d.detail || `Ошибка сервера ${r.status}`);
 
-      // Обновляем счётчик оставшихся генераций
       if (d.remaining !== undefined) updateRemaining(d.remaining);
 
       if (d.request_id) {
         pollStatus(d.request_id);
       } else if (d.result_url) {
-        // Синхронный ответ (result_url сразу)
         const url = d.result_url.startsWith('http') ? d.result_url : `${API_BASE}${d.result_url}`;
+        stopGenAnim(true);
         setGenerating(false);
         showPreview(url, true);
-        setStatus('ok', '✅ Готово! Нажмите на изображение для увеличения.');
+        setStatus('ok', 'Готово! Нажмите на изображение для увеличения.');
         refreshGenBtn();
       } else {
         throw new Error('Неожиданный ответ сервера');
       }
     } catch(e) {
+      stopGenAnim(false);
       setGenerating(false);
-      setStatus('err', `❌ ${e.message}`);
+      setStatus('err', e.message);
       refreshGenBtn();
     }
   });
 
   // ============================================================
-  //  INIT — восстановление состояния из хранилища
+  //  INIT
   // ============================================================
   function init() {
-    // Восстановить выбранную текстуру
     const savedTex = loadTexture();
     if (savedTex) applyTexture(savedTex);
 
-    // Восстановить цвет затирки (отмечается после загрузки цветов)
     selGroutName = loadGrout();
 
-    // Восстановить превью фото из sessionStorage
     const savedPhoto = loadPhoto();
     if (savedPhoto) {
       photoDataUrl = savedPhoto;
-      // Файл File недоступен после перезагрузки — показываем превью,
-      // но генерация не будет доступна без повторной загрузки файла.
       $('rsvPhotoMini').src = savedPhoto;
       $('rsvPhotoBox').classList.add('visible');
       dropzone.style.display = 'none';
-      // Фото в правой панели
       if (!selTexture) showPreview(savedPhoto, false);
-      // Показываем подсказку что файл нужно загрузить снова
-      $('rsvRemaining').textContent = '⚠ Файл не сохраняется при перезагрузке — загрузите фото снова.';
+      $('rsvRemaining').textContent = 'Файл не сохраняется при перезагрузке — загрузите фото снова.';
       $('rsvRemaining').className = 'rsv-remaining warn';
     }
 
-    // Загрузить цвета затирки
     loadGroutColors().then(() => {
-      // После загрузки подсветить сохранённый цвет
       if (selGroutName) {
         document.querySelectorAll('.rsv-swatch').forEach(s => {
           s.classList.toggle('sel', s.dataset.name === selGroutName);
