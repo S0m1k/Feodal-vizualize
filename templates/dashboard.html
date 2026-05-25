@@ -1112,13 +1112,26 @@
           </div>
 
           <div class="vis-divider"></div>
-          <div class="vis-step-title">2 · Раскладка</div>
+          <div class="vis-step-title">2 · Текстура <span style="color:var(--muted);font-weight:400;font-size:.82rem;">(опционально — можно сгенерировать из текстуры фасада)</span></div>
+          <button class="pick-btn" id="beltPickBtn" onclick="openCatalogModal('belt')"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M231.65,194.55,198.46,36.75a16,16,0,0,0-19-12.39L132.65,34.42a16.08,16.08,0,0,0-12.3,19l33.19,157.8A16,16,0,0,0,169.16,224a16.25,16.25,0,0,0,3.38-.36l46.81-10.06A16.09,16.09,0,0,0,231.65,194.55ZM136,50.15c0-.06,0-.09,0-.09l46.8-10,3.33,15.87L139.33,66Zm6.62,31.47,46.82-10.05,3.34,15.9L146,97.53Zm6.64,31.57,46.82-10.06,13.3,63.24-46.82,10.06ZM216,197.94l-46.8,10-3.33-15.87L212.67,182,216,197.85C216,197.91,216,197.94,216,197.94ZM104,32H56A16,16,0,0,0,40,48V208a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V48A16,16,0,0,0,104,32ZM56,48h48V64H56Zm0,32h48v96H56Zm48,128H56V192h48v16Z"/></svg></span> Выбрать из каталога</button>
+          <div class="selected-tex" id="beltSelectedTex">
+            <img class="tex-thumb" id="beltTexThumb" src="" alt="">
+            <div class="tex-info">
+              <div class="tex-label">Выбрана текстура</div>
+              <div class="tex-name" id="beltTexName">—</div>
+            </div>
+            <button class="tex-change" onclick="openCatalogModal('belt')">Изменить</button>
+            <button class="tex-change" style="color:var(--bad);" onclick="clearSubTex('belt')">Убрать</button>
+          </div>
+
+          <div class="vis-divider"></div>
+          <div class="vis-step-title">3 · Раскладка</div>
           <div id="beltModeRow" style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
             <button id="beltModeSoldier" class="mat-btn active" onclick="setBeltMode('soldier',this)"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32Zm0,176H48V48H208V208Z"/></svg></span> Солдатская</button>
-            <button id="beltModeChess"   class="mat-btn"        onclick="setBeltMode('chess',this)"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M200,40H56A16,16,0,0,0,40,56V200a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V56A16,16,0,0,0,200,40Zm0,80H136V56h64ZM120,56v64H56V56ZM56,136h64v64H56Zm144,64H136V136h64v64Z"/></svg></span> Рядовая</button>
+            <button id="beltModeChess"   class="mat-btn"        onclick="setBeltMode('chess',this)"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M200,40H56A16,16,0,0,0,40,56V200a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V56A16,16,0,0,0,200,40Zm0,80H136V56h64ZM120,56v64H56V56ZM56,136h64v64H56Zm144,64H136V136h64v64Z"/></svg></span> Шахматная</button>
           </div>
           <div class="vis-divider"></div>
-          <div class="vis-step-title">3 · Карниз</div>
+          <div class="vis-step-title">4 · Карниз</div>
           <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
             <button id="beltCorniceNo"  class="mat-btn active" onclick="setBeltCornice('no',this)">Нет</button>
             <button id="beltCorniceYes" class="mat-btn"        onclick="setBeltCornice('yes',this)">Есть</button>
