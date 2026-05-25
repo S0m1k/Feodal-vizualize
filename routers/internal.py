@@ -453,6 +453,9 @@ async def add_texture(
     if len(tex_bytes) > 15 * 1024 * 1024:
         raise HTTPException(status_code=413, detail="Файл текстуры превышает 15 МБ")
     filename = os.path.basename(file.filename or "upload.jpg")
+    # GenAPI валидирует расширение case-sensitive (.PNG → "Неверный формат") — нормализуем.
+    stem, ext = os.path.splitext(filename)
+    filename = stem + ext.lower()
     save_path = os.path.join("textures", material_type, supplier, filename)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     with open(save_path, "wb") as f:
