@@ -10,7 +10,7 @@
   <link rel="manifest" href="/static/manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     /* ===== CLAUDE DESIGN SYSTEM (warm editorial) ===== */
     :root {
@@ -19,8 +19,8 @@
       --cream-soft:   #f3efe6;   /* subtle inner surfaces */
       --line:         #e8e2d3;   /* hairline divider */
       --line-strong:  #d6cfbd;
-      --ink:          #1a1815;   /* primary text */
-      --ink-2:        #3d3833;   /* secondary text */
+      --ink:          #161616;   /* primary text */
+      --ink-2:        #161616;   /* secondary text */
       --muted:        #8a8275;   /* tertiary / placeholder */
       --coral:        #b54639;   /* signature accent — calm brick red */
       --coral-soft:   #f5e6e3;   /* tinted bg */
@@ -31,6 +31,9 @@
       --bad:          #b8443a;
       --serif:        'Lora', 'Source Serif 4', Georgia, 'Times New Roman', serif;
       --sans:         'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      --mono:         'IBM Plex Mono', ui-monospace, 'SF Mono', Consolas, 'Liberation Mono', monospace;
+      --beige-active: #e8dcc0;  /* warm sand — sidebar active highlight */
+      --blue-fill:    #E8F0FE;  /* blue variant: filled/active surface */
     }
 
     /* ===== RESET & BASE ===== */
@@ -217,8 +220,8 @@
     }
     .mat-btn:hover { border-color: var(--coral); color: var(--coral-deep); background: var(--coral-soft); }
     .mat-btn.active {
-      background: var(--ink); border-color: var(--ink);
-      color: var(--cream);
+      background: var(--coral); border-color: var(--coral);
+      color: #fff;
     }
 
     /* ===== PHOTO UPLOADER (accent zones) ===== */
@@ -273,7 +276,7 @@
       transition: all .15s; color: var(--ink-2);
     }
     .supplier-chip:hover { border-color: var(--coral); color: var(--coral-deep); }
-    .supplier-chip.active { background: var(--ink); border-color: var(--ink); color: var(--cream); }
+    .supplier-chip.active { background: var(--coral); border-color: var(--coral); color: #fff; }
 
     /* ===== LEADS TABLE ===== */
     .leads-count { font-size: .8rem; color: var(--muted); margin-left: 8px; font-weight: 400; }
@@ -297,7 +300,7 @@
       padding: 20px 22px; border-bottom: 1px solid var(--line);
       display: flex; align-items: center; justify-content: space-between;
     }
-    .sidebar-head-title { font-family: var(--serif); font-weight: 600; font-size: 1.05rem; color: var(--ink); }
+    .sidebar-head-title { font-family: var(--serif); font-weight: 600; font-size: 1.05rem; color: var(--ink); text-transform: uppercase; letter-spacing: .04em; }
     .sidebar-close {
       background: none; border: none;
       cursor: pointer; color: var(--muted); padding: 6px; border-radius: 8px;
@@ -310,13 +313,14 @@
       display: flex; align-items: center; gap: 12px;
       padding: 11px 14px; border-radius: 10px;
       text-decoration: none; color: var(--ink-2);
-      font-weight: 500; font-size: .95rem;
+      font-weight: 500; font-size: .85rem;
       cursor: pointer; transition: all .15s;
+      text-transform: uppercase; letter-spacing: .05em;
     }
     .nav-link:hover { background: var(--cream-soft); color: var(--ink); }
-    .nav-link.active { background: var(--ink); color: var(--cream); font-weight: 500; }
-    .nav-link.active .nav-icon { color: var(--cream); }
-    .nav-icon { font-size: 1.1rem; color: var(--ink-2); display: inline-flex; }
+    .nav-link.active { background: var(--beige-active); color: var(--ink); font-weight: 600; }
+    .nav-link.active .nav-icon { color: var(--coral); }
+    .nav-icon { font-size: 1.1rem; color: var(--coral); display: inline-flex; }
 
     /* ===== MAIN ===== */
     .app-main { max-width: 1280px; margin: 0 auto; padding: 32px 24px; }
@@ -325,8 +329,9 @@
     @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
     .page-title {
       font-family: var(--serif); font-size: 1.85rem; font-weight: 600;
-      letter-spacing: -.015em; margin-bottom: 26px; color: var(--ink);
+      letter-spacing: .04em; margin-bottom: 26px; color: var(--ink);
       display: flex; align-items: center; gap: 12px;
+      text-transform: uppercase;
     }
     .page-title .ico { color: var(--coral); }
 
@@ -380,12 +385,12 @@
     /* Texture pick */
     .pick-btn {
       width: 100%; padding: 12px 20px;
-      border: 1px solid var(--line-strong); background: var(--cream-card); color: var(--ink);
+      border: 1px solid var(--coral); background: var(--coral); color: #fff;
       border-radius: 999px; font-weight: 500; font-size: .9rem;
       cursor: pointer; transition: all .15s; margin-bottom: 14px;
       display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     }
-    .pick-btn:hover { background: var(--coral-soft); border-color: var(--coral); color: var(--coral-deep); }
+    .pick-btn:hover { background: var(--coral-hover); border-color: var(--coral-hover); color: #fff; }
     .selected-tex {
       display: none; align-items: center; gap: 12px;
       padding: 12px 14px; background: var(--cream-soft); border-radius: 14px;
@@ -417,7 +422,26 @@
       display: inline-flex; align-items: center; justify-content: center; gap: 7px;
     }
     .cat-btn:hover { border-color: var(--coral); color: var(--coral-deep); }
-    .cat-btn.active { border-color: var(--ink); color: var(--ink); background: var(--cream-soft); }
+    .cat-btn.active { border-color: var(--line-strong); color: var(--ink); background: var(--blue-fill); }
+
+    /* ===== BLUE VARIANT OVERRIDES =====
+       Active toggles + filled inputs use pale blue (#E8F0FE). */
+    #beltModeRow .mat-btn.active,
+    #beltCorniceNo.mat-btn.active,
+    #beltCorniceYes.mat-btn.active,
+    #reikaOrientBtns .mat-btn.active,
+    #accentTabBtn-plinth.mat-btn.active,
+    #accentTabBtn-belt.mat-btn.active,
+    #accentTabBtn-reika.mat-btn.active {
+      background: var(--blue-fill);
+      color: var(--ink);
+      border-color: var(--line-strong);
+    }
+    .admin-form input:not([type="file"]):not(:placeholder-shown),
+    .gen-filter input:not([type="file"]):not(:placeholder-shown),
+    #modalSearch:not(:placeholder-shown) {
+      background: var(--blue-fill);
+    }
 
     /* Result panel */
     .result-box {
@@ -469,14 +493,13 @@
     /* Generate button */
     .gen-btn {
       width: 100%; padding: 14px;
-      background: var(--cream-soft); color: var(--muted); border: 1px solid var(--line);
+      background: var(--coral); color: #fff; border: 1px solid var(--coral);
       border-radius: 999px; font-weight: 500; font-size: 1rem;
-      cursor: not-allowed; transition: all .15s;
+      cursor: not-allowed; opacity: .55; transition: all .15s;
       display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     }
     .gen-btn.ready {
-      background: var(--coral); color: #fff; border-color: var(--coral);
-      cursor: pointer;
+      cursor: pointer; opacity: 1;
     }
     .gen-btn.ready:hover { background: var(--coral-hover); border-color: var(--coral-hover); }
     .status-banner {
@@ -545,7 +568,7 @@
       padding: 18px 22px; border-bottom: 1px solid var(--line);
       display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
     }
-    .modal-head-title { font-family: var(--serif); font-size: 1.15rem; font-weight: 600; color: var(--ink); }
+    .modal-head-title { font-family: var(--serif); font-size: 1.15rem; font-weight: 600; color: var(--ink); text-transform: uppercase; letter-spacing: .04em; }
     .modal-close {
       background: var(--cream-soft); border: none; width: 34px; height: 34px;
       border-radius: 50%; font-size: 1rem; cursor: pointer;
@@ -587,7 +610,7 @@
       background: var(--cream-card); border-radius: 18px; padding: 24px;
       margin-bottom: 20px; border: 1px solid var(--line);
     }
-    .admin-section h3 { font-family: var(--serif); font-size: 1.1rem; font-weight: 600; color: var(--ink); margin-bottom: 18px; }
+    .admin-section h3 { font-family: var(--serif); font-size: 1.1rem; font-weight: 600; color: var(--ink); margin-bottom: 18px; text-transform: uppercase; letter-spacing: .04em; }
     .admin-form {
       display: flex; gap: 10px; flex-wrap: wrap;
       align-items: flex-end; margin-bottom: 18px;
@@ -787,7 +810,7 @@
           </div>
         </div>
 
-        <button class="gen-btn" id="generateBtn"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88ZM137,164.22a8,8,0,0,0-4.74,4.74L112,223.85,91.78,169A8,8,0,0,0,87,164.22L32.15,144,87,123.78A8,8,0,0,0,91.78,119L112,64.15,132.22,119a8,8,0,0,0,4.74,4.74L191.85,144ZM144,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H184V64a8,8,0,0,1-16,0V48H152A8,8,0,0,1,144,40ZM248,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,248,88Z"/></svg></span> Визуализировать</button>
+        <button class="gen-btn" id="generateBtn"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88ZM137,164.22a8,8,0,0,0-4.74,4.74L112,223.85,91.78,169A8,8,0,0,0,87,164.22L32.15,144,87,123.78A8,8,0,0,0,91.78,119L112,64.15,132.22,119a8,8,0,0,0,4.74,4.74L191.85,144ZM144,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H184V64a8,8,0,0,1-16,0V48H152A8,8,0,0,1,144,40ZM248,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,248,88Z"/></svg></span> Сгенерировать</button>
         <div class="status-banner" id="statusBanner"></div>
       </div>
     </div>
@@ -958,20 +981,12 @@
       <div class="vis-layout">
         <!-- Left: inputs -->
         <div class="vis-panel">
-          <div class="vis-step-title">1 · Фото здания</div>
-          <div class="photo-uploader" id="plinthDrop">
-            <input type="file" id="plinthFile" accept="image/*" style="display:none">
-            <div class="photo-uploader-empty">
-              <button type="button" class="photo-add-btn" onclick="document.getElementById('plinthFile').click()"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,56H180.28L166.65,35.56A8,8,0,0,0,160,32H96a8,8,0,0,0-6.65,3.56L75.71,56H48A24,24,0,0,0,24,80V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm8,136a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V80a8,8,0,0,1,8-8H80a8,8,0,0,0,6.66-3.56L100.28,48h55.43l13.63,20.44A8,8,0,0,0,176,72h32a8,8,0,0,1,8,8ZM128,88a44,44,0,1,0,44,44A44.05,44.05,0,0,0,128,88Zm0,72a28,28,0,1,1,28-28A28,28,0,0,1,128,160Z"/></svg></span> Добавить фото</button>
-              <span class="photo-uploader-hint">или перетащите файл · JPG, PNG</span>
-            </div>
-            <div class="photo-uploader-filled" style="display:none;">
-              <img class="photo-uploader-thumb" src="" alt="">
-              <div class="photo-uploader-info">
-                <div class="photo-uploader-name"></div>
-                <button type="button" class="photo-change-btn" onclick="document.getElementById('plinthFile').click()">Изменить фото</button>
-              </div>
-            </div>
+          <div class="vis-step-title">1 · Фотография</div>
+          <div class="upload-zone" id="plinthDrop">
+            <div class="upload-icon"><span class="ico ico-xl" style="color:var(--muted)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,56H180.28L166.65,35.56A8,8,0,0,0,160,32H96a8,8,0,0,0-6.65,3.56L75.71,56H48A24,24,0,0,0,24,80V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm8,136a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V80a8,8,0,0,1,8-8H80a8,8,0,0,0,6.66-3.56L100.28,48h55.43l13.63,20.44A8,8,0,0,0,176,72h32a8,8,0,0,1,8,8ZM128,88a44,44,0,1,0,44,44A44.05,44.05,0,0,0,128,88Zm0,72a28,28,0,1,1,28-28A28,28,0,0,1,128,160Z"/></svg></span></div>
+            <div class="upload-text">Перетащите фото или нажмите</div>
+            <div class="upload-hint">JPG / PNG, до 10 МБ</div>
+            <input type="file" id="plinthFile" accept="image/jpeg,image/jpg,image/png" style="display:none">
           </div>
 
           <div id="plinthCanvasCard" style="display:none;">
@@ -980,6 +995,7 @@
             <div class="brush-ctrl">
               <label>Кисть</label><input type="range" id="plinthBrush" min="4" max="60" value="14">
               <button onclick="plinthDrawer&&plinthDrawer.reset()">Очистить</button>
+              <button type="button" class="photo-change-btn" onclick="resetAccentPhoto('plinth')">Сменить фото</button>
             </div>
             <div class="canvas-wrap"><canvas id="plinthCanvas"></canvas></div>
           </div>
@@ -1017,20 +1033,12 @@
       <div class="vis-layout">
         <!-- Left: inputs -->
         <div class="vis-panel">
-          <div class="vis-step-title">1 · Фото здания</div>
-          <div class="photo-uploader" id="reikaDrop">
-            <input type="file" id="reikaFile" accept="image/*" style="display:none">
-            <div class="photo-uploader-empty">
-              <button type="button" class="photo-add-btn" onclick="document.getElementById('reikaFile').click()"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,56H180.28L166.65,35.56A8,8,0,0,0,160,32H96a8,8,0,0,0-6.65,3.56L75.71,56H48A24,24,0,0,0,24,80V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm8,136a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V80a8,8,0,0,1,8-8H80a8,8,0,0,0,6.66-3.56L100.28,48h55.43l13.63,20.44A8,8,0,0,0,176,72h32a8,8,0,0,1,8,8ZM128,88a44,44,0,1,0,44,44A44.05,44.05,0,0,0,128,88Zm0,72a28,28,0,1,1,28-28A28,28,0,0,1,128,160Z"/></svg></span> Добавить фото</button>
-              <span class="photo-uploader-hint">или перетащите файл · JPG, PNG</span>
-            </div>
-            <div class="photo-uploader-filled" style="display:none;">
-              <img class="photo-uploader-thumb" src="" alt="">
-              <div class="photo-uploader-info">
-                <div class="photo-uploader-name"></div>
-                <button type="button" class="photo-change-btn" onclick="document.getElementById('reikaFile').click()">Изменить фото</button>
-              </div>
-            </div>
+          <div class="vis-step-title">1 · Фотография</div>
+          <div class="upload-zone" id="reikaDrop">
+            <div class="upload-icon"><span class="ico ico-xl" style="color:var(--muted)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,56H180.28L166.65,35.56A8,8,0,0,0,160,32H96a8,8,0,0,0-6.65,3.56L75.71,56H48A24,24,0,0,0,24,80V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm8,136a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V80a8,8,0,0,1,8-8H80a8,8,0,0,0,6.66-3.56L100.28,48h55.43l13.63,20.44A8,8,0,0,0,176,72h32a8,8,0,0,1,8,8ZM128,88a44,44,0,1,0,44,44A44.05,44.05,0,0,0,128,88Zm0,72a28,28,0,1,1,28-28A28,28,0,0,1,128,160Z"/></svg></span></div>
+            <div class="upload-text">Перетащите фото или нажмите</div>
+            <div class="upload-hint">JPG / PNG, до 10 МБ</div>
+            <input type="file" id="reikaFile" accept="image/jpeg,image/jpg,image/png" style="display:none">
           </div>
 
           <div id="reikaCanvasCard" style="display:none;">
@@ -1039,19 +1047,13 @@
             <div class="brush-ctrl">
               <label>Кисть</label><input type="range" id="reikaBrush" min="4" max="60" value="14">
               <button onclick="reikaDrawer&&reikaDrawer.reset()">Очистить</button>
+              <button type="button" class="photo-change-btn" onclick="resetAccentPhoto('reika')">Сменить фото</button>
             </div>
             <div class="canvas-wrap"><canvas id="reikaCanvas"></canvas></div>
           </div>
 
           <div class="vis-divider"></div>
-          <div class="vis-step-title">2 · Ориентация</div>
-          <div style="display:flex;gap:8px;margin-bottom:14px;" id="reikaOrientBtns">
-            <button class="mat-btn active" onclick="setReikaOrient('horizontal',this)"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M237.66,133.66l-32,32a8,8,0,0,1-11.32-11.32L212.69,136H43.31l18.35,18.34a8,8,0,0,1-11.32,11.32l-32-32a8,8,0,0,1,0-11.32l32-32a8,8,0,0,1,11.32,11.32L43.31,120H212.69l-18.35-18.34a8,8,0,0,1,11.32-11.32l32,32A8,8,0,0,1,237.66,133.66Z"/></svg></span> Горизонтально</button>
-            <button class="mat-btn" onclick="setReikaOrient('vertical',this)"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M165.66,194.34a8,8,0,0,1,0,11.32l-32,32a8,8,0,0,1-11.32,0l-32-32a8,8,0,0,1,11.32-11.32L120,212.69V43.31L101.66,61.66A8,8,0,0,1,90.34,50.34l32-32a8,8,0,0,1,11.32,0l32,32a8,8,0,0,1-11.32,11.32L136,43.31V212.69l18.34-18.35A8,8,0,0,1,165.66,194.34Z"/></svg></span> Вертикально</button>
-          </div>
-
-          <div class="vis-divider"></div>
-          <div class="vis-step-title">3 · Текстура</div>
+          <div class="vis-step-title">2 · Текстура</div>
           <button class="pick-btn" id="reikaPickBtn" onclick="openCatalogModal('reika')"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M231.65,194.55,198.46,36.75a16,16,0,0,0-19-12.39L132.65,34.42a16.08,16.08,0,0,0-12.3,19l33.19,157.8A16,16,0,0,0,169.16,224a16.25,16.25,0,0,0,3.38-.36l46.81-10.06A16.09,16.09,0,0,0,231.65,194.55ZM136,50.15c0-.06,0-.09,0-.09l46.8-10,3.33,15.87L139.33,66Zm6.62,31.47,46.82-10.05,3.34,15.9L146,97.53Zm6.64,31.57,46.82-10.06,13.3,63.24-46.82,10.06ZM216,197.94l-46.8,10-3.33-15.87L212.67,182,216,197.85C216,197.91,216,197.94,216,197.94ZM104,32H56A16,16,0,0,0,40,48V208a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V48A16,16,0,0,0,104,32ZM56,48h48V64H56Zm0,32h48v96H56Zm48,128H56V192h48v16Z"/></svg></span> Выбрать из каталога</button>
           <div class="selected-tex" id="reikaSelectedTex">
             <img class="tex-thumb" id="reikaTexThumb" src="" alt="">
@@ -1060,6 +1062,13 @@
               <div class="tex-name" id="reikaTexName">—</div>
             </div>
             <button class="tex-change" onclick="openCatalogModal('reika')">Изменить</button>
+          </div>
+
+          <div class="vis-divider"></div>
+          <div class="vis-step-title">3 · Ориентация</div>
+          <div style="display:flex;gap:8px;margin-bottom:14px;" id="reikaOrientBtns">
+            <button class="mat-btn active" onclick="setReikaOrient('horizontal',this)"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M237.66,133.66l-32,32a8,8,0,0,1-11.32-11.32L212.69,136H43.31l18.35,18.34a8,8,0,0,1-11.32,11.32l-32-32a8,8,0,0,1,0-11.32l32-32a8,8,0,0,1,11.32,11.32L43.31,120H212.69l-18.35-18.34a8,8,0,0,1,11.32-11.32l32,32A8,8,0,0,1,237.66,133.66Z"/></svg></span> Горизонтально</button>
+            <button class="mat-btn" onclick="setReikaOrient('vertical',this)"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M165.66,194.34a8,8,0,0,1,0,11.32l-32,32a8,8,0,0,1-11.32,0l-32-32a8,8,0,0,1,11.32-11.32L120,212.69V43.31L101.66,61.66A8,8,0,0,1,90.34,50.34l32-32a8,8,0,0,1,11.32,0l32,32a8,8,0,0,1-11.32,11.32L136,43.31V212.69l18.34-18.35A8,8,0,0,1,165.66,194.34Z"/></svg></span> Вертикально</button>
           </div>
         </div>
 
@@ -1083,20 +1092,12 @@
       <div class="vis-layout">
         <!-- Left: inputs -->
         <div class="vis-panel">
-          <div class="vis-step-title">1 · Фото здания</div>
-          <div class="photo-uploader" id="beltDrop">
-            <input type="file" id="beltFile" accept="image/*" style="display:none">
-            <div class="photo-uploader-empty">
-              <button type="button" class="photo-add-btn" onclick="document.getElementById('beltFile').click()"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,56H180.28L166.65,35.56A8,8,0,0,0,160,32H96a8,8,0,0,0-6.65,3.56L75.71,56H48A24,24,0,0,0,24,80V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm8,136a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V80a8,8,0,0,1,8-8H80a8,8,0,0,0,6.66-3.56L100.28,48h55.43l13.63,20.44A8,8,0,0,0,176,72h32a8,8,0,0,1,8,8ZM128,88a44,44,0,1,0,44,44A44.05,44.05,0,0,0,128,88Zm0,72a28,28,0,1,1,28-28A28,28,0,0,1,128,160Z"/></svg></span> Добавить фото</button>
-              <span class="photo-uploader-hint">или перетащите файл · JPG, PNG</span>
-            </div>
-            <div class="photo-uploader-filled" style="display:none;">
-              <img class="photo-uploader-thumb" src="" alt="">
-              <div class="photo-uploader-info">
-                <div class="photo-uploader-name"></div>
-                <button type="button" class="photo-change-btn" onclick="document.getElementById('beltFile').click()">Изменить фото</button>
-              </div>
-            </div>
+          <div class="vis-step-title">1 · Фотография</div>
+          <div class="upload-zone" id="beltDrop">
+            <div class="upload-icon"><span class="ico ico-xl" style="color:var(--muted)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,56H180.28L166.65,35.56A8,8,0,0,0,160,32H96a8,8,0,0,0-6.65,3.56L75.71,56H48A24,24,0,0,0,24,80V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm8,136a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V80a8,8,0,0,1,8-8H80a8,8,0,0,0,6.66-3.56L100.28,48h55.43l13.63,20.44A8,8,0,0,0,176,72h32a8,8,0,0,1,8,8ZM128,88a44,44,0,1,0,44,44A44.05,44.05,0,0,0,128,88Zm0,72a28,28,0,1,1,28-28A28,28,0,0,1,128,160Z"/></svg></span></div>
+            <div class="upload-text">Перетащите фото или нажмите</div>
+            <div class="upload-hint">JPG / PNG, до 10 МБ</div>
+            <input type="file" id="beltFile" accept="image/jpeg,image/jpg,image/png" style="display:none">
           </div>
 
           <div id="beltCanvasCard" style="display:none;">
@@ -1105,29 +1106,20 @@
             <div class="brush-ctrl">
               <label>Кисть</label><input type="range" id="beltBrush" min="4" max="60" value="14">
               <button onclick="beltDrawer&&beltDrawer.reset()">Очистить</button>
+              <button type="button" class="photo-change-btn" onclick="resetAccentPhoto('belt')">Сменить фото</button>
             </div>
             <div class="canvas-wrap"><canvas id="beltCanvas"></canvas></div>
           </div>
 
           <div class="vis-divider"></div>
-          <div class="vis-step-title">2 · Текстура <span style="color:var(--muted);font-weight:400;font-size:.82rem;">(опционально — можно сгенерировать из той же текстуры фасада)</span></div>
-          <button class="pick-btn" id="beltPickBtn" onclick="openCatalogModal('belt')"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M231.65,194.55,198.46,36.75a16,16,0,0,0-19-12.39L132.65,34.42a16.08,16.08,0,0,0-12.3,19l33.19,157.8A16,16,0,0,0,169.16,224a16.25,16.25,0,0,0,3.38-.36l46.81-10.06A16.09,16.09,0,0,0,231.65,194.55ZM136,50.15c0-.06,0-.09,0-.09l46.8-10,3.33,15.87L139.33,66Zm6.62,31.47,46.82-10.05,3.34,15.9L146,97.53Zm6.64,31.57,46.82-10.06,13.3,63.24-46.82,10.06ZM216,197.94l-46.8,10-3.33-15.87L212.67,182,216,197.85C216,197.91,216,197.94,216,197.94ZM104,32H56A16,16,0,0,0,40,48V208a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V48A16,16,0,0,0,104,32ZM56,48h48V64H56Zm0,32h48v96H56Zm48,128H56V192h48v16Z"/></svg></span> Выбрать из каталога</button>
-          <div class="selected-tex" id="beltSelectedTex">
-            <img class="tex-thumb" id="beltTexThumb" src="" alt="">
-            <div class="tex-info">
-              <div class="tex-label">Выбрана текстура</div>
-              <div class="tex-name" id="beltTexName">—</div>
-            </div>
-            <button class="tex-change" onclick="openCatalogModal('belt')">Изменить</button>
-            <button class="tex-change" style="color:var(--bad);" onclick="clearSubTex('belt')">Убрать</button>
-          </div>
-          <div id="beltModeRow" style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap;">
-            <span style="font-size:.82rem;color:var(--muted);margin-right:4px;">Режим перекомпоновки:</span>
+          <div class="vis-step-title">2 · Раскладка</div>
+          <div id="beltModeRow" style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
             <button id="beltModeSoldier" class="mat-btn active" onclick="setBeltMode('soldier',this)"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32Zm0,176H48V48H208V208Z"/></svg></span> Солдатская</button>
-            <button id="beltModeChess"   class="mat-btn"        onclick="setBeltMode('chess',this)"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M200,40H56A16,16,0,0,0,40,56V200a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V56A16,16,0,0,0,200,40Zm0,80H136V56h64ZM120,56v64H56V56ZM56,136h64v64H56Zm144,64H136V136h64v64Z"/></svg></span> Шахматная</button>
+            <button id="beltModeChess"   class="mat-btn"        onclick="setBeltMode('chess',this)"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M200,40H56A16,16,0,0,0,40,56V200a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V56A16,16,0,0,0,200,40Zm0,80H136V56h64ZM120,56v64H56V56ZM56,136h64v64H56Zm144,64H136V136h64v64Z"/></svg></span> Рядовая</button>
           </div>
-          <div style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap;">
-            <span style="font-size:.82rem;color:var(--muted);margin-right:4px;">Карнизы:</span>
+          <div class="vis-divider"></div>
+          <div class="vis-step-title">3 · Карниз</div>
+          <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
             <button id="beltCorniceNo"  class="mat-btn active" onclick="setBeltCornice('no',this)">Нет</button>
             <button id="beltCorniceYes" class="mat-btn"        onclick="setBeltCornice('yes',this)">Есть</button>
           </div>
@@ -1248,7 +1240,7 @@ let currentCategory     = 'facade';
 let pollingInterval     = null;
 
 // Catalog modal state
-let modalMatType        = 'standard';
+let modalMatType        = 'rigel';
 let modalSupplierVal    = null;
 let modalTexList        = [];
 
@@ -1660,7 +1652,7 @@ function setGenerating(on) {
     btn.disabled = on;
     btn.innerHTML = on
       ? `${ico('hourglass')} Генерация…`
-      : `${ico('sparkle')} Визуализировать`;
+      : `${ico('sparkle')} Сгенерировать`;
 }
 function showResult(url) {
     const img  = document.getElementById('resultImg');
@@ -2139,7 +2131,7 @@ function createDrawer(canvasId) {
     const ctx    = canvas.getContext('2d');
     let isDrawing = false, lastX = 0, lastY = 0, brushSize = 14, snapshot = null;
 
-    function loadImage(fileOrUrl) {
+    function loadImage(fileOrUrl, onReady) {
         const img = new Image();
         img.onload = () => {
             canvas.width  = img.width;
@@ -2150,6 +2142,7 @@ function createDrawer(canvasId) {
             canvas.style.height = Math.round(img.height * sc) + 'px';
             ctx.drawImage(img, 0, 0);
             snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            if (typeof onReady === 'function') onReady();
         };
         img.src = (typeof fileOrUrl === 'string') ? fileOrUrl : URL.createObjectURL(fileOrUrl);
     }
@@ -2212,27 +2205,24 @@ function initAccentPage() {
     // Цоколь
     setupZoneDrop('plinthDrop', 'plinthFile', file => {
         if (!plinthDrawer) plinthDrawer = createDrawer('plinthCanvas');
-        plinthDrawer.loadImage(file);
+        plinthDrawer.loadImage(file, () => refreshSubGenBtn('plinth'));
         document.getElementById('plinthCanvasCard').style.display = '';
-        refreshSubGenBtn('plinth');
     });
     document.getElementById('plinthBrush').addEventListener('input', e => plinthDrawer?.setBrush(+e.target.value));
 
     // Рейка
     setupZoneDrop('reikaDrop', 'reikaFile', file => {
         if (!reikaDrawer) reikaDrawer = createDrawer('reikaCanvas');
-        reikaDrawer.loadImage(file);
+        reikaDrawer.loadImage(file, () => refreshSubGenBtn('reika'));
         document.getElementById('reikaCanvasCard').style.display = '';
-        refreshSubGenBtn('reika');
     });
     document.getElementById('reikaBrush').addEventListener('input', e => reikaDrawer?.setBrush(+e.target.value));
 
     // Пояс
     setupZoneDrop('beltDrop', 'beltFile', file => {
         if (!beltDrawer) beltDrawer = createDrawer('beltCanvas');
-        beltDrawer.loadImage(file);
+        beltDrawer.loadImage(file, () => refreshSubGenBtn('belt'));
         document.getElementById('beltCanvasCard').style.display = '';
-        refreshSubGenBtn('belt');
     });
     document.getElementById('beltBrush').addEventListener('input', e => beltDrawer?.setBrush(+e.target.value));
 }
@@ -2267,6 +2257,20 @@ function applyAccentTexture(prefix, tex) {
     if (thumb) thumb.src = url;
     if (nameEl) nameEl.textContent = tex.name;
     if (sel) sel.classList.add('visible');
+    refreshSubGenBtn(prefix);
+}
+
+function resetAccentPhoto(prefix) {
+    // Скрываем canvas-card, обнуляем drawer, очищаем input, показываем upload-zone
+    if (prefix === 'plinth') plinthDrawer = null;
+    if (prefix === 'reika')  reikaDrawer  = null;
+    if (prefix === 'belt')   beltDrawer   = null;
+    const card = document.getElementById(`${prefix}CanvasCard`);
+    const drop = document.getElementById(`${prefix}Drop`);
+    const inp  = document.getElementById(`${prefix}File`);
+    if (card) card.style.display = 'none';
+    if (drop) drop.style.display = '';
+    if (inp)  inp.value = '';
     refreshSubGenBtn(prefix);
 }
 
@@ -2356,29 +2360,21 @@ function pollZoneResult(requestId, divId) {
 }
 
 // ============================================================
-// Общая вспомогательная функция photo-uploader для зон
+// Общая вспомогательная функция upload-zone для зон-акцентов
 function setupZoneDrop(dropId, fileId, onFile) {
-    const drop  = document.getElementById(dropId);
-    const inp   = document.getElementById(fileId);
-    const empty  = drop.querySelector('.photo-uploader-empty');
-    const filled = drop.querySelector('.photo-uploader-filled');
-    const thumb  = drop.querySelector('.photo-uploader-thumb');
-    const nameEl = drop.querySelector('.photo-uploader-name');
+    const drop = document.getElementById(dropId);
+    const inp  = document.getElementById(fileId);
 
     function load(file) {
-        if (empty && filled) {
-            const reader = new FileReader();
-            reader.onload = e => {
-                thumb.src = e.target.result;
-                nameEl.textContent = file.name;
-                empty.style.display  = 'none';
-                filled.style.display = 'flex';
-            };
-            reader.readAsDataURL(file);
-        }
+        if (!file) return;
+        if (!file.type.startsWith('image/')) { alert('Неверный формат'); return; }
+        if (file.size > 10 * 1024 * 1024)    { alert('Файл больше 10 МБ'); return; }
+        // После загрузки прячем зону, дальше пользователь рисует на canvas
+        drop.style.display = 'none';
         onFile(file);
     }
 
+    drop.addEventListener('click', () => inp.click());
     inp.addEventListener('change', e => { if (e.target.files[0]) load(e.target.files[0]); });
     drop.addEventListener('dragover',  e => { e.preventDefault(); drop.classList.add('drag-over'); });
     drop.addEventListener('dragleave', () => drop.classList.remove('drag-over'));
