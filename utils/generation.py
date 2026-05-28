@@ -75,16 +75,18 @@ def build_prompt(category: str, material_type: str,
                   f"JOINTS: Deep, dark, recessed mortar lines with sharp-edged borders — strong ambient occlusion between stones.")
     elif material_type == "cobblestone":
         prompt = (f"{base} {zone_instr}"
-                  f"TASK: Replace {target} with raw, natural weathered cobblestone. "
-                  f"CRITICAL 3D VOLUME (most important rule): Every single stone must read as a fully three-dimensional rounded boulder. "
-                  f"Each stone is a convex sphere or ovoid — the center of its visible face protrudes outward, and the edges curve away from the viewer into the dark gaps. "
-                  f"Strong directional highlight on the topmost/facing surface of each stone; deep cast shadow on the lower/side edges. "
+                  f"TASK: Replace {target} with smooth, water-worn oval cobblestone (river rock / pebble masonry). "
+                  f"SHAPE (CRITICAL — most important rule): Every single stone MUST be a smooth, elongated oval or egg shape — like river pebbles tumbled by water for centuries. "
+                  f"NO angular edges, NO sharp corners, NO flat fracture faces. Every stone boundary is a gentle, continuous curve. "
+                  f"Stones vary between round, oval, and elliptical — but ALL share soft, fully rounded contours with no abrupt breaks. "
+                  f"CRITICAL 3D VOLUME: Each stone is a convex ellipsoid — the center of its visible face bulges outward, and the edges roll smoothly away into the dark gaps. "
+                  f"Strong directional highlight on the topmost/facing surface of each stone; soft gradient shadow on the lower/side edges following the curvature. "
                   f"The overall wall surface must have dramatic high-relief depth — NOT a flat appliqué of stone shapes. "
                   f"GAPS: Gaps between stones must be deep, dark, and recessed — strong ambient occlusion creating the impression of real physical depth between rounded boulders. "
-                  f"SURFACE TEXTURE: Matte, coarse, granular mineral surface with visible pores and natural imperfections. Strictly avoid smooth, glossy, or plastic-like finishes. "
-                  f"SCALE & DENSITY: High-density mosaic of many small-to-medium stones (fist-sized relative to windows). Each stone has a unique organic shape — no identical or repetitive patterns. "
+                  f"SURFACE TEXTURE: Smooth, water-polished mineral surface with subtle natural grain and fine pores. No rough fractures or split faces. "
+                  f"SCALE & DENSITY: High-density mosaic of many small-to-medium stones (fist-sized relative to windows). Each stone has a unique organic oval shape — no identical or repetitive patterns. "
                   f"COLOR VARIANCE: Natural earthy variations (grays, tans, browns) with subtle mineral staining. "
-                  f"FORBIDDEN: Flat stone faces. Silhouette-like 2D stone shapes. Uniform, identical stones.")
+                  f"FORBIDDEN: Angular edges. Sharp corners. Flat fractured faces. Blocky rectangular shapes. Uniform identical stones.")
     elif material_type in ("textured_stone", "derbent_stone"):
         prompt = (f"{base} {zone_instr}Replace {target} with the provided textured square stone cladding. "
                   f"BLOCK SCALE (CRITICAL): Blocks must be SMALL — each block should be roughly fist-sized relative to windows and doors. "
