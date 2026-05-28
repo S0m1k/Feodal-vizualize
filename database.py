@@ -64,12 +64,16 @@ def init_db_sync():
         );
     """)
 
+    # Очистка: удалить materials_old если осталась от прерванной миграции
+    conn.execute("DROP TABLE IF EXISTS materials_old")
+    conn.commit()
+
     # Миграция: расширить CHECK-ограничения materials, если 'reika' ещё не включён
     cur = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='materials'")
     row = cur.fetchone()
     if row and "'reika'" not in row[0]:
-        conn.executescript("""
-            ALTER TABLE materials RENAME TO materials_old;
+        conn.execute("ALTER TABLE materials RENAME TO materials_old")
+        conn.execute("""
             CREATE TABLE materials (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
@@ -77,17 +81,18 @@ def init_db_sync():
                 material_type TEXT NOT NULL CHECK(material_type IN ('standard', 'rigel', 'cobblestone', 'rubble_stone', 'derbent_stone', 'reika')),
                 supplier TEXT NOT NULL CHECK(supplier IN ('redstone', 'redstone_premium', 'krasny_kamen', 'reika')),
                 UNIQUE(name, material_type, supplier)
-            );
-            INSERT INTO materials SELECT * FROM materials_old;
-            DROP TABLE materials_old;
+            )
         """)
+        conn.execute("INSERT INTO materials SELECT * FROM materials_old")
+        conn.execute("DROP TABLE materials_old")
+        conn.commit()
 
     # Миграция: добавить cobblestone/rubble_stone/derbent_stone если их нет в CHECK
     cur = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='materials'")
     row = cur.fetchone()
     if row and "'cobblestone'" not in row[0]:
-        conn.executescript("""
-            ALTER TABLE materials RENAME TO materials_old;
+        conn.execute("ALTER TABLE materials RENAME TO materials_old")
+        conn.execute("""
             CREATE TABLE materials (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
@@ -95,18 +100,19 @@ def init_db_sync():
                 material_type TEXT NOT NULL CHECK(material_type IN ('standard', 'rigel', 'cobblestone', 'rubble_stone', 'derbent_stone', 'reika')),
                 supplier TEXT NOT NULL CHECK(supplier IN ('redstone', 'redstone_premium', 'krasny_kamen', 'reika')),
                 UNIQUE(name, material_type, supplier)
-            );
-            INSERT INTO materials SELECT * FROM materials_old;
-            DROP TABLE materials_old;
+            )
         """)
+        conn.execute("INSERT INTO materials SELECT * FROM materials_old")
+        conn.execute("DROP TABLE materials_old")
+        conn.commit()
 
     # Миграция: убрать decorative_stone из CHECK и удалить такие записи
     cur = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='materials'")
     row = cur.fetchone()
     if row and "'decorative_stone'" in row[0]:
-        conn.executescript("""
-            DELETE FROM materials WHERE material_type = 'decorative_stone';
-            ALTER TABLE materials RENAME TO materials_old;
+        conn.execute("DELETE FROM materials WHERE material_type = 'decorative_stone'")
+        conn.execute("ALTER TABLE materials RENAME TO materials_old")
+        conn.execute("""
             CREATE TABLE materials (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
@@ -114,18 +120,18 @@ def init_db_sync():
                 material_type TEXT NOT NULL CHECK(material_type IN ('standard', 'rigel', 'cobblestone', 'rubble_stone', 'derbent_stone', 'reika')),
                 supplier TEXT NOT NULL CHECK(supplier IN ('redstone', 'redstone_premium', 'krasny_kamen', 'reika')),
                 UNIQUE(name, material_type, supplier)
-            );
-            INSERT INTO materials SELECT * FROM materials_old;
-            DROP TABLE materials_old;
+            )
         """)
+        conn.execute("INSERT INTO materials SELECT * FROM materials_old")
+        conn.execute("DROP TABLE materials_old")
+        conn.commit()
 
     # Миграция: добавить flat_stone и textured_stone, перевести derbent_stone → textured_stone
     cur = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='materials'")
     row = cur.fetchone()
     if row and "'flat_stone'" not in row[0]:
-        # Пересоздаём таблицу с новым CHECK-ограничением
-        conn.executescript("""
-            ALTER TABLE materials RENAME TO materials_old;
+        conn.execute("ALTER TABLE materials RENAME TO materials_old")
+        conn.execute("""
             CREATE TABLE materials (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
@@ -133,10 +139,10 @@ def init_db_sync():
                 material_type TEXT NOT NULL CHECK(material_type IN ('standard', 'rigel', 'cobblestone', 'rubble_stone', 'derbent_stone', 'flat_stone', 'textured_stone', 'reika')),
                 supplier TEXT NOT NULL CHECK(supplier IN ('redstone', 'redstone_premium', 'krasny_kamen', 'reika')),
                 UNIQUE(name, material_type, supplier)
-            );
-            INSERT INTO materials SELECT * FROM materials_old;
-            DROP TABLE materials_old;
+            )
         """)
+        conn.execute("INSERT INTO materials SELECT * FROM materials_old")
+        conn.execute("DROP TABLE materials_old")
         conn.commit()
 
     # Отдельная миграция: derbent_stone → textured_stone (идемпотентна, можно запускать повторно)
@@ -147,8 +153,8 @@ def init_db_sync():
     cur = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='materials'")
     row = cur.fetchone()
     if row and "'riegel_mixed'" not in row[0]:
-        conn.executescript("""
-            ALTER TABLE materials RENAME TO materials_old;
+        conn.execute("ALTER TABLE materials RENAME TO materials_old")
+        conn.execute("""
             CREATE TABLE materials (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
@@ -156,35 +162,30 @@ def init_db_sync():
                 material_type TEXT NOT NULL CHECK(material_type IN ('standard', 'rigel', 'riegel_mixed', 'cobblestone', 'rubble_stone', 'derbent_stone', 'flat_stone', 'textured_stone', 'reika')),
                 supplier TEXT NOT NULL CHECK(supplier IN ('redstone', 'redstone_premium', 'krasny_kamen', 'reika')),
                 UNIQUE(name, material_type, supplier)
-            );
-            INSERT INTO materials SELECT * FROM materials_old;
-            DROP TABLE materials_old;
+            )
         """)
+        conn.execute("INSERT INTO materials SELECT * FROM materials_old")
+        conn.execute("DROP TABLE materials_old")
         conn.commit()
 
     # Миграция: убрать CHECK constraint с materials.material_type для поддержки кастомных типов
     cur = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='materials'")
     row = cur.fetchone()
     if row and "CHECK" in row[0]:
-        conn.execute("BEGIN")
-        try:
-            conn.execute("ALTER TABLE materials RENAME TO materials_old")
-            conn.execute("""
-                CREATE TABLE materials (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL,
-                    filename TEXT NOT NULL,
-                    material_type TEXT NOT NULL,
-                    supplier TEXT NOT NULL,
-                    UNIQUE(name, material_type, supplier)
-                )
-            """)
-            conn.execute("INSERT INTO materials SELECT * FROM materials_old")
-            conn.execute("DROP TABLE materials_old")
-            conn.commit()
-        except Exception:
-            conn.rollback()
-            raise
+        conn.execute("ALTER TABLE materials RENAME TO materials_old")
+        conn.execute("""
+            CREATE TABLE materials (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                filename TEXT NOT NULL,
+                material_type TEXT NOT NULL,
+                supplier TEXT NOT NULL,
+                UNIQUE(name, material_type, supplier)
+            )
+        """)
+        conn.execute("INSERT INTO materials SELECT * FROM materials_old")
+        conn.execute("DROP TABLE materials_old")
+        conn.commit()
 
     # Таблица кастомных типов материалов
     conn.execute("""
