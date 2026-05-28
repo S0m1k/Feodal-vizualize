@@ -465,8 +465,16 @@ async def add_texture(
     file: UploadFile = File(...),
     current_admin = Depends(get_current_admin),
 ):
-    if material_type not in ("standard", "rigel", "riegel_mixed", "cobblestone", "rubble_stone", "derbent_stone", "flat_stone", "textured_stone", "reika", "solid"):
-        raise HTTPException(status_code=400, detail="Invalid material_type")
+    builtin_types = ("standard", "rigel", "riegel_mixed", "cobblestone", "rubble_stone", "derbent_stone", "flat_stone", "textured_stone", "reika", "solid")
+    if material_type not in builtin_types:
+        check_db = await get_db()
+        try:
+            cur = await check_db.execute("SELECT 1 FROM custom_material_types WHERE slug = ?", (material_type,))
+            is_custom = await cur.fetchone()
+        finally:
+            await check_db.close()
+        if not is_custom:
+            raise HTTPException(status_code=400, detail="Invalid material_type")
     if supplier not in ("redstone", "redstone_premium", "krasny_kamen", "reika", "solid"):
         raise HTTPException(status_code=400, detail="Invalid supplier")
     if not (file.content_type or "").startswith("image/"):

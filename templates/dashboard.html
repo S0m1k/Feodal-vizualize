@@ -717,6 +717,24 @@
       display: inline-flex; align-items: center; gap: 4px;
     }
     .del-btn:hover { background: var(--coral-soft); }
+    /* reusable design-system form controls */
+    .field-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 16px; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field-label {
+      font-size: .72rem; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .06em;
+    }
+    .ctl {
+      padding: 10px 14px; border-radius: 12px;
+      border: 1px solid var(--line-strong); font-family: var(--sans);
+      font-size: .88rem; outline: none; color: var(--ink);
+      background: var(--cream-card); width: 100%; transition: border-color .15s;
+    }
+    textarea.ctl { resize: vertical; line-height: 1.5; }
+    .ctl:focus { border-color: var(--coral); box-shadow: 0 0 0 3px var(--coral-soft); }
+    .ctl::placeholder { color: var(--muted); }
+    .field-block { margin-bottom: 16px; }
+    .field-block .field-label { display: block; margin-bottom: 6px; }
     .gen-filter { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 18px; }
     .gen-filter select, .gen-filter input {
       padding: 9px 14px; border-radius: 12px;
@@ -1107,32 +1125,36 @@
 
     <div class="admin-section">
       <h3><span class="ico" style="color:var(--coral)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M200,40H56A16,16,0,0,0,40,56V200a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V56A16,16,0,0,0,200,40Zm0,80H136V56h64ZM120,56v64H56V56ZM56,136h64v64H56Zm144,64H136V136h64v64Z"/></svg></span> Типы материалов (кастомные)</h3>
-      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:flex-end;">
-        <div style="flex:1;min-width:120px;">
-          <label style="font-size:.82rem;color:var(--muted);">Название</label>
-          <input type="text" id="cmtDisplayName" placeholder="Песчаник" style="width:100%;">
+      <div class="field-row">
+        <div class="field" style="flex:1;min-width:120px;">
+          <span class="field-label">Название</span>
+          <input type="text" id="cmtDisplayName" class="ctl" placeholder="Песчаник">
         </div>
-        <div style="flex:1;min-width:100px;">
-          <label style="font-size:.82rem;color:var(--muted);">Slug</label>
-          <input type="text" id="cmtSlug" placeholder="sandstone" style="width:100%;">
+        <div class="field" style="flex:1;min-width:100px;">
+          <span class="field-label">Slug</span>
+          <input type="text" id="cmtSlug" class="ctl" placeholder="sandstone">
         </div>
-        <div style="flex:1;min-width:100px;">
-          <label style="font-size:.82rem;color:var(--muted);">Модель по умолчанию</label>
-          <select id="cmtDefaultModel" style="width:100%;">
+        <div class="field" style="flex:1;min-width:100px;">
+          <span class="field-label">Модель по умолчанию</span>
+          <select id="cmtDefaultModel" class="ctl">
             <option value="gpt-image-2">GPT Image 2</option>
             <option value="nano-banana-2">Nano Banana 2</option>
           </select>
         </div>
-        <button class="btn-add" onclick="addCustomMaterialType()">Добавить</button>
+        <button class="btn-add" onclick="addCustomMaterialType()">
+          <span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" width="15" height="15"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg></span>
+          Добавить
+        </button>
       </div>
-      <div style="margin-bottom:12px;">
+      <div class="field-block">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-          <label style="font-size:.82rem;color:var(--muted);">Системный промт</label>
-          <button class="btn-outline" onclick="openAiPromptModal()" style="font-size:.78rem;padding:4px 12px;">
-            <span style="margin-right:4px;">✨</span> AI-помощник
+          <span class="field-label">Системный промт</span>
+          <button class="btn-outline" onclick="openAiPromptModal()" style="font-size:.78rem;padding:5px 14px;display:inline-flex;align-items:center;gap:6px;">
+            <span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" width="14" height="14"><path d="M208,144a15.78,15.78,0,0,1-10.42,14.94l-51.65,19-19,51.61a15.92,15.92,0,0,1-29.88,0l-19-51.65-51.61-19a15.92,15.92,0,0,1,0-29.88l51.65-19,19-51.61a15.92,15.92,0,0,1,29.88,0l19,51.65,51.61,19A15.78,15.78,0,0,1,208,144ZM152,48h16V64a8,8,0,0,0,16,0V48h16a8,8,0,0,0,0-16H184V16a8,8,0,0,0-16,0V32H152a8,8,0,0,0,0,16Zm88,32h-8V72a8,8,0,0,0-16,0v8h-8a8,8,0,0,0,0,16h8v8a8,8,0,0,0,16,0V96h8a8,8,0,0,0,0-16Z"/></svg></span>
+            AI-помощник
           </button>
         </div>
-        <textarea id="cmtSystemPrompt" rows="3" style="width:100%;font-size:.85rem;"
+        <textarea id="cmtSystemPrompt" class="ctl" rows="3"
           placeholder="Describe the stone texture rendering rules..."></textarea>
       </div>
       <div id="cmtTable"><div style="padding:12px;color:var(--muted);">Загрузка…</div></div>
@@ -1140,27 +1162,30 @@
 
     <div class="admin-section">
       <h3><span class="ico" style="color:var(--coral)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160ZM200,216H56V40h88V88a8,8,0,0,0,8,8h48V216Zm-32-80a8,8,0,0,1-8,8H96a8,8,0,0,1,0-16h64A8,8,0,0,1,168,136Zm0,32a8,8,0,0,1-8,8H96a8,8,0,0,1,0-16h64A8,8,0,0,1,168,168Z"/></svg></span> Шаблоны промтов</h3>
-      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:flex-end;">
-        <div style="flex:0 0 120px;">
-          <label style="font-size:.82rem;color:var(--muted);">Категория</label>
-          <select id="ptCategory" style="width:100%;">
+      <div class="field-row">
+        <div class="field" style="flex:0 0 130px;">
+          <span class="field-label">Категория</span>
+          <select id="ptCategory" class="ctl">
             <option value="fix">Фикс</option>
             <option value="style">Стиль</option>
           </select>
         </div>
-        <div style="flex:1;min-width:140px;">
-          <label style="font-size:.82rem;color:var(--muted);">Название</label>
-          <input type="text" id="ptLabel" placeholder="Убери артефакты" style="width:100%;">
+        <div class="field" style="flex:1;min-width:140px;">
+          <span class="field-label">Название</span>
+          <input type="text" id="ptLabel" class="ctl" placeholder="Убери артефакты">
         </div>
-        <div style="flex:0 0 80px;">
-          <label style="font-size:.82rem;color:var(--muted);">Порядок</label>
-          <input type="number" id="ptSortOrder" value="0" min="0" style="width:100%;">
+        <div class="field" style="flex:0 0 90px;">
+          <span class="field-label">Порядок</span>
+          <input type="number" id="ptSortOrder" class="ctl" value="0" min="0">
         </div>
-        <button class="btn-add" onclick="addPromptTemplate()">Добавить</button>
+        <button class="btn-add" onclick="addPromptTemplate()">
+          <span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" width="15" height="15"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg></span>
+          Добавить
+        </button>
       </div>
-      <div style="margin-bottom:12px;">
-        <label style="font-size:.82rem;color:var(--muted);">Текст промта</label>
-        <textarea id="ptPromptText" rows="2" style="width:100%;font-size:.85rem;"
+      <div class="field-block">
+        <span class="field-label">Текст промта</span>
+        <textarea id="ptPromptText" class="ctl" rows="2"
           placeholder="Remove artifacts and noise from the generated image while preserving the stone texture details."></textarea>
       </div>
       <div id="ptTable"><div style="padding:12px;color:var(--muted);">Загрузка…</div></div>
@@ -1423,20 +1448,20 @@
     <div class="modal-body" style="display:flex;flex-direction:column;gap:16px;">
       <div style="display:flex;gap:14px;flex-wrap:wrap;">
         <div style="flex:1;min-width:200px;">
-          <label style="font-size:.82rem;color:var(--muted);margin-bottom:6px;display:block;">Фото текстуры</label>
+          <label class="field-label" style="display:block;margin-bottom:6px;">Фото текстуры</label>
           <div class="ai-upload-zone" id="aiTextureZone" onclick="document.getElementById('aiTextureInput').click()">
             <div id="aiTexturePreview" style="color:var(--muted);font-size:.82rem;text-align:center;">
-              <div style="font-size:1.5rem;margin-bottom:4px;">📷</div>
+              <div style="margin-bottom:6px;display:flex;justify-content:center;"><span class="ico" style="color:var(--muted)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" width="26" height="26"><path d="M208,56H180.28L166.65,35.56A8,8,0,0,0,160,32H96a8,8,0,0,0-6.65,3.56L75.71,56H48A24,24,0,0,0,24,80V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm-80,128a44,44,0,1,1,44-44A44.05,44.05,0,0,1,128,184Zm0-72a28,28,0,1,0,28,28A28,28,0,0,0,128,112Z"/></svg></span></div>
               Нажмите или перетащите
             </div>
             <input type="file" id="aiTextureInput" accept="image/*" style="display:none;" onchange="previewAiUpload(this,'aiTexturePreview','aiTextureZone')">
           </div>
         </div>
         <div style="flex:1;min-width:200px;">
-          <label style="font-size:.82rem;color:var(--muted);margin-bottom:6px;display:block;">Фото реальной кладки</label>
+          <label class="field-label" style="display:block;margin-bottom:6px;">Фото реальной кладки</label>
           <div class="ai-upload-zone" id="aiRealZone" onclick="document.getElementById('aiRealInput').click()">
             <div id="aiRealPreview" style="color:var(--muted);font-size:.82rem;text-align:center;">
-              <div style="font-size:1.5rem;margin-bottom:4px;">🏠</div>
+              <div style="margin-bottom:6px;display:flex;justify-content:center;"><span class="ico" style="color:var(--muted)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" width="26" height="26"><path d="M218.83,103.77l-80-75.48a1.14,1.14,0,0,1-.11-.11,16,16,0,0,0-21.53,0l-.11.11L37.17,103.77A16,16,0,0,0,32,115.55V208a16,16,0,0,0,16,16H96a16,16,0,0,0,16-16V160h32v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V115.55A16,16,0,0,0,218.83,103.77ZM208,208H160V160a16,16,0,0,0-16-16H112a16,16,0,0,0-16,16v48H48V115.55l.11-.1L128,40l79.9,75.43.11.1Z"/></svg></span></div>
               Нажмите или перетащите
             </div>
             <input type="file" id="aiRealInput" accept="image/*" style="display:none;" onchange="previewAiUpload(this,'aiRealPreview','aiRealZone')">
@@ -1444,16 +1469,16 @@
         </div>
       </div>
       <div>
-        <label style="font-size:.82rem;color:var(--muted);margin-bottom:6px;display:block;">Дополнительное описание (необязательно)</label>
-        <textarea id="aiDescription" rows="2" style="width:100%;font-size:.85rem;" placeholder="Например: это песчаник с грубой фактурой, укладывается без затирки…"></textarea>
+        <label class="field-label" style="display:block;margin-bottom:6px;">Дополнительное описание (необязательно)</label>
+        <textarea id="aiDescription" class="ctl" rows="2" placeholder="Например: это песчаник с грубой фактурой, укладывается без затирки…"></textarea>
       </div>
       <button class="btn-primary" id="aiGenBtn" onclick="generateAiPrompt()" style="align-self:flex-start;display:flex;align-items:center;gap:8px;">
         <span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" width="16" height="16"><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88Z"/></svg></span>
         Сгенерировать промт
       </button>
       <div id="aiPromptResult" style="display:none;">
-        <label style="font-size:.82rem;color:var(--muted);margin-bottom:6px;display:block;">Сгенерированный системный промт</label>
-        <textarea id="aiGeneratedPrompt" rows="6" style="width:100%;font-size:.85rem;"></textarea>
+        <label class="field-label" style="display:block;margin-bottom:6px;">Сгенерированный системный промт</label>
+        <textarea id="aiGeneratedPrompt" class="ctl" rows="6"></textarea>
         <div style="display:flex;gap:8px;margin-top:10px;">
           <button class="btn-primary" onclick="applyAiPrompt()">Применить</button>
           <button class="btn-outline" onclick="generateAiPrompt()">Перегенерировать</button>
@@ -2608,10 +2633,10 @@ async function loadCustomMaterialTypes() {
               <td>${t.display_name}</td>
               <td>${t.default_model}</td>
               <td>
-                <textarea id="cmtPrompt_${t.id}" rows="2" style="width:100%;font-size:.82rem;resize:vertical;">${(t.system_prompt||'').replace(/</g,'&lt;')}</textarea>
-                <div style="display:flex;gap:6px;margin-top:4px;">
-                  <button class="btn-add" style="font-size:.75rem;padding:3px 10px;" onclick="saveCmtPrompt(${t.id})">Сохранить</button>
-                  <button class="btn-outline" style="font-size:.72rem;padding:2px 8px;" onclick="openAiPromptModalFor(${t.id})">✨ AI</button>
+                <textarea id="cmtPrompt_${t.id}" class="ctl" rows="2" style="font-size:.82rem;">${(t.system_prompt||'').replace(/</g,'&lt;')}</textarea>
+                <div style="display:flex;gap:6px;margin-top:6px;">
+                  <button class="btn-add" style="font-size:.75rem;padding:5px 14px;" onclick="saveCmtPrompt(${t.id})">Сохранить</button>
+                  <button class="btn-outline" style="font-size:.74rem;padding:4px 12px;display:inline-flex;align-items:center;gap:5px;" onclick="openAiPromptModalFor(${t.id})"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" width="13" height="13"><path d="M208,144a15.78,15.78,0,0,1-10.42,14.94l-51.65,19-19,51.61a15.92,15.92,0,0,1-29.88,0l-19-51.65-51.61-19a15.92,15.92,0,0,1,0-29.88l51.65-19,19-51.61a15.92,15.92,0,0,1,29.88,0l19,51.65,51.61,19A15.78,15.78,0,0,1,208,144ZM152,48h16V64a8,8,0,0,0,16,0V48h16a8,8,0,0,0,0-16H184V16a8,8,0,0,0-16,0V32H152a8,8,0,0,0,0,16Zm88,32h-8V72a8,8,0,0,0-16,0v8h-8a8,8,0,0,0,0,16h8v8a8,8,0,0,0,16,0V96h8a8,8,0,0,0,0-16Z"/></svg></span>AI</button>
                 </div>
               </td>
               <td><button class="btn-del" onclick="deleteCustomMaterialType(${t.id})">Удалить</button></td>
