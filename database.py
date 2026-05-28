@@ -71,7 +71,7 @@ def init_db_sync():
     # Миграция: расширить CHECK-ограничения materials, если 'reika' ещё не включён
     cur = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='materials'")
     row = cur.fetchone()
-    if row and "'reika'" not in row[0]:
+    if row and "CHECK" in row[0] and "'reika'" not in row[0]:
         conn.execute("ALTER TABLE materials RENAME TO materials_old")
         conn.execute("""
             CREATE TABLE materials (
@@ -90,7 +90,7 @@ def init_db_sync():
     # Миграция: добавить cobblestone/rubble_stone/derbent_stone если их нет в CHECK
     cur = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='materials'")
     row = cur.fetchone()
-    if row and "'cobblestone'" not in row[0]:
+    if row and "CHECK" in row[0] and "'cobblestone'" not in row[0]:
         conn.execute("ALTER TABLE materials RENAME TO materials_old")
         conn.execute("""
             CREATE TABLE materials (
@@ -109,7 +109,7 @@ def init_db_sync():
     # Миграция: убрать decorative_stone из CHECK и удалить такие записи
     cur = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='materials'")
     row = cur.fetchone()
-    if row and "'decorative_stone'" in row[0]:
+    if row and "CHECK" in row[0] and "'decorative_stone'" in row[0]:
         conn.execute("DELETE FROM materials WHERE material_type = 'decorative_stone'")
         conn.execute("ALTER TABLE materials RENAME TO materials_old")
         conn.execute("""
@@ -129,7 +129,7 @@ def init_db_sync():
     # Миграция: добавить flat_stone и textured_stone, перевести derbent_stone → textured_stone
     cur = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='materials'")
     row = cur.fetchone()
-    if row and "'flat_stone'" not in row[0]:
+    if row and "CHECK" in row[0] and "'flat_stone'" not in row[0]:
         conn.execute("ALTER TABLE materials RENAME TO materials_old")
         conn.execute("""
             CREATE TABLE materials (
@@ -152,7 +152,7 @@ def init_db_sync():
     # Миграция: добавить riegel_mixed
     cur = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='materials'")
     row = cur.fetchone()
-    if row and "'riegel_mixed'" not in row[0]:
+    if row and "CHECK" in row[0] and "'riegel_mixed'" not in row[0]:
         conn.execute("ALTER TABLE materials RENAME TO materials_old")
         conn.execute("""
             CREATE TABLE materials (
