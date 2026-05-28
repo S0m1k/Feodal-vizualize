@@ -821,6 +821,29 @@ CHAT_SYSTEM_PROMPT = (
 )
 
 
+def _extract_chat_content(result) -> str:
+    """Pull assistant text from either OpenAI (choices) or GenAPI (result list) format."""
+    if isinstance(result, list) and result:
+        item = result[0]
+        if isinstance(item, dict):
+            return item.get("message", {}).get("content", "") or str(item)
+        return str(item)
+    if isinstance(result, dict):
+        choices = result.get("choices")
+        if isinstance(choices, list) and choices:
+            return choices[0].get("message", {}).get("content", "") or ""
+        for key in ("result", "output", "full_response"):
+            val = result.get(key)
+            if isinstance(val, list) and val and isinstance(val[0], dict):
+                content = val[0].get("message", {}).get("content")
+                if content:
+                    return content
+            if isinstance(val, str) and val:
+                return val
+        return result.get("content") or result.get("text") or ""
+    return str(result)
+
+
 async def _chat_completion(api_key: str, messages: list, max_tokens: int = 1024) -> str:
     """Call the OpenAI-compatible GenAPI proxy (synchronous, standard format)."""
     headers = {
@@ -835,10 +858,7 @@ async def _chat_completion(api_key: str, messages: list, max_tokens: int = 1024)
             logger.error("Chat API error status=%s body=%s", resp.status_code, resp.text[:500])
             raise HTTPException(502, "Ошибка текстовой модели")
         result = resp.json()
-    choices = result.get("choices", [])
-    if choices:
-        return choices[0].get("message", {}).get("content", "") or ""
-    return result.get("content") or result.get("text") or str(result)
+    return _extract_chat_content(result)
 
 
 class ChatMessage(BaseModel):
