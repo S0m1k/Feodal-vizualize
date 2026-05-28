@@ -813,7 +813,7 @@ async def free_generate(data: FreeGenerateRequest, request: Request, current_use
 # ============================================================
 
 CHAT_ENDPOINT = "https://proxy.gen-api.ru/v1/chat/completions"
-CHAT_MODEL = "gpt-5-5"
+CHAT_MODEL = "gpt-4o"
 CHAT_SYSTEM_PROMPT = (
     "Ты эксперт по облицовке зданий натуральным камнем и кирпичом. "
     "Анализируй изображения визуализации и давай рекомендации по улучшению. "
