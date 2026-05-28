@@ -812,12 +812,33 @@ async def free_generate(data: FreeGenerateRequest, request: Request, current_use
 #  CHAT — text analysis via GenAPI GPT-4o
 # ============================================================
 
-CHAT_ENDPOINT = "https://api.gen-api.ru/api/v1/networks/gpt-4o"
+CHAT_ENDPOINT = "https://proxy.gen-api.ru/v1/chat/completions"
+CHAT_MODEL = "gpt-5-5"
 CHAT_SYSTEM_PROMPT = (
     "Ты эксперт по облицовке зданий натуральным камнем и кирпичом. "
     "Анализируй изображения визуализации и давай рекомендации по улучшению. "
     "Отвечай на русском языке, кратко и по делу."
 )
+
+
+async def _chat_completion(api_key: str, messages: list, max_tokens: int = 1024) -> str:
+    """Call the OpenAI-compatible GenAPI proxy (synchronous, standard format)."""
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "Authorization": f"Bearer {api_key}",
+    }
+    payload = {"model": CHAT_MODEL, "messages": messages, "max_tokens": max_tokens}
+    async with httpx.AsyncClient(timeout=httpx.Timeout(connect=30.0, read=180.0, write=30.0, pool=5.0)) as client:
+        resp = await client.post(CHAT_ENDPOINT, json=payload, headers=headers)
+        if not resp.is_success:
+            logger.error("Chat API error status=%s body=%s", resp.status_code, resp.text[:500])
+            raise HTTPException(502, "Ошибка текстовой модели")
+        result = resp.json()
+    choices = result.get("choices", [])
+    if choices:
+        return choices[0].get("message", {}).get("content", "") or ""
+    return result.get("content") or result.get("text") or str(result)
 
 
 class ChatMessage(BaseModel):
@@ -855,47 +876,7 @@ async def chat_analysis(data: ChatRequest, request: Request, current_user=Depend
     else:
         messages.append({"role": "user", "content": user_content})
 
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "Authorization": f"Bearer {api_key}",
-    }
-    payload = {"messages": messages, "max_tokens": 1024}
-
-    async with httpx.AsyncClient(timeout=httpx.Timeout(connect=30.0, read=120.0, write=30.0, pool=5.0)) as client:
-        resp = await client.post(CHAT_ENDPOINT, json=payload, headers=headers)
-        if not resp.is_success:
-            logger.error("Chat API error status=%s body=%s", resp.status_code, resp.text[:500])
-            raise HTTPException(502, "Ошибка текстовой модели")
-        result = resp.json()
-
-    # GenAPI may return sync or async response
-    if "request_id" in result and "choices" not in result:
-        status_url = f"https://api.gen-api.ru/api/v1/request/get/{result['request_id']}"
-        async with httpx.AsyncClient(timeout=30.0) as poll_client:
-            for _ in range(60):
-                await asyncio.sleep(2)
-                try:
-                    sr = await poll_client.get(status_url, headers=headers)
-                    sd = sr.json()
-                    status = str(sd.get("status", "")).lower()
-                    if status in {"success", "done", "completed", "finished"}:
-                        result = sd.get("output") or sd.get("result") or sd
-                        break
-                    if status in {"error", "failed", "failure"}:
-                        raise HTTPException(502, "Ошибка текстовой модели")
-                except httpx.RequestError:
-                    continue
-            else:
-                raise HTTPException(504, "Таймаут ответа текстовой модели")
-
-    # Extract assistant message
-    choices = result.get("choices", [])
-    if choices:
-        reply = choices[0].get("message", {}).get("content", "")
-    else:
-        reply = result.get("content") or result.get("text") or str(result)
-
+    reply = await _chat_completion(api_key, messages)
     return {"reply": reply}
 
 
@@ -964,46 +945,8 @@ async def generate_system_prompt(
         {"role": "user", "content": user_content},
     ]
 
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "Authorization": f"Bearer {api_key}",
-    }
-    payload = {"messages": messages, "max_tokens": 1024}
-
     try:
-        async with httpx.AsyncClient(timeout=httpx.Timeout(connect=30.0, read=120.0, write=30.0, pool=5.0)) as client:
-            resp = await client.post(CHAT_ENDPOINT, json=payload, headers=headers)
-            if not resp.is_success:
-                logger.error("Prompt gen API error status=%s body=%s", resp.status_code, resp.text[:500])
-                raise HTTPException(502, "Ошибка текстовой модели")
-            result = resp.json()
-
-        if "request_id" in result and "choices" not in result:
-            status_url = f"https://api.gen-api.ru/api/v1/request/get/{result['request_id']}"
-            async with httpx.AsyncClient(timeout=30.0) as poll_client:
-                for _ in range(60):
-                    await asyncio.sleep(2)
-                    try:
-                        sr = await poll_client.get(status_url, headers=headers)
-                        sd = sr.json()
-                        status = str(sd.get("status", "")).lower()
-                        if status in {"success", "done", "completed", "finished"}:
-                            result = sd.get("output") or sd.get("result") or sd
-                            break
-                        if status in {"error", "failed", "failure"}:
-                            raise HTTPException(502, "Ошибка генерации промта")
-                    except httpx.RequestError:
-                        continue
-                else:
-                    raise HTTPException(504, "Таймаут генерации промта")
-
-        choices = result.get("choices", [])
-        if choices:
-            reply = choices[0].get("message", {}).get("content", "")
-        else:
-            reply = result.get("content") or result.get("text") or str(result)
-
+        reply = await _chat_completion(api_key, messages)
         return {"system_prompt": reply.strip()}
     finally:
         for fp in temp_files:
