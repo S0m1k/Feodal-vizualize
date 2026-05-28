@@ -664,8 +664,16 @@
     /* ===== HISTORY ===== */
     .table-wrap {
       background: var(--cream-card); border-radius: 16px;
-      overflow: hidden; border: 1px solid var(--line);
+      overflow-x: auto; border: 1px solid var(--line);
+      -webkit-overflow-scrolling: touch;
     }
+    /* admin table containers scroll horizontally instead of widening the page */
+    #texturesList, #allGenerationsTable, #leadsTable, #cmtTable, #ptTable,
+    #usersList, #groutColorsList {
+      overflow-x: auto; -webkit-overflow-scrolling: touch;
+    }
+    #allGenerationsTable table, #leadsTable table, #cmtTable table,
+    #ptTable table, #texturesList table, #usersList table { min-width: 560px; }
     table { width: 100%; border-collapse: collapse; }
     th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--line); }
     th { background: var(--cream-soft); font-weight: 600; font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
@@ -678,6 +686,7 @@
     .history-img:hover { transform: scale(1.06); }
     .pagination {
       display: flex; gap: 6px; justify-content: center; padding: 16px;
+      flex-wrap: wrap;
     }
     .page-btn {
       padding: 7px 14px; border: 1px solid var(--line-strong);
@@ -2494,10 +2503,12 @@ function appendFpPrompt(text) {
     const ta = document.getElementById('fpCustomPrompt');
     ta.value = ta.value ? ta.value + ' ' + text : text;
 }
+let fpGalleryItems = [];
 async function loadFpGallery(page = 1) {
     try {
         const r = await fetch(`${API_BASE}/api/internal/history?page=${page}&per_page=20`, { credentials:'include', headers:H() });
         const d = await r.json();
+        fpGalleryItems = d.items || [];
         const gallery = document.getElementById('fpGallery');
         if (!d.items.length) { gallery.innerHTML = '<div style="color:var(--muted);font-size:.85rem;">Нет результатов генерации</div>'; return; }
         gallery.innerHTML = d.items.map(item => {
@@ -2557,11 +2568,11 @@ function pollFreeResult(requestId) {
                 clearInterval(timer);
                 const url = d.result_url.startsWith('http') ? d.result_url : `${API_BASE}${d.result_url}`;
                 document.getElementById('fpResultBox').innerHTML = `<img src="${url}" style="width:100%;border-radius:14px;cursor:pointer;" onclick="openLightbox('${url}')">`;
-                fpSelectedGeneration = { output_image_path: url };
-                const prev = document.getElementById('fpSelectedPreview');
-                if (prev) prev.innerHTML = `<img src="${url}" style="width:100%;border-radius:14px;"><div style="text-align:center;color:var(--muted);font-size:.8rem;margin-top:4px;">Результат предыдущей итерации</div>`;
                 document.getElementById('fpCustomPrompt').value = '';
-                loadFpGallery(1);
+                // Chain: reload gallery and make the new result the source for the next iteration
+                await loadFpGallery(1);
+                const newest = fpGalleryItems[0];
+                if (newest) selectFpGeneration(newest.id, newest.output_image_url);
             } else if (d.status === 'error') {
                 clearInterval(timer);
                 document.getElementById('fpResultBox').innerHTML = '<div style="color:var(--bad);padding:10px;">Ошибка генерации</div>';
