@@ -507,6 +507,55 @@
       cursor: pointer; opacity: 1;
     }
     .gen-btn.ready:hover { background: var(--coral-hover); border-color: var(--coral-hover); }
+    .model-toggle {
+      display: flex; gap: 0; margin-bottom: 10px; border-radius: 999px;
+      overflow: hidden; border: 1px solid var(--border);
+    }
+    .model-toggle button {
+      flex: 1; padding: 8px 12px; font-size: .82rem; font-weight: 500;
+      border: none; background: var(--surface); color: var(--muted);
+      cursor: pointer; transition: all .15s;
+    }
+    .model-toggle button.active {
+      background: var(--coral); color: #fff;
+    }
+    .model-toggle button:hover:not(.active) { background: var(--hover); }
+    .fp-chip {
+      padding: 6px 14px; border-radius: 999px; font-size: .8rem; font-weight: 500;
+      border: 1px solid var(--border); background: var(--surface); color: var(--ink);
+      cursor: pointer; transition: all .15s;
+    }
+    .fp-chip:hover { border-color: var(--coral); color: var(--coral); }
+    .fp-chat-msg { margin-bottom: 10px; font-size: .88rem; line-height: 1.4; }
+    .fp-chat-msg.user { text-align: right; }
+    .fp-chat-msg .bubble {
+      display: inline-block; max-width: 85%; padding: 8px 14px; border-radius: 14px;
+      text-align: left; word-break: break-word;
+    }
+    .fp-chat-msg.user .bubble { background: var(--coral); color: #fff; }
+    .fp-chat-msg.assistant .bubble { background: var(--hover); color: var(--ink); }
+    .fp-gallery-item {
+      border-radius: 10px; overflow: hidden; cursor: pointer; border: 2px solid transparent;
+      aspect-ratio: 1; background-size: cover; background-position: center;
+      transition: border-color .15s;
+    }
+    .fp-gallery-item:hover { border-color: var(--muted); }
+    .fp-gallery-item.selected { border-color: var(--coral); }
+    .ai-upload-zone {
+      border: 2px dashed var(--line); border-radius: 14px; padding: 20px;
+      cursor: pointer; transition: border-color .15s, background .15s;
+      min-height: 120px; display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .ai-upload-zone:hover { border-color: var(--coral); background: var(--coral-soft); }
+    .ai-upload-zone.has-image { border-style: solid; padding: 4px; }
+    .ai-upload-zone.has-image img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+    .btn-outline {
+      background: transparent; color: var(--coral); border: 1.5px solid var(--coral);
+      padding: 8px 18px; border-radius: 999px; cursor: pointer; font-size: .88rem;
+      font-weight: 500; transition: all .15s;
+    }
+    .btn-outline:hover { background: var(--coral-soft); }
     .status-banner {
       padding: 10px 18px; border-radius: 999px; font-weight: 500;
       font-size: .88rem; text-align: center; margin-top: 10px; display: none;
@@ -721,6 +770,7 @@
     <li><span class="nav-link" data-page="accent"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" width="16" height="16"><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88ZM137,164.22a8,8,0,0,0-4.74,4.74L112,223.85,91.78,169A8,8,0,0,0,87,164.22L32.15,144,87,123.78A8,8,0,0,0,91.78,119L112,64.15,132.22,119a8,8,0,0,0,4.74,4.74L191.85,144ZM144,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H184V64a8,8,0,0,1-16,0V48H152A8,8,0,0,1,144,40ZM248,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,248,88Z"/></svg></span> Цоколь<span class="title-sep"></span>Пояс<span class="title-sep"></span>Рейка</span></li>
     <li><span class="nav-link" data-page="catalog"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" width="16" height="16"><path d="M231.65,194.55,198.46,36.75a16,16,0,0,0-19-12.39L132.65,34.42a16.08,16.08,0,0,0-12.3,19l33.19,157.8A16,16,0,0,0,169.16,224a16.25,16.25,0,0,0,3.38-.36l46.81-10.06A16.09,16.09,0,0,0,231.65,194.55ZM136,50.15c0-.06,0-.09,0-.09l46.8-10,3.33,15.87L139.33,66Zm6.62,31.47,46.82-10.05,3.34,15.9L146,97.53Zm6.64,31.57,46.82-10.06,13.3,63.24-46.82,10.06ZM216,197.94l-46.8,10-3.33-15.87L212.67,182,216,197.85C216,197.91,216,197.94,216,197.94ZM104,32H56A16,16,0,0,0,40,48V208a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V48A16,16,0,0,0,104,32ZM56,48h48V64H56Zm0,32h48v96H56Zm48,128H56V192h48v16Z"/></svg></span> Каталог</span></li>
     <li><span class="nav-link" data-page="history"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" width="16" height="16"><path d="M96,104a8,8,0,0,1,8-8h64a8,8,0,0,1,0,16H104A8,8,0,0,1,96,104Zm8,40h64a8,8,0,0,0,0-16H104a8,8,0,0,0,0,16Zm128,48a32,32,0,0,1-32,32H88a32,32,0,0,1-32-32V64a16,16,0,0,0-32,0c0,5.74,4.83,9.62,4.88,9.66h0A8,8,0,0,1,24,88a7.89,7.89,0,0,1-4.79-1.61h0C18.05,85.54,8,77.61,8,64A32,32,0,0,1,40,32H176a32,32,0,0,1,32,32V168h8a8,8,0,0,1,4.8,1.6C222,170.46,232,178.39,232,192ZM96.26,173.48A8.07,8.07,0,0,1,104,168h88V64a16,16,0,0,0-16-16H67.69A31.71,31.71,0,0,1,72,64V192a16,16,0,0,0,32,0c0-5.74-4.83-9.62-4.88-9.66A7.82,7.82,0,0,1,96.26,173.48ZM216,192a12.58,12.58,0,0,0-3.23-8h-94a26.92,26.92,0,0,1,1.21,8,31.82,31.82,0,0,1-4.29,16H200A16,16,0,0,0,216,192Z"/></svg></span> История</span></li>
+    <li><span class="nav-link" data-page="free-prompts"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" width="16" height="16"><path d="M232,127.89a104.07,104.07,0,0,0-104-104c-57.42,0-104,46.58-104,104a103.37,103.37,0,0,0,15.12,53.78L25.12,221.78a8,8,0,0,0,9.1,9.1l40.11-14a103.37,103.37,0,0,0,53.78,15.12A104.07,104.07,0,0,0,232,127.89ZM128,216a87.37,87.37,0,0,1-44.06-11.92,8,8,0,0,0-6.54-.67L42.42,215.58l12.17-34.98a8,8,0,0,0-.67-6.54A87.37,87.37,0,0,1,40,128a88,88,0,0,1,88-88c48.52,0,88,39.48,88,87.89A88,88,0,0,1,128,216Z"/></svg></span> Свободные промты</span></li>
     <li id="adminNavItem" style="display:none;"><span class="nav-link" data-page="admin"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" width="16" height="16"><path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm88-29.84q.06-2.16,0-4.32l14.92-18.64a8,8,0,0,0,1.48-7.06,107.21,107.21,0,0,0-10.88-26.25,8,8,0,0,0-6-3.93l-23.72-2.64q-1.48-1.56-3-3L186,40.54a8,8,0,0,0-3.94-6,107.71,107.71,0,0,0-26.25-10.87,8,8,0,0,0-7.06,1.49L130.16,40Q128,40,125.84,40L107.2,25.11a8,8,0,0,0-7.06-1.48A107.6,107.6,0,0,0,73.89,34.51a8,8,0,0,0-3.93,6L67.32,64.27q-1.56,1.49-3,3L40.54,70a8,8,0,0,0-6,3.94,107.71,107.71,0,0,0-10.87,26.25,8,8,0,0,0,1.49,7.06L40,125.84Q40,128,40,130.16L25.11,148.8a8,8,0,0,0-1.48,7.06,107.21,107.21,0,0,0,10.88,26.25,8,8,0,0,0,6,3.93l23.72,2.64q1.49,1.56,3,3L70,215.46a8,8,0,0,0,3.94,6,107.71,107.71,0,0,0,26.25,10.87,8,8,0,0,0,7.06-1.49L125.84,216q2.16.06,4.32,0l18.64,14.92a8,8,0,0,0,7.06,1.48,107.21,107.21,0,0,0,26.25-10.88,8,8,0,0,0,3.93-6l2.64-23.72q1.56-1.48,3-3L215.46,186a8,8,0,0,0,6-3.94,107.71,107.71,0,0,0,10.87-26.25,8,8,0,0,0-1.49-7.06Zm-16.1-6.5a73.93,73.93,0,0,1,0,8.68,8,8,0,0,0,1.74,5.48l14.19,17.73a91.57,91.57,0,0,1-6.23,15L187,173.11a8,8,0,0,0-5.1,2.64,74.11,74.11,0,0,1-6.14,6.14,8,8,0,0,0-2.64,5.1l-2.51,22.58a91.32,91.32,0,0,1-15,6.23l-17.74-14.19a8,8,0,0,0-5-1.75h-.48a73.93,73.93,0,0,1-8.68,0,8,8,0,0,0-5.48,1.74L100.45,215.8a91.57,91.57,0,0,1-15-6.23L82.89,187a8,8,0,0,0-2.64-5.1,74.11,74.11,0,0,1-6.14-6.14,8,8,0,0,0-5.1-2.64L46.43,170.6a91.32,91.32,0,0,1-6.23-15l14.19-17.74a8,8,0,0,0,1.74-5.48,73.93,73.93,0,0,1,0-8.68,8,8,0,0,0-1.74-5.48L40.2,100.45a91.57,91.57,0,0,1,6.23-15L69,82.89a8,8,0,0,0,5.1-2.64,74.11,74.11,0,0,1,6.14-6.14A8,8,0,0,0,82.89,69L85.4,46.43a91.32,91.32,0,0,1,15-6.23l17.74,14.19a8,8,0,0,0,5.48,1.74,73.93,73.93,0,0,1,8.68,0,8,8,0,0,0,5.48-1.74L155.55,40.2a91.57,91.57,0,0,1,15,6.23L173.11,69a8,8,0,0,0,2.64,5.1,74.11,74.11,0,0,1,6.14,6.14,8,8,0,0,0,5.1,2.64l22.58,2.51a91.32,91.32,0,0,1,6.23,15l-14.19,17.74A8,8,0,0,0,199.87,123.66Z"/></svg></span> Администрирование</span></li>
   </ul>
 </nav>
@@ -815,6 +865,10 @@
           </div>
         </div>
 
+        <div class="model-toggle" id="modelToggle">
+          <button class="active" data-model="gpt-image-2" onclick="setModel('main',this)">GPT Image 2</button>
+          <button data-model="nano-banana-2" onclick="setModel('main',this)">Nano Banana 2</button>
+        </div>
         <button class="gen-btn" id="generateBtn"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88ZM137,164.22a8,8,0,0,0-4.74,4.74L112,223.85,91.78,169A8,8,0,0,0,87,164.22L32.15,144,87,123.78A8,8,0,0,0,91.78,119L112,64.15,132.22,119a8,8,0,0,0,4.74,4.74L191.85,144ZM144,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H184V64a8,8,0,0,1-16,0V48H152A8,8,0,0,1,144,40ZM248,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,248,88Z"/></svg></span> Сгенерировать</button>
         <div class="status-banner" id="statusBanner"></div>
       </div>
@@ -859,6 +913,66 @@
     <div class="table-wrap">
       <div id="historyTableWrap"></div>
       <div class="pagination" id="historyPagination"></div>
+    </div>
+  </section>
+
+  <!-- ====== FREE PROMPTS ====== -->
+  <section class="page" id="page-free-prompts">
+    <h1 class="page-title"><span class="ico ico-lg" style="color:var(--coral)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M232,127.89a104.07,104.07,0,0,0-104-104c-57.42,0-104,46.58-104,104a103.37,103.37,0,0,0,15.12,53.78L25.12,221.78a8,8,0,0,0,9.1,9.1l40.11-14a103.37,103.37,0,0,0,53.78,15.12A104.07,104.07,0,0,0,232,127.89ZM128,216a87.37,87.37,0,0,1-44.06-11.92,8,8,0,0,0-6.54-.67L42.42,215.58l12.17-34.98a8,8,0,0,0-.67-6.54A87.37,87.37,0,0,1,40,128a88,88,0,0,1,88-88c48.52,0,88,39.48,88,87.89A88,88,0,0,1,128,216Z"/></svg></span> Свободные промты</h1>
+
+    <div style="display:flex;gap:20px;flex-wrap:wrap;">
+      <!-- LEFT: Result picker -->
+      <div style="flex:1;min-width:280px;max-width:360px;">
+        <div class="section-label" style="margin-bottom:10px;">Выберите результат генерации</div>
+        <div id="fpGallery" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;max-height:500px;overflow-y:auto;padding:4px;"></div>
+        <div class="pagination" id="fpPagination" style="margin-top:10px;"></div>
+      </div>
+
+      <!-- CENTER: Prompt templates + custom prompt -->
+      <div style="flex:2;min-width:320px;">
+        <div id="fpSelectedPreview" style="display:none;margin-bottom:16px;border:2px solid var(--coral);border-radius:14px;overflow:hidden;position:relative;">
+          <img id="fpSelectedImg" src="" alt="Выбранное изображение" style="width:100%;max-height:300px;object-fit:contain;display:block;">
+          <button onclick="clearFpSelection()" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:1rem;">×</button>
+        </div>
+
+        <div class="section-label" style="margin-bottom:8px;">Готовые промты</div>
+        <div style="margin-bottom:8px;">
+          <div style="font-size:.78rem;color:var(--muted);margin-bottom:4px;">Фиксы</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;" id="fpFixChips"></div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <div style="font-size:.78rem;color:var(--muted);margin-bottom:4px;">Стили</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;" id="fpStyleChips"></div>
+        </div>
+
+        <textarea id="fpCustomPrompt" rows="4" style="width:100%;font-size:.9rem;margin-bottom:10px;"
+          placeholder="Напишите свой промт или нажмите на чипы выше…"></textarea>
+
+        <div class="model-toggle" id="fpModelToggle">
+          <button class="active" data-model="gpt-image-2" onclick="setModel('free',this)">GPT Image 2</button>
+          <button data-model="nano-banana-2" onclick="setModel('free',this)">Nano Banana 2</button>
+        </div>
+        <button class="gen-btn" id="fpGenerateBtn" onclick="freeGenerate()">Сгенерировать</button>
+
+        <div id="fpResultBox" style="margin-top:16px;"></div>
+      </div>
+
+      <!-- RIGHT: Chat -->
+      <div style="flex:1;min-width:280px;max-width:400px;">
+        <div class="section-label" style="margin-bottom:8px;">Чат-анализ</div>
+        <div id="fpChatMessages" style="max-height:400px;overflow-y:auto;border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px;background:var(--surface);min-height:200px;">
+          <div style="color:var(--muted);font-size:.85rem;">Выберите изображение и задайте вопрос</div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <input type="text" id="fpChatInput" placeholder="Задайте вопрос…" style="flex:1;" onkeydown="if(event.key==='Enter')sendFpChat()">
+          <button class="btn-add" onclick="sendFpChat()">Отправить</button>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;">
+          <button class="mat-btn" style="font-size:.75rem;" onclick="fpChatQuick('Что можно улучшить?')">Что улучшить?</button>
+          <button class="mat-btn" style="font-size:.75rem;" onclick="fpChatQuick('Какой тип камня здесь?')">Тип камня?</button>
+          <button class="mat-btn" style="font-size:.75rem;" onclick="fpChatQuick('Предложи альтернативные промты')">Промты</button>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -964,6 +1078,67 @@
     </div>
 
     <div class="admin-section">
+      <h3><span class="ico" style="color:var(--coral)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M200,40H56A16,16,0,0,0,40,56V200a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V56A16,16,0,0,0,200,40Zm0,80H136V56h64ZM120,56v64H56V56ZM56,136h64v64H56Zm144,64H136V136h64v64Z"/></svg></span> Типы материалов (кастомные)</h3>
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:flex-end;">
+        <div style="flex:1;min-width:120px;">
+          <label style="font-size:.82rem;color:var(--muted);">Название</label>
+          <input type="text" id="cmtDisplayName" placeholder="Песчаник" style="width:100%;">
+        </div>
+        <div style="flex:1;min-width:100px;">
+          <label style="font-size:.82rem;color:var(--muted);">Slug</label>
+          <input type="text" id="cmtSlug" placeholder="sandstone" style="width:100%;">
+        </div>
+        <div style="flex:1;min-width:100px;">
+          <label style="font-size:.82rem;color:var(--muted);">Модель по умолчанию</label>
+          <select id="cmtDefaultModel" style="width:100%;">
+            <option value="gpt-image-2">GPT Image 2</option>
+            <option value="nano-banana-2">Nano Banana 2</option>
+          </select>
+        </div>
+        <button class="btn-add" onclick="addCustomMaterialType()">Добавить</button>
+      </div>
+      <div style="margin-bottom:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <label style="font-size:.82rem;color:var(--muted);">Системный промт</label>
+          <button class="btn-outline" onclick="openAiPromptModal()" style="font-size:.78rem;padding:4px 12px;">
+            <span style="margin-right:4px;">✨</span> AI-помощник
+          </button>
+        </div>
+        <textarea id="cmtSystemPrompt" rows="3" style="width:100%;font-size:.85rem;"
+          placeholder="Describe the stone texture rendering rules..."></textarea>
+      </div>
+      <div id="cmtTable"><div style="padding:12px;color:var(--muted);">Загрузка…</div></div>
+    </div>
+
+    <div class="admin-section">
+      <h3><span class="ico" style="color:var(--coral)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160ZM200,216H56V40h88V88a8,8,0,0,0,8,8h48V216Zm-32-80a8,8,0,0,1-8,8H96a8,8,0,0,1,0-16h64A8,8,0,0,1,168,136Zm0,32a8,8,0,0,1-8,8H96a8,8,0,0,1,0-16h64A8,8,0,0,1,168,168Z"/></svg></span> Шаблоны промтов</h3>
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:flex-end;">
+        <div style="flex:0 0 120px;">
+          <label style="font-size:.82rem;color:var(--muted);">Категория</label>
+          <select id="ptCategory" style="width:100%;">
+            <option value="fix">Фикс</option>
+            <option value="style">Стиль</option>
+          </select>
+        </div>
+        <div style="flex:1;min-width:140px;">
+          <label style="font-size:.82rem;color:var(--muted);">Название</label>
+          <input type="text" id="ptLabel" placeholder="Убери артефакты" style="width:100%;">
+        </div>
+        <div style="flex:0 0 80px;">
+          <label style="font-size:.82rem;color:var(--muted);">Порядок</label>
+          <input type="number" id="ptSortOrder" value="0" min="0" style="width:100%;">
+        </div>
+        <button class="btn-add" onclick="addPromptTemplate()">Добавить</button>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:.82rem;color:var(--muted);">Текст промта</label>
+        <textarea id="ptPromptText" rows="2" style="width:100%;font-size:.85rem;"
+          placeholder="Remove artifacts and noise from the generated image while preserving the stone texture details."></textarea>
+      </div>
+      <div id="ptTable"><div style="padding:12px;color:var(--muted);">Загрузка…</div></div>
+    </div>
+
+    <div class="admin-section">
       <h3><span class="ico" style="color:var(--coral)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg></span> Лиды <span class="leads-count" id="leadsCount"></span></h3>
       <div id="leadsTable"><div style="padding:12px;color:var(--muted);">Загрузка…</div></div>
       <div class="pagination" id="leadsPagination"></div>
@@ -1027,6 +1202,10 @@
               <div class="result-empty-text">Здесь появится визуализация</div>
             </div>
           </div>
+          <div class="model-toggle" id="plinthModelToggle">
+            <button class="active" data-model="gpt-image-2" onclick="setModel('plinth',this)">GPT Image 2</button>
+            <button data-model="nano-banana-2" onclick="setModel('plinth',this)">Nano Banana 2</button>
+          </div>
           <button class="gen-btn" id="plinthGenBtn" onclick="generateSubAccent('plinth')"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88ZM137,164.22a8,8,0,0,0-4.74,4.74L112,223.85,91.78,169A8,8,0,0,0,87,164.22L32.15,144,87,123.78A8,8,0,0,0,91.78,119L112,64.15,132.22,119a8,8,0,0,0,4.74,4.74L191.85,144ZM144,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H184V64a8,8,0,0,1-16,0V48H152A8,8,0,0,1,144,40ZM248,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,248,88Z"/></svg></span> Сгенерировать</button>
           <div id="plinthResult" class="zone-result-panel"></div>
         </div>
@@ -1085,6 +1264,10 @@
               <div class="result-empty-icon"><span class="ico ico-xl"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM48,48H208v77.38l-24.69-24.7a16,16,0,0,0-22.62,0L53.37,208H48ZM208,208H76l96-96,36,36v60ZM96,120A24,24,0,1,0,72,96,24,24,0,0,0,96,120Zm0-32a8,8,0,1,1-8,8A8,8,0,0,1,96,88Z"/></svg></span></div>
               <div class="result-empty-text">Здесь появится визуализация</div>
             </div>
+          </div>
+          <div class="model-toggle" id="reikaModelToggle">
+            <button class="active" data-model="gpt-image-2" onclick="setModel('reika',this)">GPT Image 2</button>
+            <button data-model="nano-banana-2" onclick="setModel('reika',this)">Nano Banana 2</button>
           </div>
           <button class="gen-btn" id="reikaGenBtn" onclick="generateSubAccent('reika')"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88ZM137,164.22a8,8,0,0,0-4.74,4.74L112,223.85,91.78,169A8,8,0,0,0,87,164.22L32.15,144,87,123.78A8,8,0,0,0,91.78,119L112,64.15,132.22,119a8,8,0,0,0,4.74,4.74L191.85,144ZM144,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H184V64a8,8,0,0,1-16,0V48H152A8,8,0,0,1,144,40ZM248,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,248,88Z"/></svg></span> Сгенерировать</button>
           <div id="reikaResult" class="zone-result-panel"></div>
@@ -1152,6 +1335,10 @@
               <div class="result-empty-text">Здесь появится визуализация</div>
             </div>
           </div>
+          <div class="model-toggle" id="beltModelToggle">
+            <button class="active" data-model="gpt-image-2" onclick="setModel('belt',this)">GPT Image 2</button>
+            <button data-model="nano-banana-2" onclick="setModel('belt',this)">Nano Banana 2</button>
+          </div>
           <button class="gen-btn" id="beltGenBtn" onclick="generateSubAccent('belt')"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88ZM137,164.22a8,8,0,0,0-4.74,4.74L112,223.85,91.78,169A8,8,0,0,0,87,164.22L32.15,144,87,123.78A8,8,0,0,0,91.78,119L112,64.15,132.22,119a8,8,0,0,0,4.74,4.74L191.85,144ZM144,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H184V64a8,8,0,0,1-16,0V48H152A8,8,0,0,1,144,40ZM248,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,248,88Z"/></svg></span> Сгенерировать</button>
           <div id="beltResult" class="zone-result-panel"></div>
         </div>
@@ -1194,6 +1381,60 @@
         </div>
       </div>
       <div class="tex-grid" id="modalGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- AI PROMPT GENERATOR MODAL -->
+<div class="modal-backdrop" id="aiPromptModal">
+  <div class="modal-box" style="max-width:640px;">
+    <div class="modal-head">
+      <span class="modal-head-title"><span class="ico" style="color:var(--coral)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M200,48H136V16a8,8,0,0,0-16,0V48H56A32,32,0,0,0,24,80V192a32,32,0,0,0,32,32H200a32,32,0,0,0,32-32V80A32,32,0,0,0,200,48Zm16,144a16,16,0,0,1-16,16H56a16,16,0,0,1-16-16V80A16,16,0,0,1,56,64H200a16,16,0,0,1,16,16Zm-36-56a12,12,0,1,1-12-12A12,12,0,0,1,180,136Zm-72,0a12,12,0,1,1-12-12A12,12,0,0,1,108,136Zm-2.26,40.93a8,8,0,0,1,3.33,10.81A36.2,36.2,0,0,1,128,200a36.2,36.2,0,0,1-18.93-12.26,8,8,0,1,1,14.46-6.87,20.2,20.2,0,0,0,8.94,6.87,20.2,20.2,0,0,0,8.94-6.87A8,8,0,0,1,152.26,176.93Z"/></svg></span> AI-помощник: генерация промта</span>
+      <button class="modal-close" onclick="closeAiPromptModal()"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></span></button>
+    </div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:16px;">
+      <div style="display:flex;gap:14px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:200px;">
+          <label style="font-size:.82rem;color:var(--muted);margin-bottom:6px;display:block;">Фото текстуры</label>
+          <div class="ai-upload-zone" id="aiTextureZone" onclick="document.getElementById('aiTextureInput').click()">
+            <div id="aiTexturePreview" style="color:var(--muted);font-size:.82rem;text-align:center;">
+              <div style="font-size:1.5rem;margin-bottom:4px;">📷</div>
+              Нажмите или перетащите
+            </div>
+            <input type="file" id="aiTextureInput" accept="image/*" style="display:none;" onchange="previewAiUpload(this,'aiTexturePreview','aiTextureZone')">
+          </div>
+        </div>
+        <div style="flex:1;min-width:200px;">
+          <label style="font-size:.82rem;color:var(--muted);margin-bottom:6px;display:block;">Фото реальной кладки</label>
+          <div class="ai-upload-zone" id="aiRealZone" onclick="document.getElementById('aiRealInput').click()">
+            <div id="aiRealPreview" style="color:var(--muted);font-size:.82rem;text-align:center;">
+              <div style="font-size:1.5rem;margin-bottom:4px;">🏠</div>
+              Нажмите или перетащите
+            </div>
+            <input type="file" id="aiRealInput" accept="image/*" style="display:none;" onchange="previewAiUpload(this,'aiRealPreview','aiRealZone')">
+          </div>
+        </div>
+      </div>
+      <div>
+        <label style="font-size:.82rem;color:var(--muted);margin-bottom:6px;display:block;">Дополнительное описание (необязательно)</label>
+        <textarea id="aiDescription" rows="2" style="width:100%;font-size:.85rem;" placeholder="Например: это песчаник с грубой фактурой, укладывается без затирки…"></textarea>
+      </div>
+      <button class="btn-primary" id="aiGenBtn" onclick="generateAiPrompt()" style="align-self:flex-start;display:flex;align-items:center;gap:8px;">
+        <span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" width="16" height="16"><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88Z"/></svg></span>
+        Сгенерировать промт
+      </button>
+      <div id="aiPromptResult" style="display:none;">
+        <label style="font-size:.82rem;color:var(--muted);margin-bottom:6px;display:block;">Сгенерированный системный промт</label>
+        <textarea id="aiGeneratedPrompt" rows="6" style="width:100%;font-size:.85rem;"></textarea>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <button class="btn-primary" onclick="applyAiPrompt()">Применить</button>
+          <button class="btn-outline" onclick="generateAiPrompt()">Перегенерировать</button>
+        </div>
+      </div>
+      <div id="aiPromptLoading" style="display:none;text-align:center;padding:20px;">
+        <div class="loader"></div>
+        <div style="margin-top:10px;color:var(--muted);font-size:.85rem;">AI анализирует материал…</div>
+      </div>
     </div>
   </div>
 </div>
@@ -1257,6 +1498,27 @@ let currentPhotoFile    = null;
 let currentCategory     = 'facade';
 let pollingInterval     = null;
 
+const _NANO_BANANA_TYPES = new Set(['standard', 'rigel']);
+const selectedModel = { main: 'gpt-image-2', plinth: 'gpt-image-2', reika: 'gpt-image-2', belt: 'gpt-image-2' };
+
+function setModel(section, btn) {
+    const toggle = btn.parentElement;
+    toggle.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedModel[section] = btn.dataset.model;
+}
+function autoSelectModel(section, materialType) {
+    const model = _NANO_BANANA_TYPES.has(materialType) ? 'nano-banana-2' : 'gpt-image-2';
+    selectedModel[section] = model;
+    const toggleId = section === 'main' ? 'modelToggle' : `${section}ModelToggle`;
+    const toggle = document.getElementById(toggleId);
+    if (toggle) {
+        toggle.querySelectorAll('button').forEach(b => {
+            b.classList.toggle('active', b.dataset.model === model);
+        });
+    }
+}
+
 // Catalog modal state
 let modalMatType        = 'rigel';
 let modalSupplierVal    = null;
@@ -1282,9 +1544,10 @@ function showPage(id) {
     if (id === 'history') loadHistory(1);
     if (id === 'catalog') initCatalogPage();
     if (id === 'admin' && currentUser?.role === 'admin') {
-        loadUsers(); loadGroutColorsAdmin(); loadAllTextures(); loadAllGenerations(1); loadLeads(1);
+        loadUsers(); loadGroutColorsAdmin(); loadAllTextures(); loadAllGenerations(1); loadLeads(1); loadCustomMaterialTypes(); loadPromptTemplatesAdmin();
     }
     if (id === 'accent') initAccentPage();
+    if (id === 'free-prompts') { loadFpPromptTemplates().then(renderFpChips); loadFpGallery(1); }
 }
 
 // ============================================================
@@ -1454,6 +1717,7 @@ function applyTexture(tex) {
     document.getElementById('texName').textContent = tex.name;
     document.getElementById('selectedTexBox').classList.add('visible');
     document.getElementById('openCatalogBtn').style.display = 'none';
+    autoSelectModel('main', tex.material_type);
     refreshGenBtn();
 }
 function refreshGenBtn() {
@@ -1526,7 +1790,30 @@ function renderModalGrid(list) {
         });
     });
 }
+let _customTypesLoaded = false;
+async function ensureCustomTypesInSelects() {
+    if (_customTypesLoaded) return;
+    try {
+        const r = await fetch(`${API_BASE}/api/internal/material-types`, { credentials:'include', headers:H() });
+        const types = await r.json();
+        const custom = types.filter(t => !t.builtin);
+        if (!custom.length) return;
+        for (const sel of [document.getElementById('modalMatType'), document.getElementById('catMatType')]) {
+            if (!sel) continue;
+            const existing = new Set([...sel.options].map(o => o.value));
+            for (const t of custom) {
+                if (!existing.has(t.slug)) {
+                    const opt = document.createElement('option');
+                    opt.value = t.slug; opt.textContent = t.display_name;
+                    sel.appendChild(opt);
+                }
+            }
+        }
+        _customTypesLoaded = true;
+    } catch(e) { console.error('Failed to load custom types:', e); }
+}
 function openCatalogModal(target = 'visualizer') {
+    ensureCustomTypesInSelects();
     catalogTarget = target;
     const matSel = document.getElementById('modalMatType');
     // Для Рейки — фиксируем тип материала
@@ -1739,6 +2026,7 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
     fd.append('supplier',        selectedTexture.supplier);
     if (selectedGroutName) fd.append('grout_color_name', selectedGroutName);
     if (useZone) fd.append('use_zone', '1');
+    if (selectedModel.main) fd.append('model', selectedModel.main);
 
     try {
         const r = await fetch(`${API_BASE}/api/internal/generate`, {
@@ -1783,7 +2071,7 @@ function renderHistory(items) {
     wrap.innerHTML = `<table>
         <thead><tr>
           <th>ID</th><th>Дата</th><th>Материал</th><th>Поставщик</th>
-          <th>Текстура</th><th>Затирка</th><th>Результат</th>
+          <th>Текстура</th><th>Затирка</th><th>Модель</th><th>Результат</th>
         </tr></thead>
         <tbody>${items.map(item => `<tr>
           <td>${item.id}</td>
@@ -1792,6 +2080,7 @@ function renderHistory(items) {
           <td>${item.supplier || '—'}</td>
           <td>${item.texture_name}</td>
           <td>${item.grout_color || '—'}</td>
+          <td>${item.model_used || '—'}</td>
           <td>${item.output_image_url
               ? `<img src="${item.output_image_url}" class="history-img"
                       onclick="openLightbox('${item.output_image_url}')">`
@@ -1983,7 +2272,7 @@ function renderAllGenerations(items) {
         <thead><tr>
           <th><input type="checkbox" id="selectAllGen" title="Выбрать все" onclick="toggleSelectAllGenerations(this)"></th>
           <th>ID</th><th>Тип</th><th>Пользователь</th><th>Дата</th>
-          <th>Материал</th><th>Поставщик</th><th>Текстура</th><th>Затирка</th><th>Результат</th>
+          <th>Материал</th><th>Поставщик</th><th>Текстура</th><th>Затирка</th><th>Модель</th><th>Результат</th>
         </tr></thead>
         <tbody>${items.map(item => `<tr>
           <td><input type="checkbox" class="gen-cb" data-id="${item.id}" onchange="updateDeleteBtn()"></td>
@@ -1995,6 +2284,7 @@ function renderAllGenerations(items) {
           <td>${item.supplier || '—'}</td>
           <td>${item.texture_name}</td>
           <td>${item.grout_color || '—'}</td>
+          <td>${item.model_used || '—'}</td>
           <td>${item.output_image_url
               ? `<img src="${item.output_image_url}" class="history-img"
                       onclick="openLightbox('${item.output_image_url}')">`
@@ -2032,7 +2322,7 @@ async function deleteSelectedGenerations() {
 //  PAGINATION (shared)
 // ============================================================
 function renderPagination(current, total, type) {
-    const idMap = { history: 'historyPagination', admin: 'adminPagination', leads: 'leadsPagination' };
+    const idMap = { history: 'historyPagination', admin: 'adminPagination', leads: 'leadsPagination', fp: 'fpPagination' };
     const c = document.getElementById(idMap[type] || 'adminPagination');
     if (!c || total <= 1) { if (c) c.innerHTML = ''; return; }
     let html = '';
@@ -2044,6 +2334,7 @@ function renderPagination(current, total, type) {
             const p = +btn.dataset.p;
             if (type === 'history') loadHistory(p);
             else if (type === 'leads') loadLeads(p);
+            else if (type === 'fp') loadFpGallery(p);
             else loadAllGenerations(p);
         }));
 }
@@ -2059,7 +2350,7 @@ document.getElementById('applyFilterBtn')?.addEventListener('click', () => loadA
 // ============================================================
 //  INIT
 // ============================================================
-fetchCurrentUser().then(() => { loadGroutColors(); loadNotifications(); });
+fetchCurrentUser().then(() => { loadGroutColors(); loadNotifications(); ensureCustomTypesInSelects(); });
 
 // ============================================================
 //  NOTIFICATIONS
@@ -2115,6 +2406,391 @@ async function markAllNotifRead() {
     document.querySelectorAll('.notif-item.unread').forEach(el => el.classList.remove('unread'));
 }
 setInterval(() => { if (currentUser) loadNotifications(); }, 60000);
+
+// ============================================================
+//  FREE PROMPTS TAB
+// ============================================================
+let fpPromptTemplates = [];
+let fpSelectedGeneration = null;
+let fpChatHistory = [];
+selectedModel.free = 'gpt-image-2';
+
+async function loadFpPromptTemplates() {
+    try {
+        const r = await fetch(`${API_BASE}/api/internal/prompt-templates`, { credentials:'include', headers:H() });
+        fpPromptTemplates = await r.json();
+    } catch(e) { console.error(e); }
+}
+function renderFpChips() {
+    const fixes = fpPromptTemplates.filter(p => p.category === 'fix');
+    const styles = fpPromptTemplates.filter(p => p.category === 'style');
+    const chipHtml = list => list.map(p =>
+        `<button class="fp-chip" onclick="appendFpPrompt(decodeURIComponent('${encodeURIComponent(p.prompt_text)}'))">${p.label}</button>`
+    ).join('');
+    document.getElementById('fpFixChips').innerHTML = fixes.length
+        ? chipHtml(fixes) : '<span style="color:var(--muted);font-size:.8rem;">Нет шаблонов — добавьте в Администрировании</span>';
+    document.getElementById('fpStyleChips').innerHTML = styles.length
+        ? chipHtml(styles) : '<span style="color:var(--muted);font-size:.8rem;">Нет шаблонов</span>';
+}
+function appendFpPrompt(text) {
+    const ta = document.getElementById('fpCustomPrompt');
+    ta.value = ta.value ? ta.value + ' ' + text : text;
+}
+async function loadFpGallery(page = 1) {
+    try {
+        const r = await fetch(`${API_BASE}/api/internal/history?page=${page}&per_page=20`, { credentials:'include', headers:H() });
+        const d = await r.json();
+        const gallery = document.getElementById('fpGallery');
+        if (!d.items.length) { gallery.innerHTML = '<div style="color:var(--muted);font-size:.85rem;">Нет результатов генерации</div>'; return; }
+        gallery.innerHTML = d.items.map(item => {
+            const sel = fpSelectedGeneration?.id === item.id ? 'selected' : '';
+            return `<div class="fp-gallery-item ${sel}" style="background-image:url('${item.output_image_url}')"
+                         onclick="selectFpGeneration(${item.id}, '${item.output_image_url}')"></div>`;
+        }).join('');
+        renderPagination(d.page, d.pages, 'fp');
+    } catch(e) { console.error(e); }
+}
+function selectFpGeneration(id, url) {
+    fpSelectedGeneration = { id, url };
+    document.getElementById('fpSelectedImg').src = url;
+    document.getElementById('fpSelectedPreview').style.display = 'block';
+    document.getElementById('fpGenerateBtn').classList.add('ready');
+    document.querySelectorAll('.fp-gallery-item').forEach(el => {
+        el.classList.toggle('selected', el.style.backgroundImage.includes(url));
+    });
+    fpChatHistory = [];
+}
+function clearFpSelection() {
+    fpSelectedGeneration = null;
+    document.getElementById('fpSelectedPreview').style.display = 'none';
+    document.getElementById('fpGenerateBtn').classList.remove('ready');
+    document.querySelectorAll('.fp-gallery-item').forEach(el => el.classList.remove('selected'));
+}
+async function freeGenerate() {
+    if (!fpSelectedGeneration) return alert('Выберите результат генерации');
+    const prompt = document.getElementById('fpCustomPrompt').value.trim();
+    if (!prompt) return alert('Введите промт');
+    const resultBox = document.getElementById('fpResultBox');
+    resultBox.innerHTML = '<div style="text-align:center;padding:30px;"><div class="spinner"></div><div style="margin-top:10px;color:var(--muted);">Генерация…</div></div>';
+    try {
+        const r = await fetch(`${API_BASE}/api/internal/free-generate`, {
+            method:'POST', credentials:'include',
+            headers: { ...H(), 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                source_generation_id: fpSelectedGeneration.id,
+                custom_prompt: prompt,
+                model: selectedModel.free,
+            }),
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.detail || 'Ошибка');
+        if (d.request_id) pollFreeResult(d.request_id);
+    } catch(e) { resultBox.innerHTML = `<div style="color:var(--bad);padding:10px;">${e.message}</div>`; }
+}
+function pollFreeResult(requestId) {
+    let attempts = 0;
+    const timer = setInterval(async () => {
+        if (++attempts > 90) { clearInterval(timer); document.getElementById('fpResultBox').innerHTML = '<div style="color:var(--bad);">Таймаут</div>'; return; }
+        try {
+            const r = await fetch(`${API_BASE}/status/${requestId}`);
+            if (!r.ok) return;
+            const d = await r.json();
+            if (d.status === 'success') {
+                clearInterval(timer);
+                const url = d.result_url.startsWith('http') ? d.result_url : `${API_BASE}${d.result_url}`;
+                document.getElementById('fpResultBox').innerHTML = `<img src="${url}" style="width:100%;border-radius:14px;cursor:pointer;" onclick="openLightbox('${url}')">`;
+                fpSelectedGeneration = { output_image_path: url };
+                const prev = document.getElementById('fpSelectedPreview');
+                if (prev) prev.innerHTML = `<img src="${url}" style="width:100%;border-radius:14px;"><div style="text-align:center;color:var(--muted);font-size:.8rem;margin-top:4px;">Результат предыдущей итерации</div>`;
+                document.getElementById('fpCustomPrompt').value = '';
+                loadFpGallery(1);
+            } else if (d.status === 'error') {
+                clearInterval(timer);
+                document.getElementById('fpResultBox').innerHTML = '<div style="color:var(--bad);padding:10px;">Ошибка генерации</div>';
+            }
+        } catch(e) {}
+    }, 2000);
+}
+
+// Chat
+function renderChatMessages() {
+    const container = document.getElementById('fpChatMessages');
+    if (!fpChatHistory.length) {
+        container.innerHTML = '<div style="color:var(--muted);font-size:.85rem;">Выберите изображение и задайте вопрос</div>';
+        return;
+    }
+    container.innerHTML = fpChatHistory.map(m =>
+        `<div class="fp-chat-msg ${m.role}"><div class="bubble">${m.content.replace(/\n/g, '<br>')}</div></div>`
+    ).join('');
+    container.scrollTop = container.scrollHeight;
+}
+async function sendFpChat() {
+    const input = document.getElementById('fpChatInput');
+    const msg = input.value.trim();
+    if (!msg) return;
+    input.value = '';
+    fpChatHistory.push({ role: 'user', content: msg });
+    renderChatMessages();
+    const container = document.getElementById('fpChatMessages');
+    container.innerHTML += '<div class="fp-chat-msg assistant"><div class="bubble" style="opacity:.5;">Думаю…</div></div>';
+    container.scrollTop = container.scrollHeight;
+    try {
+        const r = await fetch(`${API_BASE}/api/internal/chat`, {
+            method:'POST', credentials:'include',
+            headers: { ...H(), 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: msg,
+                image_url: fpSelectedGeneration?.url || null,
+                history: fpChatHistory.slice(0, -1),
+            }),
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.detail || 'Ошибка');
+        fpChatHistory.push({ role: 'assistant', content: d.reply });
+    } catch(e) {
+        fpChatHistory.push({ role: 'assistant', content: `Ошибка: ${e.message}` });
+    }
+    renderChatMessages();
+}
+function fpChatQuick(text) {
+    document.getElementById('fpChatInput').value = text;
+    sendFpChat();
+}
+
+// ============================================================
+//  CUSTOM MATERIAL TYPES
+// ============================================================
+async function loadCustomMaterialTypes() {
+    if (currentUser?.role !== 'admin') return;
+    try {
+        const r = await fetch(`${API_BASE}/api/internal/material-types`, { credentials:'include', headers:H() });
+        const types = await r.json();
+        const custom = types.filter(t => !t.builtin);
+        const c = document.getElementById('cmtTable');
+        if (!custom.length) { c.innerHTML = '<div style="padding:16px;color:var(--muted);">Кастомных типов пока нет</div>'; return; }
+        c.innerHTML = `<table>
+            <thead><tr><th>Slug</th><th>Название</th><th>Модель</th><th style="min-width:200px;">Промт</th><th></th></tr></thead>
+            <tbody>${custom.map(t => `<tr>
+              <td><code>${t.slug}</code></td>
+              <td>${t.display_name}</td>
+              <td>${t.default_model}</td>
+              <td>
+                <textarea id="cmtPrompt_${t.id}" rows="2" style="width:100%;font-size:.82rem;resize:vertical;">${(t.system_prompt||'').replace(/</g,'&lt;')}</textarea>
+                <div style="display:flex;gap:6px;margin-top:4px;">
+                  <button class="btn-add" style="font-size:.75rem;padding:3px 10px;" onclick="saveCmtPrompt(${t.id})">Сохранить</button>
+                  <button class="btn-outline" style="font-size:.72rem;padding:2px 8px;" onclick="openAiPromptModalFor(${t.id})">✨ AI</button>
+                </div>
+              </td>
+              <td><button class="btn-del" onclick="deleteCustomMaterialType(${t.id})">Удалить</button></td>
+            </tr>`).join('')}</tbody>
+        </table>`;
+    } catch(e) { console.error(e); }
+}
+async function addCustomMaterialType() {
+    const slug = document.getElementById('cmtSlug').value.trim();
+    const display_name = document.getElementById('cmtDisplayName').value.trim();
+    const system_prompt = document.getElementById('cmtSystemPrompt').value.trim();
+    const default_model = document.getElementById('cmtDefaultModel').value;
+    if (!slug || !display_name || !system_prompt) return alert('Заполните все поля');
+    try {
+        const r = await fetch(`${API_BASE}/api/internal/material-types`, {
+            method:'POST', credentials:'include',
+            headers: { ...H(), 'Content-Type': 'application/json' },
+            body: JSON.stringify({ slug, display_name, system_prompt, default_model }),
+        });
+        if (!r.ok) { const d = await r.json(); alert(d.detail || 'Ошибка'); return; }
+        document.getElementById('cmtSlug').value = '';
+        document.getElementById('cmtDisplayName').value = '';
+        document.getElementById('cmtSystemPrompt').value = '';
+        loadCustomMaterialTypes();
+    } catch(e) { alert(e); }
+}
+async function saveCmtPrompt(id) {
+    const textarea = document.getElementById(`cmtPrompt_${id}`);
+    if (!textarea) return;
+    const system_prompt = textarea.value.trim();
+    if (!system_prompt) return alert('Промт не может быть пустым');
+    try {
+        const r = await fetch(`${API_BASE}/api/internal/material-types/${id}`, {
+            method:'PUT', credentials:'include',
+            headers: { ...H(), 'Content-Type': 'application/json' },
+            body: JSON.stringify({ system_prompt }),
+        });
+        if (!r.ok) { const d = await r.json(); alert(d.detail || 'Ошибка'); return; }
+        textarea.style.outline = '2px solid var(--good)';
+        setTimeout(() => textarea.style.outline = '', 1500);
+    } catch(e) { alert(e); }
+}
+
+let aiPromptTargetId = null;
+function openAiPromptModalFor(cmtId) {
+    aiPromptTargetId = cmtId;
+    openAiPromptModal();
+}
+
+async function deleteCustomMaterialType(id) {
+    if (!confirm('Удалить кастомный тип материала?')) return;
+    try {
+        await fetch(`${API_BASE}/api/internal/material-types/${id}`, {
+            method:'DELETE', credentials:'include', headers:H(),
+        });
+        loadCustomMaterialTypes();
+    } catch(e) { alert(e); }
+}
+
+// ============================================================
+//  AI PROMPT GENERATOR
+// ============================================================
+function openAiPromptModal() {
+    aiPromptTargetId = null;
+    document.getElementById('aiPromptModal').classList.add('open');
+    document.getElementById('aiPromptResult').style.display = 'none';
+    document.getElementById('aiPromptLoading').style.display = 'none';
+    document.getElementById('aiGenBtn').disabled = false;
+}
+function closeAiPromptModal() {
+    document.getElementById('aiPromptModal').classList.remove('open');
+}
+document.getElementById('aiPromptModal').addEventListener('click', e => {
+    if (e.target.id === 'aiPromptModal') closeAiPromptModal();
+});
+
+function previewAiUpload(input, previewId, zoneId) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        document.getElementById(previewId).innerHTML = `<img src="${e.target.result}">`;
+        document.getElementById(zoneId).classList.add('has-image');
+    };
+    reader.readAsDataURL(file);
+}
+
+['aiTextureZone', 'aiRealZone'].forEach(zoneId => {
+    const zone = document.getElementById(zoneId);
+    const inputId = zoneId === 'aiTextureZone' ? 'aiTextureInput' : 'aiRealInput';
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = 'var(--coral)'; });
+    zone.addEventListener('dragleave', () => { zone.style.borderColor = ''; });
+    zone.addEventListener('drop', e => {
+        e.preventDefault();
+        zone.style.borderColor = '';
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            const input = document.getElementById(inputId);
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            input.files = dt.files;
+            const prevId = zoneId === 'aiTextureZone' ? 'aiTexturePreview' : 'aiRealPreview';
+            previewAiUpload(input, prevId, zoneId);
+        }
+    });
+});
+
+async function generateAiPrompt() {
+    const textureFile = document.getElementById('aiTextureInput').files[0];
+    const realFile = document.getElementById('aiRealInput').files[0];
+    const desc = document.getElementById('aiDescription').value.trim();
+    if (!textureFile && !realFile && !desc) {
+        alert('Загрузите хотя бы одно фото или добавьте описание');
+        return;
+    }
+    const fd = new FormData();
+    if (textureFile) fd.append('texture_photo', textureFile);
+    if (realFile) fd.append('real_photo', realFile);
+    fd.append('description', desc);
+
+    document.getElementById('aiGenBtn').disabled = true;
+    document.getElementById('aiPromptResult').style.display = 'none';
+    document.getElementById('aiPromptLoading').style.display = 'block';
+
+    try {
+        const r = await fetch(`${API_BASE}/api/internal/generate-system-prompt`, {
+            method: 'POST', credentials: 'include',
+            headers: H(),
+            body: fd,
+        });
+        if (!r.ok) {
+            const d = await r.json().catch(() => ({}));
+            throw new Error(d.detail || 'Ошибка генерации');
+        }
+        const data = await r.json();
+        document.getElementById('aiGeneratedPrompt').value = data.system_prompt;
+        document.getElementById('aiPromptResult').style.display = 'block';
+    } catch (e) {
+        alert(e.message || 'Ошибка при генерации промта');
+    } finally {
+        document.getElementById('aiPromptLoading').style.display = 'none';
+        document.getElementById('aiGenBtn').disabled = false;
+    }
+}
+
+function applyAiPrompt() {
+    const prompt = document.getElementById('aiGeneratedPrompt').value.trim();
+    if (!prompt) return;
+    if (aiPromptTargetId) {
+        const textarea = document.getElementById(`cmtPrompt_${aiPromptTargetId}`);
+        if (textarea) {
+            textarea.value = prompt;
+            textarea.style.outline = '2px solid var(--coral)';
+            setTimeout(() => textarea.style.outline = '', 2000);
+        }
+        aiPromptTargetId = null;
+    } else {
+        document.getElementById('cmtSystemPrompt').value = prompt;
+    }
+    closeAiPromptModal();
+}
+
+// ============================================================
+//  PROMPT TEMPLATES (admin)
+// ============================================================
+async function loadPromptTemplatesAdmin() {
+    if (currentUser?.role !== 'admin') return;
+    try {
+        const r = await fetch(`${API_BASE}/api/internal/prompt-templates`, { credentials:'include', headers:H() });
+        const items = await r.json();
+        const c = document.getElementById('ptTable');
+        if (!items.length) { c.innerHTML = '<div style="padding:16px;color:var(--muted);">Шаблонов пока нет</div>'; return; }
+        c.innerHTML = `<table>
+            <thead><tr><th>Категория</th><th>Название</th><th>Промт</th><th>Порядок</th><th></th></tr></thead>
+            <tbody>${items.map(t => `<tr>
+              <td><span style="display:inline-block;padding:2px 8px;border-radius:8px;font-size:.78rem;background:${t.category==='fix'?'var(--bad)':'var(--good)'};color:#fff;">${t.category==='fix'?'Фикс':'Стиль'}</span></td>
+              <td>${t.label}</td>
+              <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.prompt_text}</td>
+              <td>${t.sort_order}</td>
+              <td><button class="btn-del" onclick="deletePromptTemplate(${t.id})">Удалить</button></td>
+            </tr>`).join('')}</tbody>
+        </table>`;
+    } catch(e) { console.error(e); }
+}
+async function addPromptTemplate() {
+    const category = document.getElementById('ptCategory').value;
+    const label = document.getElementById('ptLabel').value.trim();
+    const prompt_text = document.getElementById('ptPromptText').value.trim();
+    const sort_order = parseInt(document.getElementById('ptSortOrder').value) || 0;
+    if (!label || !prompt_text) return alert('Заполните название и текст промта');
+    try {
+        const r = await fetch(`${API_BASE}/api/internal/prompt-templates`, {
+            method:'POST', credentials:'include',
+            headers: { ...H(), 'Content-Type': 'application/json' },
+            body: JSON.stringify({ category, label, prompt_text, sort_order }),
+        });
+        if (!r.ok) { const d = await r.json(); alert(d.detail || 'Ошибка'); return; }
+        document.getElementById('ptLabel').value = '';
+        document.getElementById('ptPromptText').value = '';
+        document.getElementById('ptSortOrder').value = '0';
+        loadPromptTemplatesAdmin();
+    } catch(e) { alert(e); }
+}
+async function deletePromptTemplate(id) {
+    if (!confirm('Удалить шаблон промта?')) return;
+    try {
+        await fetch(`${API_BASE}/api/internal/prompt-templates/${id}`, {
+            method:'DELETE', credentials:'include', headers:H(),
+        });
+        loadPromptTemplatesAdmin();
+    } catch(e) { alert(e); }
+}
 
 // ============================================================
 //  LEADS
@@ -2275,6 +2951,7 @@ function applyAccentTexture(prefix, tex) {
     if (thumb) thumb.src = url;
     if (nameEl) nameEl.textContent = tex.name;
     if (sel) sel.classList.add('visible');
+    autoSelectModel(prefix, tex.material_type);
     refreshSubGenBtn(prefix);
 }
 
@@ -2332,6 +3009,7 @@ async function generateSubAccent(type) {
         fd.append('material_type', tex.material_type);
         fd.append('supplier',      tex.supplier);
     }
+    if (selectedModel[type]) fd.append('model', selectedModel[type]);
 
     // Показать оверлей генерации в правой панели
     const resultBox = document.getElementById(`${type}ResultBox`);

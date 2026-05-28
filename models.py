@@ -27,4 +27,5 @@ class GenerationOut(BaseModel):
     category: Optional[str]
     material_type: Optional[str]
     supplier: Optional[str]
+    model_used: Optional[str]
     created_at: str

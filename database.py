@@ -162,6 +162,59 @@ def init_db_sync():
         """)
         conn.commit()
 
+    # Миграция: убрать CHECK constraint с materials.material_type для поддержки кастомных типов
+    cur = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='materials'")
+    row = cur.fetchone()
+    if row and "CHECK" in row[0]:
+        conn.execute("BEGIN")
+        try:
+            conn.execute("ALTER TABLE materials RENAME TO materials_old")
+            conn.execute("""
+                CREATE TABLE materials (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT NOT NULL,
+                    filename TEXT NOT NULL,
+                    material_type TEXT NOT NULL,
+                    supplier TEXT NOT NULL,
+                    UNIQUE(name, material_type, supplier)
+                )
+            """)
+            conn.execute("INSERT INTO materials SELECT * FROM materials_old")
+            conn.execute("DROP TABLE materials_old")
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+
+    # Таблица кастомных типов материалов
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS custom_material_types (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            slug TEXT UNIQUE NOT NULL,
+            display_name TEXT NOT NULL,
+            system_prompt TEXT NOT NULL,
+            default_model TEXT DEFAULT 'gpt-image-2',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS prompt_templates (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            category TEXT NOT NULL CHECK(category IN ('fix', 'style')),
+            label TEXT NOT NULL,
+            prompt_text TEXT NOT NULL,
+            sort_order INTEGER DEFAULT 0
+        )
+    """)
+    conn.commit()
+
+    # Миграция: добавить колонку model_used в generations
+    cur = conn.execute("PRAGMA table_info(generations)")
+    columns = [row[1] for row in cur.fetchall()]
+    if "model_used" not in columns:
+        conn.execute("ALTER TABLE generations ADD COLUMN model_used TEXT")
+        conn.commit()
+
     # Добавляем начальные цвета затирки
     cur = conn.execute("SELECT COUNT(*) FROM grout_colors")
     if cur.fetchone()[0] == 0:

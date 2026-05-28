@@ -47,7 +47,8 @@ from utils.common import STONE_TYPES as _STONE_TYPES
 
 
 def build_prompt(category: str, material_type: str,
-                 grout_color_hex: str = None, use_zone: bool = False) -> str:
+                 grout_color_hex: str = None, use_zone: bool = False,
+                 custom_system_prompt: str = None) -> str:
     """Промт для Облицовки (клиент + внутренний)."""
     base = (
         "STRICT ARCHITECTURAL PRESERVATION: Frozen geometry — Zero modifications to building silhouette. "
@@ -128,6 +129,8 @@ def build_prompt(category: str, material_type: str,
                   f"100% MASK LOCK: Stop exactly at the red line. Cut or crop any block that exceeds the boundary. "
                   f"FROZEN GEOMETRY: Do not touch stairs, railings, or window frames. Keep original pixels outside the mask. "
                   f"8k, photorealistic architectural render, matte mineral texture.")
+    elif custom_system_prompt:
+        prompt = f"{base} {zone_instr}Replace {target} with the provided texture. {custom_system_prompt}"
     else:
         # Ригель: пропорция 1:12, экстремально тонкие кирпичи
         prompt = (f"{base} {zone_instr}Replace {target} with EXACTLY the provided texture. "
@@ -283,12 +286,20 @@ def build_belt_prompt(has_texture: bool = True, material_type: str = None,
         )
 
 
+ENDPOINT_BY_MODEL = {
+    "nano-banana-2": NANO_BANANA_ENDPOINT,
+    "gpt-image-2": GPT_IMAGE_ENDPOINT,
+}
+
+
 async def generate_image(image_urls: list, prompt: str,
-                         material_type: str | None = None) -> dict:
+                         material_type: str | None = None,
+                         model_override: str | None = None) -> dict:
     """
     Отправляет запрос к нейросети и возвращает {'output_url': url}.
     image_urls — список URL изображений (обычно [photo_url] или [photo_url, texture_url]).
-    material_type — определяет какой API использовать:
+    model_override — явный выбор модели ("nano-banana-2" или "gpt-image-2"), если задан.
+    material_type — определяет какой API использовать (если model_override не задан):
       standard/rigel → Nano Banana 2 (чёткие кирпичные паттерны)
       остальные      → GPT Image 2 (натуральный камень и пр.)
     Использует асинхронный режим с опросом статуса.
@@ -297,7 +308,10 @@ async def generate_image(image_urls: list, prompt: str,
     if not api_key:
         raise Exception("Не задан API ключ (ожидается GEN_API_KEY или API_KEY)")
 
-    endpoint = _select_endpoint(material_type)
+    if model_override and model_override in ENDPOINT_BY_MODEL:
+        endpoint = ENDPOINT_BY_MODEL[model_override]
+    else:
+        endpoint = _select_endpoint(material_type)
 
     headers = {
         "Content-Type": "application/json",

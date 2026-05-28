@@ -52,13 +52,14 @@ async def _run_internal_generation(
     category: str,
     material_type: str,
     supplier: str,
+    model: str | None = None,
 ) -> None:
     """Фоновая задача AI-генерации для сотрудников."""
     try:
         logger.info(
-            "internal_generate bg start request_id=%s user_id=%s", request_id, user_id
+            "internal_generate bg start request_id=%s user_id=%s model=%s", request_id, user_id, model
         )
-        result_data = await generate_image([photo_url, texture_url], prompt, material_type=material_type)
+        result_data = await generate_image([photo_url, texture_url], prompt, material_type=material_type, model_override=model)
         output_url = result_data.get("output_url")
         if not output_url:
             raise ValueError("Пустой output_url от GenAPI")
@@ -79,10 +80,10 @@ async def _run_internal_generation(
         try:
             await db.execute(
                 "INSERT INTO generations (user_type, user_id, input_image_path, output_image_path, "
-                "prompt, texture_name, grout_color, category, material_type, supplier) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "prompt, texture_name, grout_color, category, material_type, supplier, model_used) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 ("internal", user_id, temp_path, output_path, prompt,
-                 texture, grout_color_name, category, material_type, supplier),
+                 texture, grout_color_name, category, material_type, supplier, model),
             )
             await db.commit()
         finally:
@@ -111,12 +112,13 @@ async def internal_generate(
     supplier: str = Form(...),
     grout_color_name: str = Form(None),
     use_zone: str = Form(None),
+    model: str = Form(None),
     current_user = Depends(get_current_manager),
 ):
     user_id = str(current_user["id"])
     logger.info(
-        "internal_generate start user_id=%s material_type=%s supplier=%s texture=%s category=%s grout=%s",
-        user_id, material_type, supplier, texture, category, grout_color_name,
+        "internal_generate start user_id=%s material_type=%s supplier=%s texture=%s category=%s grout=%s model=%s",
+        user_id, material_type, supplier, texture, category, grout_color_name, model,
     )
     if not (file.content_type or "").startswith("image/"):
         raise HTTPException(status_code=400, detail="Неверный формат файла — ожидается изображение")
@@ -167,7 +169,26 @@ async def internal_generate(
         if grout_row:
             grout_hex = grout_row["hex_code"]
 
-    prompt = build_prompt(category, material_type, grout_hex, use_zone=bool(use_zone))
+    custom_system_prompt = None
+    _builtin_slugs = {"standard", "rigel", "riegel_mixed", "cobblestone", "rubble_stone",
+                      "flat_stone", "textured_stone", "derbent_stone", "solid", "reika"}
+    if material_type and material_type not in _builtin_slugs:
+        db2 = await get_db()
+        try:
+            cur2 = await db2.execute(
+                "SELECT system_prompt, default_model FROM custom_material_types WHERE slug = ?",
+                (material_type,),
+            )
+            cmt_row = await cur2.fetchone()
+            if cmt_row:
+                custom_system_prompt = cmt_row["system_prompt"]
+                if not model:
+                    model = cmt_row["default_model"]
+        finally:
+            await db2.close()
+
+    prompt = build_prompt(category, material_type, grout_hex, use_zone=bool(use_zone),
+                          custom_system_prompt=custom_system_prompt)
 
     request_id = str(uuid.uuid4())
     redis_client.setex(f"gen_status:{request_id}", 3600, "processing")
@@ -175,6 +196,7 @@ async def internal_generate(
     asyncio.create_task(_run_internal_generation(
         request_id, user_id, photo_url, texture_url, temp_path,
         prompt, texture, grout_color_name, category, material_type, supplier,
+        model=model,
     ))
 
     logger.info(
@@ -581,16 +603,20 @@ async def _run_zone_generation(
     temp_path: str,
     material_type: str,
     supplier: str,
+    model: str | None = None,
 ):
     """Фоновая задача генерации для Поясов / Цоколя."""
     try:
         logger.info(
-            "Zone generation start request_id=%s service=%s num_urls=%d",
-            request_id, service_type, len(image_urls),
+            "Zone generation start request_id=%s service=%s num_urls=%d model=%s",
+            request_id, service_type, len(image_urls), model,
         )
-        # Цоколь и пояса всегда GPT Image 2 — лучше понимает геометрические команды и маску зоны
-        effective_material_type = None if service_type in ("plinth", "belt") else material_type
-        result = await generate_image(image_urls, prompt, material_type=effective_material_type)
+        if model:
+            result = await generate_image(image_urls, prompt, material_type=material_type, model_override=model)
+        else:
+            # Цоколь и пояса всегда GPT Image 2 — лучше понимает геометрические команды и маску зоны
+            effective_material_type = None if service_type in ("plinth", "belt") else material_type
+            result = await generate_image(image_urls, prompt, material_type=effective_material_type)
         output_url = result["output_url"]
 
         output_dir = os.path.join(GENERATED_DIR, user_id)
@@ -610,9 +636,9 @@ async def _run_zone_generation(
         try:
             await db.execute(
                 "INSERT INTO generations (user_type, user_id, input_image_path, output_image_path, "
-                "prompt, texture_name, category, material_type, supplier) VALUES (?,?,?,?,?,?,?,?,?)",
+                "prompt, texture_name, category, material_type, supplier, model_used) VALUES (?,?,?,?,?,?,?,?,?,?)",
                 ("internal", user_id, temp_path, out_path, prompt,
-                 texture_name, service_type, material_type, supplier),
+                 texture_name, service_type, material_type, supplier, model),
             )
             await db.commit()
         finally:
@@ -633,6 +659,7 @@ async def accent_generate(
     texture: str = Form(None),               # опционально для belt
     material_type: str = Form(None),
     supplier: str = Form(None),
+    model: str = Form(None),
     current_user = Depends(get_current_manager),
 ):
     """Генерация акцентов: Цоколь / Рейка / Пояса."""
@@ -693,5 +720,454 @@ async def accent_generate(
         request_id, image_urls, prompt,
         user_id, accent_type, texture_name, temp_path,
         material_type or "", supplier or "",
+        model=model,
     ))
     return {"request_id": request_id}
+
+
+# ============================================================
+#  FREE PROMPTS — re-generation with custom prompt
+# ============================================================
+
+async def _run_free_generation(
+    request_id: str, user_id: str, image_url: str,
+    prompt: str, source_id: int, model: str | None,
+):
+    try:
+        logger.info("free_generate bg start request_id=%s user_id=%s model=%s", request_id, user_id, model)
+        result = await generate_image([image_url], prompt, model_override=model)
+        output_url = result["output_url"]
+
+        output_dir = os.path.join(GENERATED_DIR, user_id)
+        os.makedirs(output_dir, exist_ok=True)
+        out_filename = f"{uuid.uuid4().hex}.jpg"
+        out_path = os.path.join(output_dir, out_filename)
+
+        async with httpx.AsyncClient(timeout=60.0) as dl_client:
+            img_resp = await dl_client.get(output_url)
+            img_resp.raise_for_status()
+            with open(out_path, "wb") as f:
+                f.write(img_resp.content)
+
+        db = await get_db()
+        try:
+            await db.execute(
+                "INSERT INTO generations (user_type, user_id, input_image_path, output_image_path, "
+                "prompt, category, model_used) VALUES (?, ?, ?, ?, ?, 'free', ?)",
+                ("internal", user_id, f"source:{source_id}", out_path, prompt, model),
+            )
+            await db.commit()
+        finally:
+            await db.close()
+
+        result_url = f"/generated/internal/{user_id}/{out_filename}"
+        redis_client.setex(f"gen_status:{request_id}", 3600, f"success:{result_url}")
+        logger.info("free_generate bg success request_id=%s", request_id)
+    except Exception as e:
+        logger.error("free_generate bg error request_id=%s: %s", request_id, e)
+        redis_client.setex(f"gen_status:{request_id}", 3600, "error")
+
+
+class FreeGenerateRequest(BaseModel):
+    source_generation_id: int
+    custom_prompt: str
+    model: str | None = None
+
+
+@router.post("/free-generate")
+async def free_generate(data: FreeGenerateRequest, request: Request, current_user=Depends(get_current_manager)):
+    user_id = str(current_user["id"])
+    user_role = current_user["role"]
+
+    db = await get_db()
+    try:
+        cursor = await db.execute(
+            "SELECT id, user_id, output_image_path FROM generations WHERE id = ? AND user_type = 'internal'",
+            (data.source_generation_id,),
+        )
+        row = await cursor.fetchone()
+    finally:
+        await db.close()
+
+    if not row:
+        raise HTTPException(404, "Генерация не найдена")
+    if user_role != "admin" and str(row["user_id"]) != user_id:
+        raise HTTPException(403, "Нет доступа к этой генерации")
+
+    base_url = resolve_public_base_url(request)
+    owner_id = str(row["user_id"])
+    output_filename = os.path.basename(row["output_image_path"])
+    image_url = f"{base_url}/generated/internal/{owner_id}/{output_filename}"
+
+    request_id = str(uuid.uuid4())
+    redis_client.setex(f"gen_status:{request_id}", 3600, "processing")
+    asyncio.create_task(_run_free_generation(
+        request_id, user_id, image_url,
+        data.custom_prompt, data.source_generation_id, data.model,
+    ))
+    return {"request_id": request_id}
+
+
+# ============================================================
+#  CHAT — text analysis via GenAPI GPT-4o
+# ============================================================
+
+CHAT_ENDPOINT = "https://api.gen-api.ru/api/v1/networks/gpt-4o"
+CHAT_SYSTEM_PROMPT = (
+    "Ты эксперт по облицовке зданий натуральным камнем и кирпичом. "
+    "Анализируй изображения визуализации и давай рекомендации по улучшению. "
+    "Отвечай на русском языке, кратко и по делу."
+)
+
+
+class ChatMessage(BaseModel):
+    role: str
+    content: str
+
+
+class ChatRequest(BaseModel):
+    message: str
+    image_url: str | None = None
+    history: list[ChatMessage] = []
+
+
+@router.post("/chat")
+async def chat_analysis(data: ChatRequest, request: Request, current_user=Depends(get_current_manager)):
+    api_key = os.getenv("GEN_API_KEY") or os.getenv("API_KEY")
+    if not api_key:
+        raise HTTPException(500, "API ключ не настроен")
+
+    messages = [{"role": "system", "content": CHAT_SYSTEM_PROMPT}]
+    for msg in data.history:
+        messages.append({"role": msg.role, "content": msg.content})
+
+    user_content = data.message
+    if data.image_url:
+        base_url = resolve_public_base_url(request)
+        full_url = data.image_url if data.image_url.startswith("http") else f"{base_url}{data.image_url}"
+        messages.append({
+            "role": "user",
+            "content": [
+                {"type": "image_url", "image_url": {"url": full_url}},
+                {"type": "text", "text": user_content},
+            ],
+        })
+    else:
+        messages.append({"role": "user", "content": user_content})
+
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "Authorization": f"Bearer {api_key}",
+    }
+    payload = {"messages": messages, "max_tokens": 1024}
+
+    async with httpx.AsyncClient(timeout=httpx.Timeout(connect=30.0, read=120.0, write=30.0, pool=5.0)) as client:
+        resp = await client.post(CHAT_ENDPOINT, json=payload, headers=headers)
+        if not resp.is_success:
+            logger.error("Chat API error status=%s body=%s", resp.status_code, resp.text[:500])
+            raise HTTPException(502, "Ошибка текстовой модели")
+        result = resp.json()
+
+    # GenAPI may return sync or async response
+    if "request_id" in result and "choices" not in result:
+        status_url = f"https://api.gen-api.ru/api/v1/request/get/{result['request_id']}"
+        async with httpx.AsyncClient(timeout=30.0) as poll_client:
+            for _ in range(60):
+                await asyncio.sleep(2)
+                try:
+                    sr = await poll_client.get(status_url, headers=headers)
+                    sd = sr.json()
+                    status = str(sd.get("status", "")).lower()
+                    if status in {"success", "done", "completed", "finished"}:
+                        result = sd.get("output") or sd.get("result") or sd
+                        break
+                    if status in {"error", "failed", "failure"}:
+                        raise HTTPException(502, "Ошибка текстовой модели")
+                except httpx.RequestError:
+                    continue
+            else:
+                raise HTTPException(504, "Таймаут ответа текстовой модели")
+
+    # Extract assistant message
+    choices = result.get("choices", [])
+    if choices:
+        reply = choices[0].get("message", {}).get("content", "")
+    else:
+        reply = result.get("content") or result.get("text") or str(result)
+
+    return {"reply": reply}
+
+
+# ============================================================
+#  AI SYSTEM PROMPT GENERATOR
+# ============================================================
+
+PROMPT_GEN_SYSTEM = (
+    "Ты — эксперт по облицовке зданий натуральным камнем, кирпичом и декоративными материалами. "
+    "Пользователь предоставит фотографии текстуры материала и/или фото реальной кладки. "
+    "Твоя задача — проанализировать материал и написать детальный системный промт на АНГЛИЙСКОМ языке "
+    "для AI-модели генерации изображений, которая будет заменять облицовку зданий на этот материал.\n\n"
+    "Системный промт должен содержать:\n"
+    "1. Описание физических свойств материала (форма, размер, текстура поверхности)\n"
+    "2. Характерные особенности укладки (паттерн, швы, расстояние между элементами)\n"
+    "3. Цветовую палитру и вариации\n"
+    "4. Особенности отражения света и теней\n"
+    "5. Важные детали для реалистичной генерации\n\n"
+    "Формат ответа: ТОЛЬКО текст системного промта, без пояснений, заголовков и кавычек. "
+    "Промт должен быть 3-6 предложений, начинаться с описания типа материала. "
+    "Пиши на английском языке."
+)
+
+
+@router.post("/generate-system-prompt")
+async def generate_system_prompt(
+    request: Request,
+    texture_photo: UploadFile = File(None),
+    real_photo: UploadFile = File(None),
+    description: str = Form(""),
+    current_user=Depends(get_current_admin),
+):
+    api_key = os.getenv("GEN_API_KEY") or os.getenv("API_KEY")
+    if not api_key:
+        raise HTTPException(500, "API ключ не настроен")
+
+    if not texture_photo and not real_photo and not description:
+        raise HTTPException(400, "Загрузите хотя бы одно фото или добавьте описание")
+
+    base_url = resolve_public_base_url(request)
+    temp_files = []
+    image_parts = []
+
+    for label, upload in [("Текстура материала", texture_photo), ("Реальная кладка", real_photo)]:
+        if not upload:
+            continue
+        contents = await upload.read()
+        if len(contents) > 15 * 1024 * 1024:
+            raise HTTPException(413, f"Файл {label} превышает 15 МБ")
+        fname = f"{uuid.uuid4().hex}.jpg"
+        fpath = os.path.join(TEMP_DIR, fname)
+        with open(fpath, "wb") as f:
+            f.write(contents)
+        temp_files.append(fpath)
+        url = f"{base_url}/temp/internal/{fname}"
+        image_parts.append({"type": "image_url", "image_url": {"url": url}})
+
+    user_text = "Проанализируй этот облицовочный материал и составь системный промт для AI-генерации."
+    if description.strip():
+        user_text += f"\n\nДополнительное описание от администратора: {description.strip()}"
+
+    user_content: list | str = image_parts + [{"type": "text", "text": user_text}] if image_parts else user_text
+
+    messages = [
+        {"role": "system", "content": PROMPT_GEN_SYSTEM},
+        {"role": "user", "content": user_content},
+    ]
+
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "Authorization": f"Bearer {api_key}",
+    }
+    payload = {"messages": messages, "max_tokens": 1024}
+
+    try:
+        async with httpx.AsyncClient(timeout=httpx.Timeout(connect=30.0, read=120.0, write=30.0, pool=5.0)) as client:
+            resp = await client.post(CHAT_ENDPOINT, json=payload, headers=headers)
+            if not resp.is_success:
+                logger.error("Prompt gen API error status=%s body=%s", resp.status_code, resp.text[:500])
+                raise HTTPException(502, "Ошибка текстовой модели")
+            result = resp.json()
+
+        if "request_id" in result and "choices" not in result:
+            status_url = f"https://api.gen-api.ru/api/v1/request/get/{result['request_id']}"
+            async with httpx.AsyncClient(timeout=30.0) as poll_client:
+                for _ in range(60):
+                    await asyncio.sleep(2)
+                    try:
+                        sr = await poll_client.get(status_url, headers=headers)
+                        sd = sr.json()
+                        status = str(sd.get("status", "")).lower()
+                        if status in {"success", "done", "completed", "finished"}:
+                            result = sd.get("output") or sd.get("result") or sd
+                            break
+                        if status in {"error", "failed", "failure"}:
+                            raise HTTPException(502, "Ошибка генерации промта")
+                    except httpx.RequestError:
+                        continue
+                else:
+                    raise HTTPException(504, "Таймаут генерации промта")
+
+        choices = result.get("choices", [])
+        if choices:
+            reply = choices[0].get("message", {}).get("content", "")
+        else:
+            reply = result.get("content") or result.get("text") or str(result)
+
+        return {"system_prompt": reply.strip()}
+    finally:
+        for fp in temp_files:
+            if os.path.exists(fp):
+                os.unlink(fp)
+
+
+# ============================================================
+#  CUSTOM MATERIAL TYPES (admin CRUD)
+# ============================================================
+_BUILTIN_MATERIAL_TYPES = [
+    {"slug": "standard",       "display_name": "Кирпич",                "builtin": True},
+    {"slug": "rigel",          "display_name": "Ригель",                 "builtin": True},
+    {"slug": "riegel_mixed",   "display_name": "Разноформатный ригель",  "builtin": True},
+    {"slug": "cobblestone",    "display_name": "Круглый камень",         "builtin": True},
+    {"slug": "rubble_stone",   "display_name": "Рваный камень",          "builtin": True},
+    {"slug": "flat_stone",     "display_name": "Плоский камень",         "builtin": True},
+    {"slug": "textured_stone", "display_name": "Фактурный камень",       "builtin": True},
+    {"slug": "solid",          "display_name": "Сплошные",               "builtin": True},
+    {"slug": "reika",          "display_name": "Рейка",                  "builtin": True},
+]
+
+
+class CustomMaterialTypeCreate(BaseModel):
+    slug: str
+    display_name: str
+    system_prompt: str
+    default_model: str = "gpt-image-2"
+
+
+class CustomMaterialTypeUpdate(BaseModel):
+    display_name: str | None = None
+    system_prompt: str | None = None
+    default_model: str | None = None
+
+
+@router.get("/material-types")
+async def list_material_types(current_user=Depends(get_current_manager)):
+    db = await get_db()
+    try:
+        cursor = await db.execute(
+            "SELECT id, slug, display_name, system_prompt, default_model, created_at "
+            "FROM custom_material_types ORDER BY display_name"
+        )
+        rows = await cursor.fetchall()
+    finally:
+        await db.close()
+    custom = [dict(row) | {"builtin": False} for row in rows]
+    return _BUILTIN_MATERIAL_TYPES + custom
+
+
+@router.post("/material-types")
+async def create_material_type(data: CustomMaterialTypeCreate, current_user=Depends(get_current_admin)):
+    builtin_slugs = {t["slug"] for t in _BUILTIN_MATERIAL_TYPES}
+    if data.slug in builtin_slugs:
+        raise HTTPException(400, "Этот slug зарезервирован для встроенного типа")
+    db = await get_db()
+    try:
+        await db.execute(
+            "INSERT INTO custom_material_types (slug, display_name, system_prompt, default_model) "
+            "VALUES (?, ?, ?, ?)",
+            (data.slug, data.display_name, data.system_prompt, data.default_model),
+        )
+        await db.commit()
+        cursor = await db.execute("SELECT last_insert_rowid()")
+        row = await cursor.fetchone()
+        return {"id": row[0], "slug": data.slug}
+    except Exception as e:
+        if "UNIQUE" in str(e):
+            raise HTTPException(400, f"Тип с slug '{data.slug}' уже существует")
+        raise
+    finally:
+        await db.close()
+
+
+@router.put("/material-types/{type_id}")
+async def update_material_type(type_id: int, data: CustomMaterialTypeUpdate, current_user=Depends(get_current_admin)):
+    db = await get_db()
+    try:
+        cursor = await db.execute("SELECT id FROM custom_material_types WHERE id = ?", (type_id,))
+        if not await cursor.fetchone():
+            raise HTTPException(404, "Тип не найден")
+        updates, params = [], []
+        if data.display_name is not None:
+            updates.append("display_name = ?"); params.append(data.display_name)
+        if data.system_prompt is not None:
+            updates.append("system_prompt = ?"); params.append(data.system_prompt)
+        if data.default_model is not None:
+            updates.append("default_model = ?"); params.append(data.default_model)
+        if not updates:
+            raise HTTPException(400, "Нечего обновлять")
+        params.append(type_id)
+        await db.execute(f"UPDATE custom_material_types SET {', '.join(updates)} WHERE id = ?", params)
+        await db.commit()
+    finally:
+        await db.close()
+    return {"ok": True}
+
+
+@router.delete("/material-types/{type_id}")
+async def delete_material_type(type_id: int, current_user=Depends(get_current_admin)):
+    db = await get_db()
+    try:
+        cursor = await db.execute("SELECT id FROM custom_material_types WHERE id = ?", (type_id,))
+        if not await cursor.fetchone():
+            raise HTTPException(404, "Тип не найден")
+        await db.execute("DELETE FROM custom_material_types WHERE id = ?", (type_id,))
+        await db.commit()
+    finally:
+        await db.close()
+    return {"ok": True}
+
+
+# ============================================================
+#  PROMPT TEMPLATES (admin CRUD, read for all managers)
+# ============================================================
+
+class PromptTemplateCreate(BaseModel):
+    category: str  # 'fix' or 'style'
+    label: str
+    prompt_text: str
+    sort_order: int = 0
+
+
+@router.get("/prompt-templates")
+async def list_prompt_templates(current_user=Depends(get_current_manager)):
+    db = await get_db()
+    try:
+        cursor = await db.execute(
+            "SELECT id, category, label, prompt_text, sort_order FROM prompt_templates ORDER BY category, sort_order, id"
+        )
+        rows = await cursor.fetchall()
+    finally:
+        await db.close()
+    return [dict(row) for row in rows]
+
+
+@router.post("/prompt-templates")
+async def create_prompt_template(data: PromptTemplateCreate, current_user=Depends(get_current_admin)):
+    if data.category not in ("fix", "style"):
+        raise HTTPException(400, "category must be 'fix' or 'style'")
+    db = await get_db()
+    try:
+        await db.execute(
+            "INSERT INTO prompt_templates (category, label, prompt_text, sort_order) VALUES (?, ?, ?, ?)",
+            (data.category, data.label, data.prompt_text, data.sort_order),
+        )
+        await db.commit()
+        cursor = await db.execute("SELECT last_insert_rowid()")
+        row = await cursor.fetchone()
+        return {"id": row[0]}
+    finally:
+        await db.close()
+
+
+@router.delete("/prompt-templates/{template_id}")
+async def delete_prompt_template(template_id: int, current_user=Depends(get_current_admin)):
+    db = await get_db()
+    try:
+        cursor = await db.execute("SELECT id FROM prompt_templates WHERE id = ?", (template_id,))
+        if not await cursor.fetchone():
+            raise HTTPException(404, "Шаблон не найден")
+        await db.execute("DELETE FROM prompt_templates WHERE id = ?", (template_id,))
+        await db.commit()
+    finally:
+        await db.close()
+    return {"ok": True}
