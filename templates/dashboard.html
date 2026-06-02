@@ -1138,7 +1138,8 @@
     </div>
 
     <div class="admin-section">
-      <h3><span class="ico" style="color:var(--coral)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M200,40H56A16,16,0,0,0,40,56V200a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V56A16,16,0,0,0,200,40Zm0,80H136V56h64ZM120,56v64H56V56ZM56,136h64v64H56Zm144,64H136V136h64v64Z"/></svg></span> Типы материалов (кастомные)</h3>
+      <h3><span class="ico" style="color:var(--coral)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M200,40H56A16,16,0,0,0,40,56V200a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V56A16,16,0,0,0,200,40Zm0,80H136V56h64ZM120,56v64H56V56ZM56,136h64v64H56Zm144,64H136V136h64v64Z"/></svg></span> Типы материалов</h3>
+      <div style="font-size:.82rem;color:var(--muted);margin:-8px 0 16px;">Добавляйте свои типы и редактируйте промт/модель любой категории — включая встроенные. Пустой промт у встроенного типа = стандартный.</div>
       <div class="field-row">
         <div class="field" style="flex:1;min-width:120px;">
           <span class="field-label">Название</span>
@@ -1575,7 +1576,9 @@ function setModel(section, btn) {
     selectedModel[section] = btn.dataset.model;
 }
 function autoSelectModel(section, materialType) {
-    const model = _NANO_BANANA_TYPES.has(materialType) ? 'nano-banana-2' : 'gpt-image-2';
+    // приоритет: модель, заданная админом для типа; иначе эвристика
+    const model = typeDefaultModelMap[materialType]
+        || (_NANO_BANANA_TYPES.has(materialType) ? 'nano-banana-2' : 'gpt-image-2');
     selectedModel[section] = model;
     const toggleId = section === 'main' ? 'modelToggle' : `${section}ModelToggle`;
     const toggle = document.getElementById(toggleId);
@@ -1858,7 +1861,8 @@ function renderModalGrid(list) {
     });
 }
 let _customTypesLoaded = false;
-let customTypeMap = {};   // slug -> display_name (custom types only)
+let customTypeMap = {};        // slug -> display_name (custom types only)
+let typeDefaultModelMap = {};  // slug -> default_model (all types, honors admin overrides)
 async function ensureCustomTypesInSelects(force = false) {
     if (_customTypesLoaded && !force) return;
     try {
@@ -1867,6 +1871,8 @@ async function ensureCustomTypesInSelects(force = false) {
         const custom = types.filter(t => !t.builtin);
         customTypeMap = {};
         custom.forEach(t => { customTypeMap[t.slug] = t.display_name; });
+        typeDefaultModelMap = {};
+        types.forEach(t => { if (t.default_model) typeDefaultModelMap[t.slug] = t.default_model; });
         _customTypesLoaded = true;
         if (!custom.length) return;
         const selIds = ['modalMatType', 'catMatType', 'textureMaterialType', 'texFilterType'];
@@ -2677,31 +2683,87 @@ async function loadGenapiInfo() {
 // ============================================================
 //  CUSTOM MATERIAL TYPES
 // ============================================================
+const _SPARK_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" width="13" height="13"><path d="M208,144a15.78,15.78,0,0,1-10.42,14.94l-51.65,19-19,51.61a15.92,15.92,0,0,1-29.88,0l-19-51.65-51.61-19a15.92,15.92,0,0,1,0-29.88l51.65-19,19-51.61a15.92,15.92,0,0,1,29.88,0l19,51.65,51.61,19A15.78,15.78,0,0,1,208,144ZM152,48h16V64a8,8,0,0,0,16,0V48h16a8,8,0,0,0,0-16H184V16a8,8,0,0,0-16,0V32H152a8,8,0,0,0,0,16Zm88,32h-8V72a8,8,0,0,0-16,0v8h-8a8,8,0,0,0,0,16h8v8a8,8,0,0,0,16,0V96h8a8,8,0,0,0,0-16Z"/></svg>';
+function _modelSelect(rowKey, current) {
+    const opts = [['gpt-image-2','GPT Image 2'],['nano-banana-2','Nano Banana 2']];
+    return `<select id="cmtModel_${rowKey}" class="ctl" style="font-size:.82rem;min-width:140px;">`
+        + opts.map(([v,l]) => `<option value="${v}" ${v===current?'selected':''}>${l}</option>`).join('')
+        + `</select>`;
+}
+function _typeRow(t) {
+    const key = t.builtin ? ('b-' + t.slug) : ('c' + t.id);
+    const promptVal = (t.system_prompt || '').replace(/</g,'&lt;');
+    const ph = t.builtin
+        ? 'Пусто = стандартный встроенный промт. Введите текст, чтобы переопределить.'
+        : 'Системный промт для генерации…';
+    const saveCall = t.builtin ? `saveTypeRow('builtin','${t.slug}','${key}')` : `saveTypeRow('custom',${t.id},'${key}')`;
+    const actionBtn = t.builtin
+        ? `<button class="btn-del" onclick="resetBuiltinType('${t.slug}')">Сбросить</button>`
+        : `<button class="btn-del" onclick="deleteCustomMaterialType(${t.id})">Удалить</button>`;
+    const tag = t.builtin
+        ? '<span style="font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;">встроенный</span>'
+        : '<span style="font-size:.66rem;color:var(--coral);text-transform:uppercase;letter-spacing:.05em;">кастомный</span>';
+    return `<tr>
+      <td><div style="font-weight:500;">${t.display_name}</div><code style="font-size:.72rem;color:var(--muted);">${t.slug}</code><div>${tag}</div></td>
+      <td>${_modelSelect(key, t.default_model)}</td>
+      <td>
+        <textarea id="cmtPrompt_${key}" class="ctl" rows="2" style="font-size:.82rem;" placeholder="${ph}">${promptVal}</textarea>
+        <div style="display:flex;gap:6px;margin-top:6px;">
+          <button class="btn-add" style="font-size:.75rem;padding:5px 14px;" onclick="${saveCall}">Сохранить</button>
+          <button class="btn-outline" style="font-size:.74rem;padding:4px 12px;display:inline-flex;align-items:center;gap:5px;" onclick="openAiPromptModalFor('${key}')"><span class="ico">${_SPARK_SVG}</span>AI</button>
+        </div>
+      </td>
+      <td>${actionBtn}</td>
+    </tr>`;
+}
 async function loadCustomMaterialTypes() {
     if (currentUser?.role !== 'admin') return;
     try {
         const r = await fetch(`${API_BASE}/api/internal/material-types`, { credentials:'include', headers:H() });
         const types = await r.json();
+        const builtin = types.filter(t => t.builtin);
         const custom = types.filter(t => !t.builtin);
         const c = document.getElementById('cmtTable');
-        if (!custom.length) { c.innerHTML = '<div style="padding:16px;color:var(--muted);">Кастомных типов пока нет</div>'; return; }
         c.innerHTML = `<table>
-            <thead><tr><th>Slug</th><th>Название</th><th>Модель</th><th style="min-width:200px;">Промт</th><th></th></tr></thead>
-            <tbody>${custom.map(t => `<tr>
-              <td><code>${t.slug}</code></td>
-              <td>${t.display_name}</td>
-              <td>${t.default_model}</td>
-              <td>
-                <textarea id="cmtPrompt_${t.id}" class="ctl" rows="2" style="font-size:.82rem;">${(t.system_prompt||'').replace(/</g,'&lt;')}</textarea>
-                <div style="display:flex;gap:6px;margin-top:6px;">
-                  <button class="btn-add" style="font-size:.75rem;padding:5px 14px;" onclick="saveCmtPrompt(${t.id})">Сохранить</button>
-                  <button class="btn-outline" style="font-size:.74rem;padding:4px 12px;display:inline-flex;align-items:center;gap:5px;" onclick="openAiPromptModalFor(${t.id})"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" width="13" height="13"><path d="M208,144a15.78,15.78,0,0,1-10.42,14.94l-51.65,19-19,51.61a15.92,15.92,0,0,1-29.88,0l-19-51.65-51.61-19a15.92,15.92,0,0,1,0-29.88l51.65-19,19-51.61a15.92,15.92,0,0,1,29.88,0l19,51.65,51.61,19A15.78,15.78,0,0,1,208,144ZM152,48h16V64a8,8,0,0,0,16,0V48h16a8,8,0,0,0,0-16H184V16a8,8,0,0,0-16,0V32H152a8,8,0,0,0,0,16Zm88,32h-8V72a8,8,0,0,0-16,0v8h-8a8,8,0,0,0,0,16h8v8a8,8,0,0,0,16,0V96h8a8,8,0,0,0,0-16Z"/></svg></span>AI</button>
-                </div>
-              </td>
-              <td><button class="btn-del" onclick="deleteCustomMaterialType(${t.id})">Удалить</button></td>
-            </tr>`).join('')}</tbody>
+            <thead><tr><th>Тип</th><th>Модель</th><th style="min-width:240px;">Системный промт</th><th></th></tr></thead>
+            <tbody>${builtin.map(_typeRow).join('')}${custom.map(_typeRow).join('')}</tbody>
         </table>`;
     } catch(e) { console.error(e); }
+}
+async function saveTypeRow(kind, idOrSlug, key) {
+    const ta  = document.getElementById(`cmtPrompt_${key}`);
+    const sel = document.getElementById(`cmtModel_${key}`);
+    const system_prompt = ta ? ta.value.trim() : '';
+    const default_model = sel ? sel.value : undefined;
+    let url, body;
+    if (kind === 'builtin') {
+        url = `${API_BASE}/api/internal/material-types/builtin/${idOrSlug}`;
+        body = { system_prompt, default_model };   // пустой промт = сброс на стандартный
+    } else {
+        if (!system_prompt) return alert('Промт не может быть пустым');
+        url = `${API_BASE}/api/internal/material-types/${idOrSlug}`;
+        body = { system_prompt, default_model };
+    }
+    try {
+        const r = await fetch(url, {
+            method:'PUT', credentials:'include',
+            headers: { ...H(), 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+        if (!r.ok) { const d = await r.json(); alert(d.detail || 'Ошибка'); return; }
+        if (ta) { ta.style.outline = '2px solid var(--good)'; setTimeout(() => ta.style.outline = '', 1500); }
+        ensureCustomTypesInSelects(true);
+    } catch(e) { alert(e); }
+}
+async function resetBuiltinType(slug) {
+    if (!confirm('Сбросить промт и модель этого типа к стандартным значениям?')) return;
+    try {
+        await fetch(`${API_BASE}/api/internal/material-types/builtin/${slug}`, {
+            method:'DELETE', credentials:'include', headers:H(),
+        });
+        loadCustomMaterialTypes();
+        ensureCustomTypesInSelects(true);
+    } catch(e) { alert(e); }
 }
 async function addCustomMaterialType() {
     const slug = document.getElementById('cmtSlug').value.trim();
@@ -2723,23 +2785,6 @@ async function addCustomMaterialType() {
         ensureCustomTypesInSelects(true);
     } catch(e) { alert(e); }
 }
-async function saveCmtPrompt(id) {
-    const textarea = document.getElementById(`cmtPrompt_${id}`);
-    if (!textarea) return;
-    const system_prompt = textarea.value.trim();
-    if (!system_prompt) return alert('Промт не может быть пустым');
-    try {
-        const r = await fetch(`${API_BASE}/api/internal/material-types/${id}`, {
-            method:'PUT', credentials:'include',
-            headers: { ...H(), 'Content-Type': 'application/json' },
-            body: JSON.stringify({ system_prompt }),
-        });
-        if (!r.ok) { const d = await r.json(); alert(d.detail || 'Ошибка'); return; }
-        textarea.style.outline = '2px solid var(--good)';
-        setTimeout(() => textarea.style.outline = '', 1500);
-    } catch(e) { alert(e); }
-}
-
 let aiPromptTargetId = null;
 function openAiPromptModalFor(cmtId) {
     aiPromptTargetId = cmtId;

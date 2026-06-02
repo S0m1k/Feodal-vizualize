@@ -207,6 +207,14 @@ def init_db_sync():
             sort_order INTEGER DEFAULT 0
         )
     """)
+    # Переопределения системного промта/модели для ВСТРОЕННЫХ типов материалов
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS material_type_overrides (
+            slug TEXT PRIMARY KEY,
+            system_prompt TEXT,
+            default_model TEXT
+        )
+    """)
     conn.commit()
 
     # Миграция: добавить колонку model_used в generations

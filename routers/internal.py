@@ -169,23 +169,7 @@ async def internal_generate(
         if grout_row:
             grout_hex = grout_row["hex_code"]
 
-    custom_system_prompt = None
-    _builtin_slugs = {"standard", "rigel", "riegel_mixed", "cobblestone", "rubble_stone",
-                      "flat_stone", "textured_stone", "derbent_stone", "solid", "reika"}
-    if material_type and material_type not in _builtin_slugs:
-        db2 = await get_db()
-        try:
-            cur2 = await db2.execute(
-                "SELECT system_prompt, default_model FROM custom_material_types WHERE slug = ?",
-                (material_type,),
-            )
-            cmt_row = await cur2.fetchone()
-            if cmt_row:
-                custom_system_prompt = cmt_row["system_prompt"]
-                if not model:
-                    model = cmt_row["default_model"]
-        finally:
-            await db2.close()
+    custom_system_prompt, model = await _resolve_type_overrides(material_type, model)
 
     prompt = build_prompt(category, material_type, grout_hex, use_zone=bool(use_zone),
                           custom_system_prompt=custom_system_prompt)
@@ -710,24 +694,8 @@ async def accent_generate(
         image_urls.append(texture_url)
         texture_name = texture
 
-    # Кастомный системный промт для нестандартных типов материала
-    custom_system_prompt = None
-    _builtin_slugs = {"standard", "rigel", "riegel_mixed", "cobblestone", "rubble_stone",
-                      "flat_stone", "textured_stone", "derbent_stone", "solid", "reika"}
-    if material_type and material_type not in _builtin_slugs:
-        db2 = await get_db()
-        try:
-            cur2 = await db2.execute(
-                "SELECT system_prompt, default_model FROM custom_material_types WHERE slug = ?",
-                (material_type,),
-            )
-            cmt_row = await cur2.fetchone()
-            if cmt_row:
-                custom_system_prompt = cmt_row["system_prompt"]
-                if not model:
-                    model = cmt_row["default_model"]
-        finally:
-            await db2.close()
+    # Кастомный/переопределённый системный промт + модель по типу материала
+    custom_system_prompt, model = await _resolve_type_overrides(material_type, model)
 
     # Выбираем промт по типу подвкладки
     has_texture = len(image_urls) > 1
@@ -738,7 +706,7 @@ async def accent_generate(
     elif accent_type == "reika":
         if not has_texture:
             raise HTTPException(status_code=400, detail="Для Рейки необходимо выбрать текстуру")
-        prompt = build_reika_prompt(orientation)
+        prompt = build_reika_prompt(orientation, custom_system_prompt=custom_system_prompt)
     else:  # belt
         prompt = build_belt_prompt(has_texture, material_type, belt_mode, cornice,
                                    custom_system_prompt=custom_system_prompt)
@@ -1016,6 +984,48 @@ _BUILTIN_MATERIAL_TYPES = [
     {"slug": "solid",          "display_name": "Сплошные",               "builtin": True},
     {"slug": "reika",          "display_name": "Рейка",                  "builtin": True},
 ]
+_BUILTIN_SLUGS = {t["slug"] for t in _BUILTIN_MATERIAL_TYPES}
+_NANO_BANANA_BUILTINS = {"standard", "rigel"}
+
+
+def _builtin_default_model(slug: str) -> str:
+    """Авто-модель для встроенного типа (как в _select_endpoint)."""
+    return "nano-banana-2" if slug in _NANO_BANANA_BUILTINS else "gpt-image-2"
+
+
+async def _resolve_type_overrides(material_type: str | None, model: str | None):
+    """Возвращает (custom_system_prompt, model) с учётом кастомных типов и
+    переопределений встроенных типов. model берётся из настроек только если
+    пользователь не выбрал модель явно."""
+    custom_system_prompt = None
+    if not material_type:
+        return custom_system_prompt, model
+    db = await get_db()
+    try:
+        cur = await db.execute(
+            "SELECT system_prompt, default_model FROM custom_material_types WHERE slug = ?",
+            (material_type,),
+        )
+        row = await cur.fetchone()
+        if row:
+            custom_system_prompt = row["system_prompt"]
+            if not model:
+                model = row["default_model"]
+            return custom_system_prompt, model
+        # переопределение встроенного типа
+        cur = await db.execute(
+            "SELECT system_prompt, default_model FROM material_type_overrides WHERE slug = ?",
+            (material_type,),
+        )
+        row = await cur.fetchone()
+        if row:
+            if row["system_prompt"]:
+                custom_system_prompt = row["system_prompt"]
+            if not model and row["default_model"]:
+                model = row["default_model"]
+    finally:
+        await db.close()
+    return custom_system_prompt, model
 
 
 class CustomMaterialTypeCreate(BaseModel):
@@ -1040,10 +1050,23 @@ async def list_material_types(current_user=Depends(get_current_manager)):
             "FROM custom_material_types ORDER BY display_name"
         )
         rows = await cursor.fetchall()
+        ov_cursor = await db.execute(
+            "SELECT slug, system_prompt, default_model FROM material_type_overrides"
+        )
+        ov_rows = await ov_cursor.fetchall()
     finally:
         await db.close()
+    overrides = {r["slug"]: r for r in ov_rows}
+    builtins = []
+    for t in _BUILTIN_MATERIAL_TYPES:
+        o = overrides.get(t["slug"])
+        builtins.append({
+            **t,
+            "system_prompt": (o["system_prompt"] if o else None),
+            "default_model": (o["default_model"] if o and o["default_model"] else _builtin_default_model(t["slug"])),
+        })
     custom = [dict(row) | {"builtin": False} for row in rows]
-    return _BUILTIN_MATERIAL_TYPES + custom
+    return builtins + custom
 
 
 @router.post("/material-types")
@@ -1102,6 +1125,46 @@ async def delete_material_type(type_id: int, current_user=Depends(get_current_ad
         if not await cursor.fetchone():
             raise HTTPException(404, "Тип не найден")
         await db.execute("DELETE FROM custom_material_types WHERE id = ?", (type_id,))
+        await db.commit()
+    finally:
+        await db.close()
+    return {"ok": True}
+
+
+class BuiltinTypeOverride(BaseModel):
+    system_prompt: str | None = None
+    default_model: str | None = None
+
+
+@router.put("/material-types/builtin/{slug}")
+async def upsert_builtin_override(slug: str, data: BuiltinTypeOverride, current_user=Depends(get_current_admin)):
+    """Переопределить системный промт и/или модель для встроенного типа.
+    Пустой system_prompt → сброс на стандартный (хардкод) промт."""
+    if slug not in _BUILTIN_SLUGS:
+        raise HTTPException(404, "Встроенный тип не найден")
+    sp = (data.system_prompt or "").strip() or None
+    dm = data.default_model or _builtin_default_model(slug)
+    db = await get_db()
+    try:
+        await db.execute(
+            "INSERT INTO material_type_overrides (slug, system_prompt, default_model) VALUES (?, ?, ?) "
+            "ON CONFLICT(slug) DO UPDATE SET system_prompt = excluded.system_prompt, default_model = excluded.default_model",
+            (slug, sp, dm),
+        )
+        await db.commit()
+    finally:
+        await db.close()
+    return {"ok": True}
+
+
+@router.delete("/material-types/builtin/{slug}")
+async def reset_builtin_override(slug: str, current_user=Depends(get_current_admin)):
+    """Сбросить переопределение встроенного типа к стандартным значениям."""
+    if slug not in _BUILTIN_SLUGS:
+        raise HTTPException(404, "Встроенный тип не найден")
+    db = await get_db()
+    try:
+        await db.execute("DELETE FROM material_type_overrides WHERE slug = ?", (slug,))
         await db.commit()
     finally:
         await db.close()

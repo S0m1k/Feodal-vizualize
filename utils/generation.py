@@ -62,7 +62,9 @@ def build_prompt(category: str, material_type: str,
         "Do NOT change anything outside the red zone. "
     ) if use_zone else ""
 
-    if material_type == "rubble_stone":
+    if custom_system_prompt:
+        prompt = f"{base} {zone_instr}Replace {target} with the provided texture. {custom_system_prompt}"
+    elif material_type == "rubble_stone":
         prompt = (f"{base} {zone_instr}Replace {target} with the provided texture. "
                   f"FORMAT: Irregular rubble / angular fieldstone masonry. "
                   f"EDGES (CRITICAL — most important rule): Every single stone MUST have razor-sharp, abrupt, angular edges. "
@@ -129,8 +131,6 @@ def build_prompt(category: str, material_type: str,
                   f"100% MASK LOCK: Stop exactly at the red line. Cut or crop any block that exceeds the boundary. "
                   f"FROZEN GEOMETRY: Do not touch stairs, railings, or window frames. Keep original pixels outside the mask. "
                   f"8k, photorealistic architectural render, matte mineral texture.")
-    elif custom_system_prompt:
-        prompt = f"{base} {zone_instr}Replace {target} with the provided texture. {custom_system_prompt}"
     else:
         # Ригель: пропорция 1:12, экстремально тонкие кирпичи
         prompt = (f"{base} {zone_instr}Replace {target} with EXACTLY the provided texture. "
@@ -173,15 +173,15 @@ def _solid_zone_detail() -> str:
 
 def build_plinth_prompt(material_type: str = None, custom_system_prompt: str = None) -> str:
     """Промт для подвкладки Цоколь."""
-    if material_type == "derbent_stone":
-        fill = _derbent_zone_detail()
-    elif material_type == "solid":
-        fill = _solid_zone_detail()
-    elif custom_system_prompt:
+    if custom_system_prompt:
         fill = (
             "Replace the texture STRICTLY within the red zone with the provided texture. "
             + custom_system_prompt + " "
         )
+    elif material_type == "derbent_stone":
+        fill = _derbent_zone_detail()
+    elif material_type == "solid":
+        fill = _solid_zone_detail()
     else:
         fill = (
             "Replace the texture STRICTLY within the red zone with the provided texture. "
@@ -202,9 +202,10 @@ def build_plinth_prompt(material_type: str = None, custom_system_prompt: str = N
     )
 
 
-def build_reika_prompt(orientation: str = "horizontal") -> str:
+def build_reika_prompt(orientation: str = "horizontal", custom_system_prompt: str = None) -> str:
     """Промт для подвкладки Рейка."""
     orient_word = "Horizontal" if orientation == "horizontal" else "Vertical"
+    extra = f" {custom_system_prompt}" if custom_system_prompt else ""
     return (
         "STRICT ARCHITECTURAL PRESERVATION: Frozen geometry. "
         "CRITICAL: Do NOT modify window positions, doors, or structural elements. "
@@ -216,7 +217,8 @@ def build_reika_prompt(orientation: str = "horizontal") -> str:
         "Follow the orientation of the provided texture sample exactly. "
         "Ensure clean edges where the slats meet other materials. "
         "Do NOT change anything outside the red zone. "
-        "8k, sharp focus on timber/metal texture."
+        + extra +
+        " 8k, sharp focus on timber/metal texture."
     )
 
 
@@ -249,16 +251,16 @@ def build_belt_prompt(has_texture: bool = True, material_type: str = None,
     )
 
     if has_texture:
-        if material_type in ("textured_stone", "derbent_stone"):
-            fill = _derbent_zone_detail()
-        elif material_type == "solid":
-            fill = _solid_zone_detail()
-        elif custom_system_prompt:
+        if custom_system_prompt:
             fill = (
                 "Replace the texture STRICTLY within the red zone with the provided material. "
                 "CLIPPING ONLY: Do not apply texture a single pixel outside the mask. "
                 + custom_system_prompt + " "
             )
+        elif material_type in ("textured_stone", "derbent_stone"):
+            fill = _derbent_zone_detail()
+        elif material_type == "solid":
+            fill = _solid_zone_detail()
         else:
             fill = (
                 "Replace the texture STRICTLY within the red zone with the provided material. "
