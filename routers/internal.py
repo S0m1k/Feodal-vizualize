@@ -710,18 +710,38 @@ async def accent_generate(
         image_urls.append(texture_url)
         texture_name = texture
 
+    # Кастомный системный промт для нестандартных типов материала
+    custom_system_prompt = None
+    _builtin_slugs = {"standard", "rigel", "riegel_mixed", "cobblestone", "rubble_stone",
+                      "flat_stone", "textured_stone", "derbent_stone", "solid", "reika"}
+    if material_type and material_type not in _builtin_slugs:
+        db2 = await get_db()
+        try:
+            cur2 = await db2.execute(
+                "SELECT system_prompt, default_model FROM custom_material_types WHERE slug = ?",
+                (material_type,),
+            )
+            cmt_row = await cur2.fetchone()
+            if cmt_row:
+                custom_system_prompt = cmt_row["system_prompt"]
+                if not model:
+                    model = cmt_row["default_model"]
+        finally:
+            await db2.close()
+
     # Выбираем промт по типу подвкладки
     has_texture = len(image_urls) > 1
     if accent_type == "plinth":
         if not has_texture:
             raise HTTPException(status_code=400, detail="Для Цоколя необходимо выбрать текстуру")
-        prompt = build_plinth_prompt(material_type)
+        prompt = build_plinth_prompt(material_type, custom_system_prompt=custom_system_prompt)
     elif accent_type == "reika":
         if not has_texture:
             raise HTTPException(status_code=400, detail="Для Рейки необходимо выбрать текстуру")
         prompt = build_reika_prompt(orientation)
     else:  # belt
-        prompt = build_belt_prompt(has_texture, material_type, belt_mode, cornice)
+        prompt = build_belt_prompt(has_texture, material_type, belt_mode, cornice,
+                                   custom_system_prompt=custom_system_prompt)
 
     redis_client.setex(f"gen_status:{request_id}", 3600, "processing")
     asyncio.create_task(_run_zone_generation(

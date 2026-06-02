@@ -171,12 +171,17 @@ def _solid_zone_detail() -> str:
     )
 
 
-def build_plinth_prompt(material_type: str = None) -> str:
+def build_plinth_prompt(material_type: str = None, custom_system_prompt: str = None) -> str:
     """Промт для подвкладки Цоколь."""
     if material_type == "derbent_stone":
         fill = _derbent_zone_detail()
     elif material_type == "solid":
         fill = _solid_zone_detail()
+    elif custom_system_prompt:
+        fill = (
+            "Replace the texture STRICTLY within the red zone with the provided texture. "
+            + custom_system_prompt + " "
+        )
     else:
         fill = (
             "Replace the texture STRICTLY within the red zone with the provided texture. "
@@ -216,7 +221,8 @@ def build_reika_prompt(orientation: str = "horizontal") -> str:
 
 
 def build_belt_prompt(has_texture: bool = True, material_type: str = None,
-                      belt_mode: str = "soldier", cornice: str = "no") -> str:
+                      belt_mode: str = "soldier", cornice: str = "no",
+                      custom_system_prompt: str = None) -> str:
     """Промт для подвкладки Пояса.
     Сценарий А (has_texture=True): заменить зону на выбранную текстуру.
     Сценарий Б (has_texture=False, belt_mode='soldier'): солдатский ряд.
@@ -247,6 +253,12 @@ def build_belt_prompt(has_texture: bool = True, material_type: str = None,
             fill = _derbent_zone_detail()
         elif material_type == "solid":
             fill = _solid_zone_detail()
+        elif custom_system_prompt:
+            fill = (
+                "Replace the texture STRICTLY within the red zone with the provided material. "
+                "CLIPPING ONLY: Do not apply texture a single pixel outside the mask. "
+                + custom_system_prompt + " "
+            )
         else:
             fill = (
                 "Replace the texture STRICTLY within the red zone with the provided material. "
