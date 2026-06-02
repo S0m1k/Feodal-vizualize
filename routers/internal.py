@@ -1089,6 +1089,34 @@ async def delete_material_type(type_id: int, current_user=Depends(get_current_ad
 
 
 # ============================================================
+#  GENAPI BALANCE / TOP-UP INFO (admin only)
+# ============================================================
+@router.get("/genapi-info")
+async def genapi_info(current_user=Depends(get_current_admin)):
+    """Баланс GenAPI + ссылка на пополнение + учётные данные (из .env)."""
+    api_key = os.getenv("GEN_API_KEY") or os.getenv("API_KEY")
+    balance = None
+    if api_key:
+        try:
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                resp = await client.get(
+                    "https://api.gen-api.ru/api/v1/user",
+                    headers={"Authorization": f"Bearer {api_key}", "Accept": "application/json"},
+                )
+                if resp.is_success:
+                    balance = float(resp.json().get("balance", 0))
+        except Exception as e:
+            logger.warning("genapi_info balance fetch failed: %s", e)
+    return {
+        "balance": balance,
+        "threshold": float(os.getenv("BALANCE_THRESHOLD", "300")),
+        "topup_url": os.getenv("GENAPI_BILLING_URL", "https://gen-api.ru/account/billing"),
+        "login": os.getenv("GENAPI_LOGIN") or "",
+        "password": os.getenv("GENAPI_PASSWORD") or "",
+    }
+
+
+# ============================================================
 #  PROMPT TEMPLATES (admin CRUD, read for all managers)
 # ============================================================
 
