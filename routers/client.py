@@ -61,6 +61,49 @@ def increment_count(client_ip: str) -> int:
     return new_count
 
 
+@router.get("/material-types")
+async def get_material_types():
+    """Типы материалов для клиентского каталога.
+
+    Возвращает только те типы, для которых реально есть текстуры в БД
+    (встроенные + кастомные, созданные админом), исключая скрытые от клиента.
+    """
+    # Импорт здесь, чтобы не тянуть internal на уровне модуля (нет циклов, но чище)
+    from routers.internal import _BUILTIN_MATERIAL_TYPES
+
+    db = await get_db()
+    try:
+        cursor = await db.execute("SELECT DISTINCT material_type FROM materials")
+        present = {row["material_type"] for row in await cursor.fetchall()}
+        cursor = await db.execute("SELECT slug, display_name FROM custom_material_types")
+        custom = {row["slug"]: row["display_name"] for row in await cursor.fetchall()}
+    finally:
+        await db.close()
+
+    # backward-compat связка flat_stone <-> textured_stone (см. _EXTRA_TYPES):
+    # если есть текстуры одного типа, показываем и смежный
+    for primary, extra in _EXTRA_TYPES.items():
+        if extra in present:
+            present.add(primary)
+
+    present -= _CLIENT_BLOCKED_TYPES
+
+    labels = {t["slug"]: t["display_name"] for t in _BUILTIN_MATERIAL_TYPES}
+    labels.update(custom)
+
+    result = []
+    # сначала встроенные в их исходном порядке
+    for t in _BUILTIN_MATERIAL_TYPES:
+        slug = t["slug"]
+        if slug in present:
+            result.append({"slug": slug, "name": labels.get(slug, slug), "is_stone": slug in STONE_TYPES})
+            present.discard(slug)
+    # затем кастомные (и любые осиротевшие) по алфавиту
+    for slug in sorted(present, key=lambda s: labels.get(s, s).lower()):
+        result.append({"slug": slug, "name": labels.get(slug, slug), "is_stone": slug in STONE_TYPES})
+    return result
+
+
 @router.get("/suppliers")
 async def get_suppliers(material_type: str):
     if material_type in _CLIENT_BLOCKED_TYPES:

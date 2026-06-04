@@ -645,7 +645,9 @@
 <script>
 'use strict';
 const API_BASE = 'https://rstone.tech';
+// Типы без затирки. Стартовый набор — фолбэк; актуализируется из /api/client/material-types
 const STONE_TYPES = new Set(['cobblestone','rubble_stone','derbent_stone','flat_stone','textured_stone']);
+// Подписи типов материалов. Дополняется динамически (встроенные + кастомные из админки)
 const MAT_LABEL = {
   standard:      'Кирпич',
   rigel:         'Ригель',
@@ -841,6 +843,31 @@ function applyTexture(tex) {
   refreshBtn();
 }
 
+// ── Material types (динамически: встроенные + созданные админом) ──
+let matTypesPromise = null;
+async function loadMaterialTypes() {
+  try {
+    const r = await fetch(`${API_BASE}/api/client/material-types`);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const types = await r.json();
+    if (!Array.isArray(types) || !types.length) return;
+    types.forEach(t => {
+      MAT_LABEL[t.slug] = t.name;
+      if (t.is_stone) STONE_TYPES.add(t.slug); else STONE_TYPES.delete(t.slug);
+    });
+    const matSel = $('catMat');
+    matSel.innerHTML = types.map(t => `<option value="${t.slug}">${t.name}</option>`).join('');
+    if (!types.some(t => t.slug === catMat)) catMat = types[0].slug;
+    matSel.value = catMat;
+  } catch (e) {
+    console.error('loadMaterialTypes:', e); // оставляем захардкоженный fallback-список
+  }
+}
+function ensureMaterialTypes() {
+  if (!matTypesPromise) matTypesPromise = loadMaterialTypes();
+  return matTypesPromise;
+}
+
 // ── Catalog modal ──
 async function loadCatSuppliers() {
   const supSel = $('catSup');
@@ -907,7 +934,8 @@ function renderCatGrid() {
   });
 }
 
-function openCatalog() {
+async function openCatalog() {
+  await ensureMaterialTypes();
   if (selectedTex) {
     // Pre-select material type to match current texture
     catMat = selectedTex.material_type;
@@ -1127,6 +1155,7 @@ $('leadForm').addEventListener('submit', async e => {
 // ── Init ──
 function init() {
   loadPref();
+  ensureMaterialTypes();
   if (selectedTex) applyTexture(selectedTex);
   groutStep.style.display = selectedTex && !STONE_TYPES.has(selectedTex.material_type) ? '' : 'none';
   loadGroutColors().then(() => {
