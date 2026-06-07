@@ -54,16 +54,24 @@ async def public_cors_middleware(request: Request, call_next):
 
     return response
 
-# CORS для авторизованных маршрутов (дашборд, generate, auth)
+# CORS для авторизованных маршрутов (дашборд, generate, auth).
+# Домены берём из env CORS_ORIGINS (через запятую), чтобы каждый инстанс
+# задавал свои разрешённые источники без правки кода.
+_default_cors_origins = [
+    "https://rstone.tech",
+    "https://www.rstone.tech",
+    "https://rstone.ru",
+    "https://www.rstone.ru",
+    "https://swiftly-natural-sitar.tilda.ws",
+]
+_cors_env = os.getenv("CORS_ORIGINS")
+_allow_origins = (
+    [o.strip() for o in _cors_env.split(",") if o.strip()]
+    if _cors_env else _default_cors_origins
+)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://rstone.tech",
-        "https://www.rstone.tech",
-        "https://rstone.ru",
-        "https://www.rstone.ru",
-        "https://swiftly-natural-sitar.tilda.ws",
-    ],
+    allow_origins=_allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
