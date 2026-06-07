@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вход для сотрудников</title>
+    <title>Феодал — Визуализатор</title>
     <link rel="icon" type="image/png" href="/static/favicon.svg">
     <link rel="apple-touch-icon" href="/static/favicon.svg">
-    <meta name="theme-color" content="#c0392b">
+    <meta name="theme-color" content="#c2562b">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -25,7 +25,8 @@
             width: 100%;
             max-width: 400px;
         }
-        h2 { margin-bottom: 1.5rem; color: #1e293b; }
+        h1 { font-size: 1.4rem; color: #c2562b; margin-bottom: .35rem; }
+        h2 { margin-bottom: 1.5rem; color: #1e293b; font-size: 1rem; font-weight: 500; }
         input {
             width: 100%;
             padding: 12px 16px;
@@ -37,7 +38,7 @@
         button {
             width: 100%;
             padding: 12px;
-            background: #ff3b3b;
+            background: #c2562b;
             color: white;
             border: none;
             border-radius: 60px;
@@ -46,12 +47,13 @@
             cursor: pointer;
             margin-top: 16px;
         }
-        button:hover { background: #e32c2c; }
+        button:hover { background: #a3441f; }
         .error { color: #b91c1c; margin-top: 12px; text-align: center; }
     </style>
 </head>
 <body>
 <div class="login-container">
+    <h1>Феодал — Визуализатор</h1>
     <h2>Вход для сотрудников</h2>
     <form id="loginForm">
         <input type="text" id="username" placeholder="Логин" required autofocus>
